@@ -107,8 +107,7 @@ function log(data, type = "log") {
 								}
 							}
 						}
-						if (!data.started) {
-							alert(data.started)
+						if (data.started) {
 							$("#pupBtnStart").toggleClass("d-none", true);
 							$("#pupBtnStop").toggleClass("d-none", false);
 						}

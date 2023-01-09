@@ -8,6 +8,7 @@ const { JSDOM, VirtualConsole } = require("jsdom");
 const { Logger, FormUpload } = require('./plugin/tutils/index.js');
 const motd = require('./assets/json/motd.json');
 
+const uploadDir = path.join(__dirname, 'assets', 'images');
 const app = express();
 const port = 3000;
 const rootDir = path.join(__dirname, "public");
@@ -121,12 +122,8 @@ function runPuppet(act, res) {
 			puppet.started = true;
 			puppet.counter = 0;
 			async function randRequest(time) {
-				//test post json data
 				randPost(motd, time);
-				//test file upload
-// 				const uploadDir = path.join(__dirname, 'assets', 'images');
-// 				const image = path.join(uploadDir, "resampled.jpg");
-// 				randUpload(formData, time);
+				randUpload(uploadDir, time);
 
 				function wait() {
 					return new Promise((resolve) => {
@@ -297,6 +294,21 @@ async function randPost(data, time) {
 }
 
 async function randUpload(formData, time) {
+	if (typeof formData === "string") {
+		const dirPath = formData;
+		fs.readdir(dirPath, function (err, files) {
+			if (err) {
+				console.error(err);
+				return;
+			}
+			files.forEach(function (file, index) {
+				files[index] = path.join(dirPath, file);
+			});
+			formData = new FormUpload(files);
+			formData.append("message", `Files upload path: ${dirPath}`);
+		});
+	}
+
 	function wait() {
 		return new Promise((resolve) => {
 			let randTime = Math.floor(Math.random() * time + 1);
@@ -309,8 +321,8 @@ async function randUpload(formData, time) {
 				else if (puppet.counter < 100000 && puppet[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
 				else rand = Math.floor(Math.random() * puppet[puppet.current].length);
 
-// 				const url = `https://${puppet[puppet.current][rand]}`;
-				const url = `http://localhost:3001/upload`;
+				const url = `https://${puppet[puppet.current][rand]}`;
+// 				const url = `http://localhost:3001/upload`;
 				const options = {
 					method: "POST",
 					url: url,
@@ -332,7 +344,6 @@ async function randUpload(formData, time) {
 			}, randTime);
 		});
 	}
-// 	await wait();
 	while (puppet.started) {
 		await wait();
 	}
