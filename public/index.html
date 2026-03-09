@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="description" content="Localhost test page">
+		<meta name="keywords" content="HTML,CSS,JavaScript">
+		<meta name="author" content="Thai Nguyen">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Test Page</title>
+	</head>
+
+	<body>
+		<h1>Test Page</h1>
+		<p>This is test page for <a href="http://localhost:3000">http://localhost:3000</a></p>
+		<h4><a href="http://localhost:3000/docs">EBooks Download</a></h4>
+
+		<hr>
+
+		<form id="fData">
+			First name: <input type="text" name="fname"><br>
+			Last name: <input type="text" name="lname"><br>
+			<input id="submit" type="submit" value="Submit">
+		</form>
+
+		<hr>
+
+		<h3>Puppet</h3>
+		<button id="pupBtnStart">Start</button>
+		<button id="pupBtnStop">Stop</button>
+
+		<hr>
+
+		<p id="log"></p>
+		<script>
+			submit.onclick = async function(e) {
+				e.preventDefault();
+				let data = {
+					fname: fData.fname.value,
+					lname: fData.lname.value
+				};
+				const response = await fetch("http://localhost:3000/post", {
+					method: "POST",
+					body: JSON.stringify(data),
+					headers: {
+						"Content-Type": "application/json"
+					}
+				});
+				if (response.ok) {
+					let res = await response.json();
+					log.innerText = res.result
+				}
+				else log.innerText = `request error ${response.status}!`;
+			}
+			
+			//puppet
+			async function puppet(action) {
+				let data = {
+					action: action
+				};
+				const response = await fetch("http://localhost:3000/puppet", {
+					method: "POST",
+					body: JSON.stringify(data),
+					headers: {
+						"Content-Type": "application/json"
+					}
+				});
+				if (response.ok) {
+					let res = await response.json();
+					log.innerText = res.result
+				}
+				else log.innerText = `request error ${response.status}!`;
+			}
+
+			pupBtnStart.onclick = function(e) {
+				puppet("start");
+			}
+
+			pupBtnStop.onclick = function(e) {
+				puppet("stop");
+			}
+		</script>
+	</body>
+</html>
