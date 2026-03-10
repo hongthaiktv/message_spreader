@@ -6,13 +6,31 @@ const app = express();
 const port = 3000;
 const rootDir = path.join(__dirname, "public");
 const websites = require('./websites.json');
+let server;
 let puppet = {
-	started: true,
+	started: false,
 	total: 0,
 	success: 0,
 	failed: 0,
-	urlFailed: []
+	urlFailed: [],
+	quickStart: process.env.PUPPET == 1 ? true : false
 };
+
+let trustSites = [
+	"example.com",
+	"example.com",
+	"example.com",
+	"example.com",
+	"example.com",
+	"test.com",
+	"test.com",
+	"test.com",
+	"test.com",
+	"test.com",
+	"test.com"
+];
+
+if (puppet.quickStart) runPuppet("start", websites);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -25,10 +43,40 @@ app.post("/post", (req, res) => {
 });
 
 app.post("/puppet", (req, res) => {
-	let reqAct = req.body.action;
+	const reqAct = req.body.action;
+	let urls = req.body.urls;
+	if (!urls) urls = websites;
+	else urls = trustSites;
+	runPuppet(reqAct, urls, res);
+});
+
+app.get("/test", (req, res) => {
+	console.log(req.headers);
+	console.log(req.body);
+	res.send("test");
+});
+
+app.use(serveIndex(rootDir, {
+	'icons': true,
+	'view': 'details'
+}));
+
+app.get("*", (req, res) => res.status(404).sendFile(path.join(rootDir, "404.html")));
+
+server = app.listen(port, () => {
+  console.log(`Web server running at http://localhost:${port}`);
+});
+
+function runPuppet(act, urls, res) {
 	let msg = "";
-	switch (reqAct) {
+	switch (act) {
 		case "start":
+			if (puppet.started) {
+				msg = "Puppet already started.";
+				console.log(msg);
+				if (res) res.json({result: msg});
+				return;
+			}
 			msg = 'Puppet starting...';
 			console.log(msg);
 			puppet.started = true;
@@ -43,7 +91,8 @@ app.post("/puppet", (req, res) => {
 							else if (puppet.total <= 1000) rand = Math.floor(Math.random() * 1000 + 1);
 							else if (puppet.total <= 10000) rand = Math.floor(Math.random() * 10000 + 1);
 							else rand = Math.floor(Math.random() * 100000 + 1);
-							const url = `https://${websites[rand]}`;
+
+							const url = `https://${urls[rand]}`;
 							console.log(`Rank ${rand}: ${url}`);
 							const options = {
 								url: url,
@@ -53,8 +102,8 @@ app.post("/puppet", (req, res) => {
 								}
 							};
 
+							++puppet.total;
 							request(options, function (error, response, body) {
-								++puppet.total;
 								if (error) {
 									puppet.urlFailed.push(url);
 									console.log(`Failed: ${++puppet.failed}`);
@@ -79,7 +128,7 @@ app.post("/puppet", (req, res) => {
 				}
 			}
 			randRequest(10000);
-			res.json({result: msg});
+			if (res) res.json({result: msg});
 			break;
 
 		case "stop":
@@ -87,29 +136,13 @@ app.post("/puppet", (req, res) => {
 			puppet.started = false;
 			console.log(msg);
 			console.log('URL failed:', puppet.urlFailed);
-			res.json({result: msg});
+			if (res) res.json({result: msg});
 			break;
 
 		default:
-			res.json({result: "Wrong action!"});
+			console.log("Wrong action!");
+			if (res) res.json({result: "Wrong action!"});
 			break;
 	}
-});
-
-app.get("/test", (req, res) => {
-	console.log(req.headers);
-	console.log(req.body);
-	res.send("test");
-});
-
-app.use(serveIndex(rootDir, {
-	'icons': true,
-	'view': 'details'
-}));
-
-app.get("*", (req, res) => res.status(404).sendFile(path.join(rootDir, "404.html")));
-
-app.listen(port, () => {
-  console.log(`Web server running at http://localhost:${port}`);
-});
+}
 
