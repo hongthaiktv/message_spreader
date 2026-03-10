@@ -38,7 +38,8 @@ app.post("/puppet", (req, res) => {
 						let randTime = Math.floor(Math.random() * time + 1);
 						setTimeout(() => {
 							let rand;
-							if (puppet.total <= 100) rand = Math.floor(Math.random() * 100 + 1);
+							if (puppet.total <= 10) rand = Math.floor(Math.random() * 10 + 1);
+							else if (puppet.total <= 100) rand = Math.floor(Math.random() * 100 + 1);
 							else if (puppet.total <= 1000) rand = Math.floor(Math.random() * 1000 + 1);
 							else if (puppet.total <= 10000) rand = Math.floor(Math.random() * 10000 + 1);
 							else rand = Math.floor(Math.random() * 100000 + 1);
