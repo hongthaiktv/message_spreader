@@ -5,32 +5,21 @@ const path = require('path');
 const app = express();
 const port = 3000;
 const rootDir = path.join(__dirname, "public");
-const websites = require('./websites.json');
 let server;
 let puppet = {
 	started: false,
 	total: 0,
+	counter: 0,
 	success: 0,
 	failed: 0,
 	urlFailed: [],
-	quickStart: process.env.PUPPET == 1 ? true : false
+	current: "mainSites",
+	quickStart: process.env.PUPPET == 1 ? true : false,
+	mainSites: require('./websites.json'),
+	trustSites: require('./trustsites.json')
 };
 
-let trustSites = [
-	"example.com",
-	"example.com",
-	"example.com",
-	"example.com",
-	"example.com",
-	"test.com",
-	"test.com",
-	"test.com",
-	"test.com",
-	"test.com",
-	"test.com"
-];
-
-if (puppet.quickStart) runPuppet("start", websites);
+if (puppet.quickStart) runPuppet("start");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -44,10 +33,8 @@ app.post("/post", (req, res) => {
 
 app.post("/puppet", (req, res) => {
 	const reqAct = req.body.action;
-	let urls = req.body.urls;
-	if (!urls) urls = websites;
-	else urls = trustSites;
-	runPuppet(reqAct, urls, res);
+	if (!puppet.started || reqAct === "change") puppet.current = req.body.urls || "mainSites";
+	runPuppet(reqAct, res);
 });
 
 app.get("/test", (req, res) => {
@@ -67,7 +54,7 @@ server = app.listen(port, () => {
   console.log(`Web server running at http://localhost:${port}`);
 });
 
-function runPuppet(act, urls, res) {
+function runPuppet(act, res) {
 	let msg = "";
 	switch (act) {
 		case "start":
@@ -80,19 +67,20 @@ function runPuppet(act, urls, res) {
 			msg = 'Puppet starting...';
 			console.log(msg);
 			puppet.started = true;
+			puppet.counter = 0;
 			async function randRequest(time) {
 				function wait() {
 					return new Promise((resolve) => {
 						let randTime = Math.floor(Math.random() * time + 1);
 						setTimeout(() => {
 							let rand;
-							if (puppet.total <= 10) rand = Math.floor(Math.random() * 10 + 1);
-							else if (puppet.total <= 100) rand = Math.floor(Math.random() * 100 + 1);
-							else if (puppet.total <= 1000) rand = Math.floor(Math.random() * 1000 + 1);
-							else if (puppet.total <= 10000) rand = Math.floor(Math.random() * 10000 + 1);
-							else rand = Math.floor(Math.random() * 100000 + 1);
+							if (puppet.counter <= 10) rand = Math.floor(Math.random() * 10);
+							else if (puppet.counter <= 100) rand = Math.floor(Math.random() * 100);
+							else if (puppet.counter <= 1000) rand = Math.floor(Math.random() * 1000);
+							else if (puppet.counter <= 10000) rand = Math.floor(Math.random() * 10000);
+							else rand = Math.floor(Math.random() * 100000);
 
-							const url = `https://${urls[rand]}`;
+							const url = `https://${puppet[puppet.current][rand]}`;
 							console.log(`Rank ${rand}: ${url}`);
 							const options = {
 								url: url,
@@ -103,6 +91,7 @@ function runPuppet(act, urls, res) {
 							};
 
 							++puppet.total;
+							++puppet.counter;
 							request(options, function (error, response, body) {
 								if (error) {
 									puppet.urlFailed.push(url);
@@ -136,6 +125,13 @@ function runPuppet(act, urls, res) {
 			puppet.started = false;
 			console.log(msg);
 			console.log('URL failed:', puppet.urlFailed);
+			if (res) res.json({result: msg});
+			break;
+
+		case "change":
+			msg = `Puppet URLs list changed to "${puppet.current}".`;
+			console.log(msg);
+			puppet.counter = 0;
 			if (res) res.json({result: msg});
 			break;
 

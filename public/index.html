@@ -25,8 +25,13 @@
 		<hr>
 
 		<h3>Puppet</h3>
-		<button id="pupBtnStart">Start</button>
-		<button id="pupBtnStop">Stop</button>
+		<form id="fPuppet">
+			List: <input type="text" name="urls" value="mainSites"><br>
+			<br>
+			<button id="pupBtnStart">Start</button>
+			<button id="pupBtnStop">Stop</button>
+			<button id="pupBtnChange">Change</button>
+		</form>
 
 		<hr>
 
@@ -53,9 +58,10 @@
 			}
 			
 			//puppet
-			async function puppet(action) {
+			async function puppet(action, urls = "mainSites") {
 				let data = {
-					action: action
+					action: action,
+					urls: urls
 				};
 				const response = await fetch("http://localhost:3000/puppet", {
 					method: "POST",
@@ -77,6 +83,11 @@
 
 			pupBtnStop.onclick = function(e) {
 				puppet("stop");
+			}
+
+			pupBtnChange.onclick = function(e) {
+				const urls = fPuppet.urls.value;
+				puppet("change", urls);
 			}
 		</script>
 	</body>
