@@ -74,14 +74,15 @@ function runPuppet(act, res) {
 						let randTime = Math.floor(Math.random() * time + 1);
 						setTimeout(() => {
 							let rand;
-							if (puppet.counter <= 10) rand = Math.floor(Math.random() * 10);
-							else if (puppet.counter <= 100) rand = Math.floor(Math.random() * 100);
-							else if (puppet.counter <= 1000) rand = Math.floor(Math.random() * 1000);
-							else if (puppet.counter <= 10000) rand = Math.floor(Math.random() * 10000);
-							else rand = Math.floor(Math.random() * 100000);
+							if (puppet.counter < 10 && puppet[puppet.current].length >= 10) rand = Math.floor(Math.random() * 10);
+							else if (puppet.counter < 100 && puppet[puppet.current].length >= 100) rand = Math.floor(Math.random() * 100);
+							else if (puppet.counter < 1000 && puppet[puppet.current].length >= 1000) rand = Math.floor(Math.random() * 1000);
+							else if (puppet.counter < 10000 && puppet[puppet.current].length >= 10000) rand = Math.floor(Math.random() * 10000);
+							else if (puppet.counter < 100000 && puppet[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
+							else rand = Math.floor(Math.random() * puppet[puppet.current].length);
 
 							const url = `https://${puppet[puppet.current][rand]}`;
-							console.log(`Rank ${rand}: ${url}`);
+							console.log(`Rank ${rand + 1}: ${url}`);
 							const options = {
 								url: url,
 								strictSSL: false,
