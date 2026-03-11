@@ -1,5 +1,7 @@
 [
-	"example.com",
-	"example2.com",
-	"example3.com"
+	"www.google.com/search?q=abc%20def&ie=utf-8&oe=utf-8&client=firefox-b-1-m",
+	"www.google.com/search?q=top&ie=utf-8&oe=utf-8&client=firefox-b-1-m",
+	"www.google.com/search?q=keyword&ie=utf-8&oe=utf-8&client=firefox-b-1-m",
+	"www.google.com/search?q=test&ie=utf-8&oe=utf-8&client=firefox-b-1-m",
+	"www.google.com/search?q=google&ie=utf-8&oe=utf-8&client=firefox-b-1-m"
 ]

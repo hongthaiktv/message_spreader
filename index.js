@@ -33,7 +33,7 @@ app.post("/post", (req, res) => {
 
 app.post("/puppet", (req, res) => {
 	const reqAct = req.body.action;
-	if (!puppet.started || reqAct === "change") puppet.current = req.body.urls || "mainSites";
+	if (reqAct === "change") puppet.current = req.body.urls || "mainSites";
 	runPuppet(reqAct, res);
 });
 
@@ -64,7 +64,7 @@ function runPuppet(act, res) {
 				if (res) res.json({result: msg});
 				return;
 			}
-			msg = 'Puppet starting...';
+			msg = `Puppet starting with "${puppet.current}"...`;
 			console.log(msg);
 			puppet.started = true;
 			puppet.counter = 0;
