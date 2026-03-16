@@ -6,6 +6,7 @@
 		<meta name="keywords" content="HTML,CSS,JavaScript">
 		<meta name="author" content="Thai Nguyen">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="style.css">
 		<title>Test Page</title>
 	</head>
 
@@ -35,7 +36,7 @@
 
 		<hr>
 
-		<p id="log"></p>
+		<div id="log"></div>
 		<script>
 			submit.onclick = async function(e) {
 				e.preventDefault();
@@ -72,9 +73,13 @@
 				});
 				if (response.ok) {
 					let res = await response.json();
-					log.innerText = res.result
+					log.innerHTML += `<div>${res.result}</div>`;
+					log.scrollTop = log.scrollHeight;
 				}
-				else log.innerText = `request error ${response.status}!`;
+				else {
+					log.innerHTML += `<div>request error ${response.status}!</div>`;
+					log.scrollTop = log.scrollHeight;
+				}
 			}
 
 			pupBtnStart.onclick = function(e) {
