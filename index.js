@@ -5,6 +5,9 @@ const path = require('path');
 const app = express();
 const port = 3000;
 const rootDir = path.join(__dirname, "public");
+const {Logger} = require('./Logger.js');
+const logger = new Logger();
+
 let server;
 let puppet = {
 	started: false,
@@ -18,6 +21,29 @@ let puppet = {
 	mainSites: require('./websites.json'),
 	trustSites: require('./trustsites.json')
 };
+
+logger.addEventListener("change", function (e) {
+	const clients = this.getClients();
+	for (const res of clients) {
+		switch (e.detail) {
+			case "add":
+				console.log("run act add");
+				break;
+
+			case "update":
+				console.log("run act update");
+				break;
+
+			case "remove":
+				console.log("run act remove");
+				break;
+
+			default:
+				console.log("Logger: Wrong event action!");
+				break;
+		}
+	}
+});
 
 if (puppet.quickStart) runPuppet("start");
 
@@ -37,6 +63,38 @@ app.post("/puppet", (req, res) => {
 	runPuppet(reqAct, res);
 });
 
+app.get("/logger", (req, res) => {
+	console.log(req.headers);
+	console.log("Logger: Client connected.");
+	res.on("close", () => {
+		const clients = logger.getClients();
+		if (clients.includes(res)) {
+			const index = clients.indexOf(res);
+			clients.splice(index, 1);
+		}
+		clearInterval(logging);
+		console.log("client disconnected.");
+	});
+	logger.addClient({a: "00"});
+	logger.addClient(res);
+	logger.addClient({c: "22"});
+	const clients = logger.getClients();
+	res.set({
+		"Content-Type": "text/event-stream",
+		"Cache-Control": "no-cache"
+	});
+	let counter = 0;
+	let logging = setInterval(() => {
+		res.write("data: sse res\n\n");
+		console.log("sse res");
+// 		if (++counter > 5) res.end();
+// 		else {
+// 			res.write("data: sse res\n\n");
+// 			console.log("sse res");
+// 		}
+	}, 2000);
+});
+
 app.get("/test", (req, res) => {
 	console.log(req.headers);
 	console.log(req.body);
@@ -51,7 +109,7 @@ app.use(serveIndex(rootDir, {
 app.get("*", (req, res) => res.status(404).sendFile(path.join(rootDir, "404.html")));
 
 server = app.listen(port, () => {
-  console.log(`Web server running at http://localhost:${port}`);
+	console.log(`Web server running at http://localhost:${port}`);
 });
 
 function runPuppet(act, res) {

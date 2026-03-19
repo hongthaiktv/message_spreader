@@ -32,11 +32,12 @@
 			<button type="button" id="pupBtnStart">Start</button>
 			<button type="button" id="pupBtnStop">Stop</button>
 			<button type="button" id="pupBtnChange">Change</button>
+			<button type="button" id="pupBtnDisconnect">Disconnect</button>
 		</form>
 
 		<hr>
 
-		<div id="log"></div>
+		<div id="logger"></div>
 		<script>
 			submit.onclick = async function(e) {
 				e.preventDefault();
@@ -53,12 +54,13 @@
 				});
 				if (response.ok) {
 					let res = await response.json();
-					log.innerText = res.result
+					logger.innerText = res.result
 				}
-				else log.innerText = `request error ${response.status}!`;
+				else logger.innerText = `request error ${response.status}!`;
 			}
 			
 			//puppet
+			let source;
 			async function puppet(action, urls = "mainSites") {
 				let data = {
 					action: action,
@@ -73,26 +75,42 @@
 				});
 				if (response.ok) {
 					let res = await response.json();
-					log.innerHTML += `<div>${res.result}</div>`;
-					log.scrollTop = log.scrollHeight;
+					let msg = res.result;
+					log(msg);
 				}
 				else {
-					log.innerHTML += `<div>request error ${response.status}!</div>`;
-					log.scrollTop = log.scrollHeight;
+					let msg = `request error ${response.status}!`;
+					log(msg);
 				}
 			}
 
 			pupBtnStart.onclick = function(e) {
+				source = new EventSource("http://localhost:3000/logger");
+				source.onmessage = e => log(e.data);
+				source.onopen = e => log("connected");
+				source.onerror = e => log("error");
 				puppet("start");
-			}
+			};
 
 			pupBtnStop.onclick = function(e) {
 				puppet("stop");
-			}
+			};
 
 			pupBtnChange.onclick = function(e) {
 				const urls = fPuppet.urls.value;
 				puppet("change", urls);
+			};
+
+			pupBtnDisconnect.onclick = function(e) {
+				source.close();
+				log("disconnected");
+			};
+
+			function log(msg) {
+				let divMsg = document.createElement("DIV");
+				divMsg.innerText = msg;
+				logger.appendChild(divMsg);
+				logger.scrollTop = logger.scrollHeight;
 			}
 		</script>
 	</body>
