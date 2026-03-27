@@ -22,10 +22,6 @@ let puppet = {
 	trustSites: require('./trustsites.json')
 };
 
-setInterval(function () {
-	logger.addLog("test log interval...");
-}, 2000);
-
 if (puppet.quickStart) runPuppet("start");
 
 app.use(express.json());
@@ -100,7 +96,8 @@ function runPuppet(act, res) {
 							else rand = Math.floor(Math.random() * puppet[puppet.current].length);
 
 							const url = `https://${puppet[puppet.current][rand]}`;
-							console.log(`Rank ${rand + 1}: ${url}`);
+							const msg = `Rank ${rand + 1}: ${url}`;
+							logger.addLog(msg);
 							const options = {
 								url: url,
 								strictSSL: false,
@@ -114,17 +111,19 @@ function runPuppet(act, res) {
 							request(options, function (error, response, body) {
 								if (error) {
 									puppet.urlFailed.push(url);
-									console.log(`Failed: ${++puppet.failed}`);
+									const msg = `Failed: ${++puppet.failed}`;
+									logger.addLog(msg);
 									console.error(error);
 									return;
 								}
 								if (response.statusCode !== 200) {
 									puppet.urlFailed.push(url);
 									console.log(`Failed: ${++puppet.failed}`);
-									let err = `Error ${response.statusCode}: ${url}`;
-									console.error(err);
+									const err = `Error ${response.statusCode}: ${url}`;
+									logger.addLog(err);
 								} else {
-									console.log(`Success: ${++puppet.success}`);
+									const msg = `Success: ${++puppet.success}`;
+									logger.addLog(msg);
 								}
 							});
 							resolve(puppet);

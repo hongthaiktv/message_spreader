@@ -60,7 +60,9 @@
 			}
 			
 			//puppet
-			let source;
+			let source = new EventSource("http://localhost:3000/logger");
+			source.onmessage = e => log(e.data);
+			source.onerror = e => log("Logger disconnected.");
 			async function puppet(action, urls = "mainSites") {
 				let data = {
 					action: action,
@@ -79,16 +81,12 @@
 					log(msg);
 				}
 				else {
-					let msg = `request error ${response.status}!`;
+					let msg = `Request error ${response.status}!`;
 					log(msg);
 				}
 			}
 
 			pupBtnStart.onclick = function(e) {
-				source = new EventSource("http://localhost:3000/logger");
-				source.onmessage = e => log(e.data);
-				source.onopen = e => log("connected");
-				source.onerror = e => log("error");
 				puppet("start");
 			};
 

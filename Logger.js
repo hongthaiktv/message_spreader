@@ -19,7 +19,9 @@ class Logger extends EventTarget {
 
 	addClient(client) {
 		this.#clients.push(client);
-		console.log("Logger: Client added. Total:", this.#clients.length);
+		const msg = `Logger: Client added. Total: ${this.#clients.length}`;
+		console.log(msg);
+		client.write(`data: ${msg}\n\n`);
 		this.#update("add");
 	}
 
@@ -31,7 +33,7 @@ class Logger extends EventTarget {
 		this.#logs.push(log);
 		console.log(`Logger: ${log}`);
 		for (const client of this.#clients) {
-			client.write(`data: ${log}\n\n`);
+			client.write('data: ' + log + '\n\n');
 		}
 		this.#update("update", log);
 	}
