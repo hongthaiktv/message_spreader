@@ -5,7 +5,7 @@ const path = require('path');
 const app = express();
 const port = 3000;
 const rootDir = path.join(__dirname, "public");
-const {Logger} = require('./Logger.js');
+const Logger = require('./Logger.js');
 const logger = new Logger();
 
 let server;
@@ -22,28 +22,9 @@ let puppet = {
 	trustSites: require('./trustsites.json')
 };
 
-logger.addEventListener("change", function (e) {
-	const clients = this.getClients();
-	for (const res of clients) {
-		switch (e.detail) {
-			case "add":
-				console.log("run act add");
-				break;
-
-			case "update":
-				console.log("run act update");
-				break;
-
-			case "remove":
-				console.log("run act remove");
-				break;
-
-			default:
-				console.log("Logger: Wrong event action!");
-				break;
-		}
-	}
-});
+setInterval(function () {
+	logger.addLog("test log interval...");
+}, 2000);
 
 if (puppet.quickStart) runPuppet("start");
 
@@ -64,35 +45,14 @@ app.post("/puppet", (req, res) => {
 });
 
 app.get("/logger", (req, res) => {
-	console.log(req.headers);
-	console.log("Logger: Client connected.");
 	res.on("close", () => {
-		const clients = logger.getClients();
-		if (clients.includes(res)) {
-			const index = clients.indexOf(res);
-			clients.splice(index, 1);
-		}
-		clearInterval(logging);
-		console.log("client disconnected.");
+		logger.removeClient(res);
 	});
-	logger.addClient({a: "00"});
-	logger.addClient(res);
-	logger.addClient({c: "22"});
-	const clients = logger.getClients();
 	res.set({
 		"Content-Type": "text/event-stream",
 		"Cache-Control": "no-cache"
 	});
-	let counter = 0;
-	let logging = setInterval(() => {
-		res.write("data: sse res\n\n");
-		console.log("sse res");
-// 		if (++counter > 5) res.end();
-// 		else {
-// 			res.write("data: sse res\n\n");
-// 			console.log("sse res");
-// 		}
-	}, 2000);
+	logger.addClient(res);
 });
 
 app.get("/test", (req, res) => {
