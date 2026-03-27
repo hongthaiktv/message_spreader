@@ -2,6 +2,8 @@ const express = require('express');
 const serveIndex = require('serve-index');
 const request = require('request');
 const path = require('path');
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
 const app = express();
 const port = 3000;
 const rootDir = path.join(__dirname, "public");
@@ -102,7 +104,7 @@ function runPuppet(act, res) {
 								url: url,
 								strictSSL: false,
 								headers: {
-									'User-Agent': 'Mozilla/5.0 (Android 15; Mobile; rv:79.0) Gecko/79.0 Firefox/79.0'
+									'User-Agent': 'Mozilla/5.0 (Android 15; Mobile; rv:78.0) Gecko/78.0 Firefox/78.0'
 								}
 							};
 
@@ -122,8 +124,11 @@ function runPuppet(act, res) {
 									const err = `Error ${response.statusCode}: ${url}`;
 									logger.addLog(err);
 								} else {
+									const document = parseHTML(body); 
 									const msg = `Success: ${++puppet.success}`;
-									logger.addLog(msg);
+									const para = document.querySelector("p");
+									if (para && para.innerHTML) logger.addLog(para.innerHTML);
+									else logger.addLog(msg);
 								}
 							});
 							resolve(puppet);
@@ -158,5 +163,11 @@ function runPuppet(act, res) {
 			if (res) res.json({result: "Wrong action!"});
 			break;
 	}
+}
+
+function parseHTML(html) {
+	const dom = new JSDOM(html);
+	const document = dom.window.document;
+	return document;
 }
 
