@@ -7,7 +7,7 @@ const app = express();
 const port = 3000;
 const rootDir = path.join(__dirname, "public");
 const Logger = require('./Logger.js');
-const logger = new Logger();
+const logger = new Logger("Puppet");
 
 let server;
 let puppet = {
@@ -25,10 +25,7 @@ let puppet = {
 
 logger.addEventListener("change", function (e) {
 	const { action, log, client } = e.detail;
-	const result = {
-		message: log
-	};
-	const msg = `data: ${JSON.stringify(result)}\n\n`;
+	const msg = `data: ${JSON.stringify(log)}\n\n`;
 
 	switch (action) {
 		case "add":
@@ -134,7 +131,7 @@ function runPuppet(act, res) {
 								if (error) {
 									puppet.urlFailed.push(url);
 									const msg = `Failed: ${++puppet.failed}`;
-									logger.addLog(msg);
+									logger.addLog(msg, "error");
 									console.error(error);
 									return;
 								}
@@ -142,15 +139,18 @@ function runPuppet(act, res) {
 									puppet.urlFailed.push(url);
 									console.log(`Failed: ${++puppet.failed}`);
 									const err = `Error ${response.statusCode}: ${url}`;
-									logger.addLog(err);
+									logger.addLog(err, "error");
 								} else {
 									const document = parseHTML(body); 
 									const msg = `Success: ${++puppet.success}`;
 									console.log(msg);
 									if (document) {
-										const para = document.querySelector("p");
-										if (para && para.innerHTML) logger.addLog(para.innerHTML);
-										else logger.addLog(`Paragraph not found: ${url}`);
+										const para = document.querySelectorAll("p");
+										if (para.length) {
+											const rand = Math.floor(Math.random() * para.length);
+											if (para[rand].innerHTML) logger.addLog(para[rand].innerHTML);
+										}
+										else logger.addLog(`Paragraph not found: ${url}`, "warning");
 									}
 								}
 							});
@@ -163,7 +163,10 @@ function runPuppet(act, res) {
 				}
 			}
 			randRequest(10000);
-			if (res) res.json({result: msg});
+			if (res) res.json({
+				message: msg,
+				type: "log"
+			});
 			break;
 
 		case "stop":
@@ -171,19 +174,28 @@ function runPuppet(act, res) {
 			puppet.started = false;
 			console.log(msg);
 			console.log('URL failed:', puppet.urlFailed);
-			if (res) res.json({result: msg});
+			if (res) res.json({
+				message: msg,
+				type: "log"
+			});
 			break;
 
 		case "change":
 			msg = `Puppet URLs list changed to "${puppet.current}".`;
 			console.log(msg);
 			puppet.counter = 0;
-			if (res) res.json({result: msg});
+			if (res) res.json({
+				message: msg,
+				type: "log"
+			});
 			break;
 
 		default:
 			console.log("Wrong action!");
-			if (res) res.json({result: "Wrong action!"});
+			if (res) res.json({
+				message: "Wrong action!",
+				type: "log"
+			});
 			break;
 	}
 }

@@ -1,4 +1,13 @@
 #logger {
-	height: 18em;
+	height: 17em;
 	overflow: scroll;
 }
+
+.warning {
+	background-color: orange;
+}
+
+.error {
+	background-color: red;
+}
+

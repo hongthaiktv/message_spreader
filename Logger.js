@@ -3,8 +3,10 @@ class Logger extends EventTarget {
 	#logs = [];
 	#prefix = "Logger: ";
 
-	constructor() {
+	constructor(name) {
 		super();
+		if (name === "") this.#prefix = "";
+		else if (name !== undefined) this.#prefix = `${name}: `;
 	}
 
 	#update(act, log, client) {
@@ -19,29 +21,37 @@ class Logger extends EventTarget {
 		this.dispatchEvent(ev);
 	}
 
-	addClient(client) {
+	addClient(client, type = "log") {
 		this.#clients.push(client);
 		const msg = `${this.#prefix}Client added. Total: ${this.#clients.length}`;
 		console.log(msg);
-		this.#update("add", msg, client);
+		const logData = {
+			message: msg,
+			type: type
+		};
+		this.#update("add", logData, client);
 	}
 
 	getClients() {
 		return this.#clients;
 	}
 
-	addLog(log) {
+	addLog(log, type = "log") {
 		this.#logs.push(log);
 		const msg = `${this.#prefix}${log.trim()}`;
 		console.log(msg);
-		this.#update("update", msg);
+		const logData = {
+			message: msg,
+			type: type
+		};
+		this.#update("update", logData);
 	}
 
 	getLogs() {
 		return this.#logs;
 	}
 
-	removeClient(client) {
+	removeClient(client, type = "log") {
 		let msg;
 		const clients = this.#clients;
 		if (clients.includes(client)) {
@@ -50,7 +60,15 @@ class Logger extends EventTarget {
 			msg = `${this.#prefix}Client disconnected. Left: ${clients.length}`;
 			console.log(msg);
 		}
-		this.#update("remove", msg);
+		const logData = {
+			message: msg,
+			type: type
+		};
+		this.#update("remove", logData);
+	}
+
+	setPrefix(name) {
+		this.#prefix = name;
 	}
 }
 
