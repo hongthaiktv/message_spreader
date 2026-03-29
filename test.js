@@ -1,4 +1,3 @@
-let obj = {name1: "AA", name2: "BB"};
-for (const [key, value] of Object.entries(obj)) {
-	console.log(name, value);
-}
+const s = "   abc\n\ndef   \n\n";
+console.log(s.includes("\n\n"));
+console.log(`1${s.trim()}2`);

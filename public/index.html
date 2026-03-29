@@ -27,7 +27,7 @@
 
 		<h3>Puppet</h3>
 		<form id="fPuppet">
-			List: <input type="text" name="urls" value="mainSites"><br>
+			List: <input type="text" name="urls" value="trustSites"><br>
 			<br>
 			<button type="button" id="pupBtnStart">Start</button>
 			<button type="button" id="pupBtnStop">Stop</button>
@@ -61,7 +61,7 @@
 			
 			//puppet
 			let source = new EventSource("http://localhost:3000/logger");
-			source.onmessage = e => log(e.data);
+			source.onmessage = e => log(JSON.parse(e.data).message);
 			source.onerror = e => log("Logger disconnected.");
 			async function puppet(action, urls = "mainSites") {
 				let data = {
@@ -106,7 +106,7 @@
 
 			function log(msg) {
 				let divMsg = document.createElement("DIV");
-				divMsg.innerText = msg;
+				divMsg.innerHTML = msg;
 				logger.appendChild(divMsg);
 				logger.scrollTop = logger.scrollHeight;
 			}

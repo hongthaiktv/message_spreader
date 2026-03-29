@@ -2,8 +2,7 @@ const express = require('express');
 const serveIndex = require('serve-index');
 const request = require('request');
 const path = require('path');
-const jsdom = require("jsdom");
-const { JSDOM } = jsdom;
+const { JSDOM, VirtualConsole } = require("jsdom");
 const app = express();
 const port = 3000;
 const rootDir = path.join(__dirname, "public");
@@ -23,6 +22,27 @@ let puppet = {
 	mainSites: require('./websites.json'),
 	trustSites: require('./trustsites.json')
 };
+
+logger.addEventListener("change", function (e) {
+	const { action, log, client } = e.detail;
+	const result = {
+		message: log
+	};
+	const msg = `data: ${JSON.stringify(result)}\n\n`;
+
+	switch (action) {
+		case "add":
+			client.write(msg);
+			break;
+	
+		case "update":
+			const clients = logger.getClients();
+			for (const client of clients) {
+				client.write(msg);
+			}
+			break;
+	}
+});
 
 if (puppet.quickStart) runPuppet("start");
 
@@ -126,9 +146,12 @@ function runPuppet(act, res) {
 								} else {
 									const document = parseHTML(body); 
 									const msg = `Success: ${++puppet.success}`;
-									const para = document.querySelector("p");
-									if (para && para.innerHTML) logger.addLog(para.innerHTML);
-									else logger.addLog(msg);
+									console.log(msg);
+									if (document) {
+										const para = document.querySelector("p");
+										if (para && para.innerHTML) logger.addLog(para.innerHTML);
+										else logger.addLog(`Paragraph not found: ${url}`);
+									}
 								}
 							});
 							resolve(puppet);
@@ -166,8 +189,14 @@ function runPuppet(act, res) {
 }
 
 function parseHTML(html) {
-	const dom = new JSDOM(html);
-	const document = dom.window.document;
+	let dom, document;
+	const virtualConsole = new VirtualConsole();
+	try {
+		dom = new JSDOM(html, { virtualConsole });
+	} catch(err) {
+		console.error("Error parsing HTML:", err);
+	}
+	if (dom && dom.window && dom.window.document) document = dom.window.document;
 	return document;
 }
 

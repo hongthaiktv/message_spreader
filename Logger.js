@@ -1,16 +1,18 @@
 class Logger extends EventTarget {
 	#clients = [];
 	#logs = [];
+	#prefix = "Logger: ";
 
 	constructor() {
 		super();
 	}
 
-	#update(act, log) {
+	#update(act, log, client) {
 		const data = {
 			detail: {
 				action: act,
-				log: log
+				log: log,
+				client: client
 			}
 		};
 		const ev = new CustomEvent("change", data);
@@ -19,10 +21,9 @@ class Logger extends EventTarget {
 
 	addClient(client) {
 		this.#clients.push(client);
-		const msg = `Logger: Client added. Total: ${this.#clients.length}`;
+		const msg = `${this.#prefix}Client added. Total: ${this.#clients.length}`;
 		console.log(msg);
-		client.write(`data: ${msg}\n\n`);
-		this.#update("add");
+		this.#update("add", msg, client);
 	}
 
 	getClients() {
@@ -31,11 +32,9 @@ class Logger extends EventTarget {
 
 	addLog(log) {
 		this.#logs.push(log);
-		console.log(`Logger: ${log}`);
-		for (const client of this.#clients) {
-			client.write('data: ' + log + '\n\n');
-		}
-		this.#update("update", log);
+		const msg = `${this.#prefix}${log.trim()}`;
+		console.log(msg);
+		this.#update("update", msg);
 	}
 
 	getLogs() {
@@ -43,13 +42,15 @@ class Logger extends EventTarget {
 	}
 
 	removeClient(client) {
+		let msg;
 		const clients = this.#clients;
 		if (clients.includes(client)) {
 			const index = clients.indexOf(client);
 			clients.splice(index, 1);
-			console.log("Client disconnected. Left:", clients.length);
+			msg = `${this.#prefix}Client disconnected. Left: ${clients.length}`;
+			console.log(msg);
 		}
-		this.#update("remove");
+		this.#update("remove", msg);
 	}
 }
 
