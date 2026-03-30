@@ -63,15 +63,23 @@ pupBtnDisconnect.onclick = function(e) {
 };
 
 function log(data, type = "log") {
-	let divMsg = document.createElement("DIV");
+	let divCard = document.createElement("DIV");
+	let cardContent, cardType;
 	if (data instanceof Object) {
-		divMsg.innerHTML = data.message;
-		divMsg.className = data.type;
+		cardContent = data.message;
+		cardType = data.type;
 	} else {
-		divMsg.innerHTML = data;
-		divMsg.className = type;
+		cardContent = data;
+		cardType = type;
 	}
-	logger.appendChild(divMsg);
+	let card =`
+    <div class="card-body mask purple-gradient-rgba">
+      <p class="card-text text-white">${cardContent}</p>
+    </div>
+	`;
+	divCard.className = `card gradient-card mb-2 ${cardType}`;
+	divCard.innerHTML = card;
+	logger.appendChild(divCard);
 	logger.scrollTop = logger.scrollHeight;
 }
 		

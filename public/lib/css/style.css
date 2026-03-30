@@ -1,8 +1,12 @@
+body {
+	padding: 0.5em;
+}
+
 #logger {
 	height: 17em;
 	overflow: scroll;
 }
-
+/* 
 .warning {
 	background-color: orange;
 }
@@ -10,4 +14,4 @@
 .error {
 	background-color: red;
 }
-
+*/ 
