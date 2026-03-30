@@ -7,7 +7,7 @@ const app = express();
 const port = 3000;
 const rootDir = path.join(__dirname, "public");
 const Logger = require('./Logger.js');
-const logger = new Logger("Puppet");
+const logger = new Logger("");
 
 let server;
 let puppet = {
@@ -94,7 +94,10 @@ function runPuppet(act, res) {
 			if (puppet.started) {
 				msg = "Puppet already started.";
 				console.log(msg);
-				if (res) res.json({result: msg});
+				if (res) res.json({
+					message: msg,
+					type: "log"
+				});
 				return;
 			}
 			msg = `Puppet starting with "${puppet.current}"...`;
@@ -130,16 +133,15 @@ function runPuppet(act, res) {
 							request(options, function (error, response, body) {
 								if (error) {
 									puppet.urlFailed.push(url);
-									const msg = `Failed: ${++puppet.failed}`;
+									const msg = `Failed (${++puppet.failed}) : ${error.code} : ${url}`;
 									logger.addLog(msg, "error");
 									console.error(error);
 									return;
 								}
 								if (response.statusCode !== 200) {
 									puppet.urlFailed.push(url);
-									console.log(`Failed: ${++puppet.failed}`);
-									const err = `Error ${response.statusCode}: ${url}`;
-									logger.addLog(err, "error");
+									const msg = `Failed (${++puppet.failed}) : Error ${response.statusCode} : ${url}`;
+									logger.addLog(msg, "error");
 								} else {
 									const document = parseHTML(body); 
 									const msg = `Success: ${++puppet.success}`;
@@ -148,7 +150,7 @@ function runPuppet(act, res) {
 										const para = document.querySelectorAll("p");
 										if (para.length) {
 											const rand = Math.floor(Math.random() * para.length);
-											if (para[rand].innerHTML) logger.addLog(para[rand].innerHTML);
+											if (para[rand].innerHTML) logger.addLog(para[rand].innerHTML, "info");
 										}
 										else logger.addLog(`Paragraph not found: ${url}`, "warning");
 									}

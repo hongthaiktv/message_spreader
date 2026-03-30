@@ -72,13 +72,34 @@ function log(data, type = "log") {
 		cardContent = data;
 		cardType = type;
 	}
-	let card =`
-    <div class="card-body mask purple-gradient-rgba">
-      <p class="card-text text-white">${cardContent}</p>
-    </div>
-	`;
-	divCard.className = `card gradient-card mb-2 ${cardType}`;
-	divCard.innerHTML = card;
+
+	switch (cardType) {
+		case "info": case "error": case "warning":
+			let logType;
+			switch (cardType) {
+				case "info":
+					logType = "purple-gradient-rgba";
+					break;
+			
+				case "error":
+					logType = "young-passion-gradient";
+					break;
+				
+				case "warning":
+					logType = "peach-gradient-rgba";
+					break;
+			}
+			divCard.innerHTML = `
+			<div class="card-body px-3 py-2 mask ${logType}">
+			  <p class="card-text text-white">${cardContent}</p>
+			</div>
+			`;
+			divCard.className = `card gradient-card mb-2 ${cardType}`;
+			break;
+		default:
+			divCard.innerHTML = cardContent;
+			divCard.className = cardType;
+	}
 	logger.appendChild(divCard);
 	logger.scrollTop = logger.scrollHeight;
 }
