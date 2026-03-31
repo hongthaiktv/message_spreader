@@ -133,15 +133,17 @@ function runPuppet(act, res) {
 							request(options, function (error, response, body) {
 								if (error) {
 									puppet.urlFailed.push(url);
-									const msg = `Failed (${++puppet.failed}) : ${error.code} : ${url}`;
-									logger.addLog(msg, "error");
+									++puppet.failed;
+									const msg = `Failed`;
+									logger.addLog(msg, "error", {failed: puppet.failed, code: error.code, url: url});
 									console.error(error);
 									return;
 								}
 								if (response.statusCode !== 200) {
 									puppet.urlFailed.push(url);
-									const msg = `Failed (${++puppet.failed}) : Error ${response.statusCode} : ${url}`;
-									logger.addLog(msg, "error");
+									++puppet.failed;
+									const msg = `Failed`;
+									logger.addLog(msg, "error", {failed: puppet.failed, code: response.statusCode, url: url});
 								} else {
 									const document = parseHTML(body); 
 									const msg = `Success: ${++puppet.success}`;
@@ -152,7 +154,7 @@ function runPuppet(act, res) {
 											const rand = Math.floor(Math.random() * para.length);
 											if (para[rand].innerHTML) logger.addLog(para[rand].innerHTML, "info");
 										}
-										else logger.addLog(`Paragraph not found: ${url}`, "warning");
+										else logger.addLog("Paragraph not found", "log", {url: url});
 									}
 								}
 							});
@@ -174,29 +176,30 @@ function runPuppet(act, res) {
 		case "stop":
 			msg = `Puppet stopped with ${puppet.total} request and ${puppet.urlFailed.length} failed.`;
 			puppet.started = false;
-			console.log(msg);
+			logger.addLog(msg, "success", {total: puppet.total, success: puppet.success, failed: puppet.failed, urlFailed: puppet.urlFailed});
 			console.log('URL failed:', puppet.urlFailed);
 			if (res) res.json({
 				message: msg,
-				type: "log"
+				type: "success"
 			});
 			break;
 
 		case "change":
 			msg = `Puppet URLs list changed to "${puppet.current}".`;
-			console.log(msg);
 			puppet.counter = 0;
+			logger.addLog(msg, "success", {current: puppet.current});
 			if (res) res.json({
 				message: msg,
-				type: "log"
+				type: "success"
 			});
 			break;
 
 		default:
-			console.log("Wrong action!");
+			msg = "Wrong action!";
+			console.log(msg);
 			if (res) res.json({
-				message: "Wrong action!",
-				type: "log"
+				message: msg,
+				type: "error"
 			});
 			break;
 	}

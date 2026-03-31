@@ -1,3 +1,4 @@
+let SSE = false;
 submit.onclick = async function(e) {
 	e.preventDefault();
 	let data = {
@@ -20,6 +21,7 @@ submit.onclick = async function(e) {
 
 //puppet
 let source = new EventSource("http://localhost:3000/logger");
+source.onopen = e => SSE = true;
 source.onmessage = e => log(JSON.parse(e.data));
 source.onerror = e => log("Logger disconnected.");
 async function puppet(action, urls = "mainSites") {
@@ -36,7 +38,10 @@ async function puppet(action, urls = "mainSites") {
 	});
 	if (response.ok) {
 		const res = await response.json();
-		log(res);
+		if (res && res.message && res.type) {
+			if (SSE && (action === "stop" || action === "change")) return;
+			else log(res);
+		}
 	}
 	else {
 		const msg = `Request error ${response.status}!`;
@@ -68,13 +73,23 @@ function log(data, type = "log") {
 	if (data instanceof Object) {
 		cardContent = data.message;
 		cardType = data.type;
+		switch (cardType) {
+			case "error":
+				if (data.failed && data.code && data.url) cardContent += ` (<span class="text-default">${data.failed}</span>) : <span class="text-danger">${data.code}</span> : <span class="text-primary">${data.url}</span>`;
+				break;
+		}
+		if (data.urlFailed) {
+			for (const url of data.urlFailed) {
+				cardContent += `<br><a class="text-primary" target="_blank" href="${url}">${url}</a>`;
+			}
+		}
 	} else {
 		cardContent = data;
 		cardType = type;
 	}
 
 	switch (cardType) {
-		case "info": case "error": case "warning":
+		case "info": case "error": case "warning": case "success":
 			let logType;
 			switch (cardType) {
 				case "info":
@@ -87,6 +102,10 @@ function log(data, type = "log") {
 				
 				case "warning":
 					logType = "peach-gradient-rgba";
+					break;
+
+				case "success":
+					logType = "aqua-gradient-rgba";
 					break;
 			}
 			divCard.innerHTML = `
