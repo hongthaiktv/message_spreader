@@ -64,7 +64,7 @@ pupBtnChange.onclick = function(e) {
 
 pupBtnDisconnect.onclick = function(e) {
 	source.close();
-	log("disconnected");
+	log("Disconnected");
 };
 
 function log(data, type = "log") {
@@ -75,7 +75,23 @@ function log(data, type = "log") {
 		cardType = data.type;
 		switch (cardType) {
 			case "error":
-				if (data.failed && data.code && data.url) cardContent += ` (<span class="text-default">${data.failed}</span>) : <span class="text-danger">${data.code}</span> : <span class="text-primary">${data.url}</span>`;
+				if (data.failed && data.total && data.code && data.url) cardContent = `Failed (<span class="text-danger">${data.failed}</span>/<span class="text-default">${data.total}</span>) : <span class="text-danger">${data.code}</span> : <span class="text-primary">${data.url}</span>`;
+				break;
+
+			case "success":
+				if (data.failed && data.total && data.code && data.url) cardContent = `Failed (<span class="text-danger">${data.failed}</span>/<span class="text-default">${data.total}</span>) : <span class="text-danger">${data.code}</span> : <span class="text-primary">${data.url}</span>`;
+				break;
+
+			case "log":
+				switch (data.code) {
+					case 2:
+						cardContent = `Success (<span class="text-success">${data.success}</span>/<span class="text-default">${data.total}</span>)`;
+						break;
+				
+					case 3:
+						cardContent = `Paragraph not found: <a class="text-primary" target="_blank" href="${data.url}">${data.url}</a>`
+						break;
+				}
 				break;
 		}
 		if (data.urlFailed) {

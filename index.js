@@ -101,7 +101,6 @@ function runPuppet(act, res) {
 				return;
 			}
 			msg = `Puppet starting with "${puppet.current}"...`;
-			console.log(msg);
 			puppet.started = true;
 			puppet.counter = 0;
 			async function randRequest(time) {
@@ -118,8 +117,9 @@ function runPuppet(act, res) {
 							else rand = Math.floor(Math.random() * puppet[puppet.current].length);
 
 							const url = `https://${puppet[puppet.current][rand]}`;
-							const msg = `Rank ${rand + 1}: ${url}`;
-							logger.addLog(msg);
+							const pageRank = rand + 1;
+							const msg = `Rank ${pageRank}: ${url}`;
+							logger.addLog(msg, "log", { pageRank, url });
 							const options = {
 								url: url,
 								strictSSL: false,
@@ -134,27 +134,28 @@ function runPuppet(act, res) {
 								if (error) {
 									puppet.urlFailed.push(url);
 									++puppet.failed;
-									const msg = `Failed`;
-									logger.addLog(msg, "error", {failed: puppet.failed, code: error.code, url: url});
+									const msg = `Failed (${puppet.failed}/${puppet.total}) : ${error.code} : ${url}`;
+									logger.addLog(msg, "error", {failed: puppet.failed, total: puppet.total, code: error.code, url});
 									console.error(error);
 									return;
 								}
 								if (response.statusCode !== 200) {
 									puppet.urlFailed.push(url);
 									++puppet.failed;
-									const msg = `Failed`;
-									logger.addLog(msg, "error", {failed: puppet.failed, code: response.statusCode, url: url});
+									const msg = `Failed (${puppet.failed}/${puppet.total}) : ${response.statusCode} : ${url}`;
+									logger.addLog(msg, "error", {failed: puppet.failed, total: puppet.total, code: response.statusCode, url});
 								} else {
 									const document = parseHTML(body); 
-									const msg = `Success: ${++puppet.success}`;
-									console.log(msg);
+									++puppet.success;
+									const msg = `Success (${puppet.success}/${puppet.total})`;
+									logger.addLog(msg, "log", {code: 2, success: puppet.success, total: puppet.total});
 									if (document) {
 										const para = document.querySelectorAll("p");
 										if (para.length) {
 											const rand = Math.floor(Math.random() * para.length);
 											if (para[rand].innerHTML) logger.addLog(para[rand].innerHTML, "info");
 										}
-										else logger.addLog("Paragraph not found", "log", {url: url});
+										else logger.addLog(`Paragraph not found: ${url}`, "log", {code: 3, url});
 									}
 								}
 							});
@@ -167,9 +168,13 @@ function runPuppet(act, res) {
 				}
 			}
 			randRequest(10000);
+			logger.addLog(msg, "success", {
+				current: puppet.current
+			});
 			if (res) res.json({
 				message: msg,
-				type: "log"
+				type: "success",
+				current: puppet.current
 			});
 			break;
 
@@ -180,7 +185,11 @@ function runPuppet(act, res) {
 			console.log('URL failed:', puppet.urlFailed);
 			if (res) res.json({
 				message: msg,
-				type: "success"
+				type: "success",
+				total: puppet.total,
+				success: puppet.success,
+				failed: puppet.failed,
+				urlFailed: puppet.urlFailed
 			});
 			break;
 
@@ -190,7 +199,8 @@ function runPuppet(act, res) {
 			logger.addLog(msg, "success", {current: puppet.current});
 			if (res) res.json({
 				message: msg,
-				type: "success"
+				type: "success",
+				current: puppet.current
 			});
 			break;
 
