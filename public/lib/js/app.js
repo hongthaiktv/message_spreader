@@ -38,10 +38,11 @@ async function puppet(action, urls = "mainSites") {
 	});
 	if (response.ok) {
 		const res = await response.json();
-		if (res && res.message && res.type) {
-			if (SSE && (action === "stop" || action === "change")) return;
-			else log(res);
-		}
+// 		if (res && res.message && res.type) {
+// 			if (SSE && (action === "stop" || action === "change")) return;
+// 			else log(res);
+// 		}
+		log(res);
 	}
 	else {
 		const msg = `Request error ${response.status}!`;
@@ -75,26 +76,51 @@ function log(data, type = "log") {
 		cardType = data.type;
 		switch (cardType) {
 			case "error":
-				if (data.failed && data.total && data.code && data.url) cardContent = `Failed (<span class="text-danger">${data.failed}</span>/<span class="text-default">${data.total}</span>) : <span class="text-danger">${data.code}</span> : <span class="text-primary">${data.url}</span>`;
-				break;
-
-			case "success":
-				if (data.failed && data.total && data.code && data.url) cardContent = `Failed (<span class="text-danger">${data.failed}</span>/<span class="text-default">${data.total}</span>) : <span class="text-danger">${data.code}</span> : <span class="text-primary">${data.url}</span>`;
+				if (data.code === 1) cardContent = `Failed (<span class="text-danger font-weight-bold">${data.failed}</span>/<span class="text-default font-weight-bold">${data.total}</span>) : <span class="text-danger font-weight-bold">${data.errorCode}</span> : <a class="text-primary" target="_blank" href="${data.url}">${data.url}</a>`;
 				break;
 
 			case "log":
 				switch (data.code) {
 					case 2:
-						cardContent = `Success (<span class="text-success">${data.success}</span>/<span class="text-default">${data.total}</span>)`;
+						cardContent = `Paragraph not found: <a class="text-primary" target="_blank" href="${data.url}">${data.url}</a>`;
+						break;
+
+					case 3:
+						cardContent = `Success (<span class="text-success font-weight-bold">${data.success}</span>/<span class="text-default font-weight-bold">${data.total}</span>)`;
+						break;
+
+					case 4:
+						cardContent = `Rank ${data.pageRank}: <a class="text-primary" target="_blank" href="${data.url}">${data.url}</a>`;
+						break;
+
+					case 5:
+						cardContent = `Client added. Total: <span class="text-default font-weight-bold">${data.total}</span>`;
+						break;
+
+					case 6:
+						cardContent = `Client disconnected. Left: <span class="text-default font-weight-bold">${data.total}</span>`;
+						break;
+				}
+				break;
+
+			case "success":
+				switch (data.code) {
+					case 7:
+						cardContent = `Puppet starting with "<span class="orange-text font-weight-bold">${data.current}</span>"...`;
 						break;
 				
-					case 3:
-						cardContent = `Paragraph not found: <a class="text-primary" target="_blank" href="${data.url}">${data.url}</a>`
+					case 8:
+						cardContent = `Puppet stopped with <span class="orange-text font-weight-bold">${data.total}</span> request, <span class="text-success font-weight-bold">${data.success}</span> success, <span class="text-danger font-weight-bold">${data.failed}</span> failed.`;
+						break;
+
+					case 9:
+						cardContent = `Puppet URLs list changed to "<span class="orange-text font-weight-bold">${data.current}</span>".`;
 						break;
 				}
 				break;
 		}
-		if (data.urlFailed) {
+		if (data.urlFailed && data.urlFailed.length) {
+			cardContent += `<br><span class="text-danger font-weight-bold">URLs failed:</span>`;
 			for (const url of data.urlFailed) {
 				cardContent += `<br><a class="text-primary" target="_blank" href="${url}">${url}</a>`;
 			}
