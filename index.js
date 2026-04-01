@@ -92,7 +92,8 @@ function runPuppet(act, res) {
 				console.log(msg);
 				if (res) res.json({
 					message: msg,
-					type: "log"
+					type: "log",
+					nosse: true
 				});
 				return;
 			}
@@ -209,7 +210,8 @@ function runPuppet(act, res) {
 			console.log(msg);
 			if (res) res.json({
 				message: msg,
-				type: "error"
+				type: "error",
+				nosse: true
 			});
 			break;
 	}

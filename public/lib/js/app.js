@@ -23,7 +23,10 @@ submit.onclick = async function(e) {
 let source = new EventSource("http://localhost:3000/logger");
 source.onopen = e => SSE = true;
 source.onmessage = e => log(JSON.parse(e.data));
-source.onerror = e => log("Logger disconnected.");
+source.onerror = e => {
+	SSE = false;
+	log("Logger disconnected.");
+};
 async function puppet(action, urls = "mainSites") {
 	let data = {
 		action: action,
@@ -38,11 +41,8 @@ async function puppet(action, urls = "mainSites") {
 	});
 	if (response.ok) {
 		const res = await response.json();
-// 		if (res && res.message && res.type) {
-// 			if (SSE && (action === "stop" || action === "change")) return;
-// 			else log(res);
-// 		}
-		log(res);
+		if (SSE && !res.nosse) return;
+		else log(res);
 	}
 	else {
 		const msg = `Request error ${response.status}!`;
@@ -65,7 +65,8 @@ pupBtnChange.onclick = function(e) {
 
 pupBtnDisconnect.onclick = function(e) {
 	source.close();
-	log("Disconnected");
+	SSE = false;
+	log("Logger disconnected.");
 };
 
 function log(data, type = "log") {
