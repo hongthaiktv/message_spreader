@@ -32,7 +32,7 @@ class Logger extends EventTarget {
 		}
 		logData.message = msg;
 		logData.type = type;
-		logData.total = total;
+		logData.totalClient = total;
 		this.#update("add", logData, client);
 	}
 

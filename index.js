@@ -63,7 +63,7 @@ app.get("/logger", (req, res) => {
 		"Content-Type": "text/event-stream",
 		"Cache-Control": "no-cache"
 	});
-	logger.addClient(res, "log", {code: 5});
+	logger.addClient(res, "log", {code: 5, total: puppet.total, success: puppet.success, failed: puppet.failed});
 });
 
 app.get("/test", (req, res) => {
@@ -132,7 +132,7 @@ function runPuppet(act, res) {
 									puppet.urlFailed.push(url);
 									++puppet.failed;
 									const msg = `Failed (${puppet.failed}/${puppet.total}) : ${error.code} : ${url}`;
-									logger.addLog(msg, "error", {code: 1, failed: puppet.failed, total: puppet.total, errorCode: error.code, url});
+									logger.addLog(msg, "error", {code: 1, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: error.code, url});
 									console.error(error);
 									return;
 								}
@@ -140,7 +140,7 @@ function runPuppet(act, res) {
 									puppet.urlFailed.push(url);
 									++puppet.failed;
 									const msg = `Failed (${puppet.failed}/${puppet.total}) : ${response.statusCode} : ${url}`;
-									logger.addLog(msg, "error", {code: 1, failed: puppet.failed, total: puppet.total, errorCode: response.statusCode, url});
+									logger.addLog(msg, "error", {code: 1, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: response.statusCode, url});
 								} else {
 									const document = parseHTML(body); 
 									++puppet.success;
@@ -150,9 +150,9 @@ function runPuppet(act, res) {
 										const para = document.querySelectorAll("p");
 										if (para.length) {
 											const rand = Math.floor(Math.random() * para.length);
-											if (para[rand].innerHTML) logger.addLog(para[rand].innerHTML, "info");
+											if (para[rand].innerHTML) logger.addLog(para[rand].innerHTML, "info", {code: 10, total: puppet.total, success: puppet.success, failed: puppet.failed});
 										}
-										else logger.addLog(`Paragraph not found: ${url}`, "log", {code: 2, url});
+										else logger.addLog(`Paragraph not found: ${url}`, "log", {code: 2, total: puppet.total, success: puppet.success, failed: puppet.failed, url});
 									}
 								}
 							});

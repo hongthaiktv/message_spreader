@@ -1,9 +1,12 @@
 body {
+	display: flex;
+	flex-direction: column;
+	width: 100vw;
 	padding: 0.5em;
 }
 
 #logger {
-	height: 15em;
+	flex-grow: 1;
 	overflow: scroll;
 }
 /* 

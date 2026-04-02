@@ -39,11 +39,12 @@
 		<hr>
 
 		<div id="logger"></div>
-		<div class="btn-group puppet-status" role="group" aria-label="Puppet status">
-			<button type="button" class="btn btn-purple btn-rounded"><i class="fas fa-star fa-sm pr-2" aria-hidden="true"></i>Left</button>
-			<button type="button" class="btn btn-purple btn-rounded"><i class="fas fa-heart fa-sm pr-2" aria-hidden="true"></i>Middle</button>
-			<button type="button" class="btn btn-purple btn-rounded"><i class="fas fa-user fa-sm pr-2" aria-hidden="true"></i>Right</button>
+		<div id="puppet-status" class="btn-group" role="group" aria-label="Puppet status">
+			<button id="btnTotalRequest" type="button" class="btn btn-orange btn-rounded py-2"><div class="font-weight-bold"><div class="flex-center"><i class="fas fa-paper-plane pr-2" aria-hidden="true"></i>Total</div><div id="cTotalRequest">0</div></div></button>
+			<button id="btnTotalSuccess" type="button" class="btn btn-success btn-rounded py-2"><div class="font-weight-bold"><div class="flex-center"><i class="fas fa-check-circle pr-2" aria-hidden="true"></i>Success</div><div id="cTotalSuccess">0</div></div></button>
+			<button id="btnTotalFailed" type="button" class="btn btn-danger btn-rounded py-2"><div class="font-weight-bold"><div class="flex-center"><i class="fas fa-times-circle pr-2" aria-hidden="true"></i>Failed</div><div id="cTotalFailed">0</div></div></button>
 		</div>
+		<script src="lib/js/mdb-4.11.0.min.js"></script>
 		<script src="lib/js/app.js"></script>
 	</body>
 </html>

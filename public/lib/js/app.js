@@ -1,23 +1,7 @@
 let SSE = false;
-submit.onclick = async function(e) {
-	e.preventDefault();
-	let data = {
-		fname: fData.fname.value,
-		lname: fData.lname.value
-	};
-	const response = await fetch("http://localhost:3000/post", {
-		method: "POST",
-		body: JSON.stringify(data),
-		headers: {
-			"Content-Type": "application/json"
-		}
-	});
-	if (response.ok) {
-		let res = await response.json();
-		logger.innerText = res.result
-	}
-	else logger.innerText = `request error ${response.status}!`;
-}
+
+const wHeight = window.innerHeight;
+document.body.style.height = `${wHeight}px`;
 
 //puppet
 let source = new EventSource("http://localhost:3000/logger");
@@ -28,10 +12,7 @@ source.onerror = e => {
 	log("Logger disconnected.");
 };
 async function puppet(action, urls = "mainSites") {
-	let data = {
-		action: action,
-		urls: urls
-	};
+	let data = {action, urls};
 	const response = await fetch("http://localhost:3000/puppet", {
 		method: "POST",
 		body: JSON.stringify(data),
@@ -75,6 +56,9 @@ function log(data, type = "log") {
 	if (data instanceof Object) {
 		cardContent = data.message;
 		cardType = data.type;
+		if (data.total) cTotalRequest.innerText = data.total;
+		if (data.success) cTotalSuccess.innerText = data.success;
+		if (data.failed) cTotalFailed.innerText = data.failed;
 		switch (cardType) {
 			case "error":
 				if (data.code === 1) cardContent = `Failed (<span class="text-danger font-weight-bold">${data.failed}</span>/<span class="text-default font-weight-bold">${data.total}</span>) : <span class="text-danger font-weight-bold">${data.errorCode}</span> : <a class="text-primary" target="_blank" href="${data.url}">${data.url}</a>`;
@@ -95,7 +79,7 @@ function log(data, type = "log") {
 						break;
 
 					case 5:
-						cardContent = `Client added. Total: <span class="text-default font-weight-bold">${data.total}</span>`;
+						cardContent = `Client added. Total: <span class="text-default font-weight-bold">${data.totalClient}</span>`;
 						break;
 
 					case 6:
