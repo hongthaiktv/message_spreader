@@ -20,7 +20,8 @@ let puppet = {
 	current: "mainSites",
 	quickStart: process.env.PUPPET == 1 ? true : false,
 	mainSites: require('./websites.json'),
-	trustSites: require('./trustsites.json')
+	trustSites: require('./trustsites.json'),
+	blackSites: require('./blacksites.json')
 };
 
 logger.addEventListener("change", function (e) {

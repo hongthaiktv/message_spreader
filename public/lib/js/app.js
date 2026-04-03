@@ -3,6 +3,11 @@ let SSE = false;
 const wHeight = window.innerHeight;
 document.body.style.height = `${wHeight}px`;
 
+listSite.onchange = function (e) {
+	const urls = document.querySelector("#listSite input:checked").id;
+	puppet("change", urls);
+}
+
 //puppet
 let source = new EventSource("http://localhost:3000/logger");
 source.onopen = e => SSE = true;
@@ -37,11 +42,6 @@ pupBtnStart.onclick = function(e) {
 
 pupBtnStop.onclick = function(e) {
 	puppet("stop");
-};
-
-pupBtnChange.onclick = function(e) {
-	const urls = fPuppet.urls.value;
-	puppet("change", urls);
 };
 
 pupBtnDisconnect.onclick = function(e) {
