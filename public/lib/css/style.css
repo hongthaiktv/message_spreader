@@ -5,16 +5,36 @@ body {
 	padding: 0.5em;
 }
 
+#layoutBottom, #loggerTabsContent, #tabLoggerContent {
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	overflow: scroll;
+}
+
+#tabUrlsContent, #tabStatisticContent {
+	flex-grow: 1;
+}
+
 #logger {
 	flex-grow: 1;
 	overflow: scroll;
 }
-/* 
-.warning {
-	background-color: orange;
+
+#sliderRate {
+	height: 50px;
 }
 
-.error {
-	background-color: red;
+#btnControlGroup > button {
+	font-size: 12px;
 }
-*/ 
+
+.color-light-blue {
+	color: white;
+	background-color: #82b1ff;
+}
+
+.color-light-blue-active {
+	background-color: #1c71ff;
+}
+
