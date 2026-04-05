@@ -5,6 +5,14 @@ body {
 	padding: 0.5em;
 }
 
+#tabButtons {
+	padding: 0.5em;
+}
+
+#tabButtons a {
+	padding: 0.2em;
+}
+
 #sliderRate {
 	height: 50px;
 }
