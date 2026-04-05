@@ -79,11 +79,11 @@ function log(data, type = "log") {
 						break;
 
 					case 5:
-						cardContent = `Client added. Total: <span class="text-default font-weight-bold">${data.totalClient}</span>`;
+						cardContent = `Client added. Total: <span class="orange-text font-weight-bold">${data.totalClient}</span>`;
 						break;
 
 					case 6:
-						cardContent = `Client disconnected. Left: <span class="text-default font-weight-bold">${data.total}</span>`;
+						cardContent = `Client disconnected. Left: <span class="orange-text font-weight-bold">${data.total}</span>`;
 						break;
 				}
 				break;
