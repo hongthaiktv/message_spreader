@@ -5,22 +5,6 @@ body {
 	padding: 0.5em;
 }
 
-#layoutBottom, #loggerTabsContent, #tabLoggerContent {
-	display: flex;
-	flex-direction: column;
-	flex-grow: 1;
-	overflow: scroll;
-}
-
-#tabUrlsContent, #tabStatisticContent {
-	flex-grow: 1;
-}
-
-#logger {
-	flex-grow: 1;
-	overflow: scroll;
-}
-
 #sliderRate {
 	height: 50px;
 }

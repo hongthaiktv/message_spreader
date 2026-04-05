@@ -6,6 +6,7 @@
 		<meta name="keywords" content="HTML,CSS,JavaScript">
 		<meta name="author" content="Thai Nguyen">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="icon" href="/favicon.ico" type="image/x-icon">
 		<link rel="stylesheet" type="text/css" href="lib/css/mdb-4.11.0.min.css">
 		<link rel="stylesheet" type="text/css" href="lib/css/style.css">
 		<title>Test Page</title>
@@ -56,8 +57,8 @@
 
 		<hr class="w-100">
 
-		<div id="layoutBottom">
-			<ul class="nav nav-tabs nav-justified md-tabs color-light-blue-active" id="loggerTabs" role="tablist">
+		<div id="layoutTabs" class="d-flex flex-column overflow-auto flex-grow-1 w-100">
+			<ul class="nav nav-tabs nav-justified md-tabs color-light-blue-active" id="tabButtons" role="tablist">
 				<li class="nav-item">
 					<a class="nav-link active" id="tabLogger" data-toggle="tab" href="#tabLoggerContent" role="tab" aria-controls="tabLoggerContent" aria-selected="true">Logger</a>
 				</li>
@@ -68,33 +69,39 @@
 					<a class="nav-link" id="tabStatistic" data-toggle="tab" href="#tabStatisticContent" role="tab" aria-controls="tabStatisticContent" aria-selected="false">Statistic</a>
 				</li>
 			</ul>
-			<div class="tab-content card pt-5 color-light-blue pb-0" id="loggerTabsContent">
-				<div class="tab-pane fade show active" id="tabLoggerContent" role="tabpanel" aria-labelledby="tabLogger">
-					<div id="logger"></div>
-					<div id="puppet-status" class="btn-group" role="group" aria-label="Puppet status">
-						<button id="btnTotalRequest" type="button" class="btn btn-orange btn-rounded py-2"><div class="flex-center font-weight-bold"><i class="fas fa-paper-plane pr-2" aria-hidden="true"></i><span id="cTotalRequest">0</span></div></button>
-						<button id="btnTotalSuccess" type="button" class="btn btn-success btn-rounded py-2"><div class="flex-center font-weight-bold"><i class="fas fa-check-circle pr-2" aria-hidden="true"></i><span id="cTotalSuccess">0</span></div></button>
-						<button id="btnTotalFailed" type="button" class="btn btn-danger btn-rounded py-2"><div class="flex-center font-weight-bold"><i class="fas fa-times-circle pr-2" aria-hidden="true"></i><span id="cTotalFailed">0</span></div></button>
+			<div class="d-flex flex-column overflow-auto flex-grow-1 w-100 tab-content card pt-4 color-light-blue pb-0" id="tabsContainer">
+				<div class="overflow-auto flex-grow-1 w-100 tab-pane fade show active" id="tabLoggerContent" role="tabpanel" aria-labelledby="tabLogger">
+					<div class="d-flex flex-column overflow-auto w-100 h-100">
+						<div id="logger" class="overflow-auto flex-grow-1 w-100"></div>
+						<div id="puppet-status" class="btn-group w-100" role="group" aria-label="Puppet status">
+							<button id="btnTotalRequest" type="button" class="btn btn-orange btn-rounded py-2"><div class="flex-center font-weight-bold"><i class="fas fa-paper-plane pr-2" aria-hidden="true"></i><span id="cTotalRequest">0</span></div></button>
+							<button id="btnTotalSuccess" type="button" class="btn btn-success btn-rounded py-2"><div class="flex-center font-weight-bold"><i class="fas fa-check-circle pr-2" aria-hidden="true"></i><span id="cTotalSuccess">0</span></div></button>
+							<button id="btnTotalFailed" type="button" class="btn btn-danger btn-rounded py-2"><div class="flex-center font-weight-bold"><i class="fas fa-times-circle pr-2" aria-hidden="true"></i><span id="cTotalFailed">0</span></div></button>
+						</div>
 					</div>
 				</div>
-				<div class="tab-pane fade" id="tabUrlsContent" role="tabpanel" aria-labelledby="tabUrls">
-					<p>Food truck fixie locavore, accusamus mcsweeney's marfa nulla single-origin coffee squid. Exercitation +1
-						labore velit, blog sartorial PBR leggings next level wes anderson artisan four loko farm-to-table craft
-						beer twee. Qui photo booth letterpress, commodo enim craft beer mlkshk aliquip jean shorts ullamco ad
-						vinyl cillum PBR. Homo nostrud organic, assumenda labore aesthetic magna delectus mollit. Keytar
-						helvetica VHS salvia yr, vero magna velit sapiente labore stumptown. Vegan fanny pack odio cillum wes
-						anderson 8-bit, sustainable jean shorts beard ut DIY ethical culpa terry richardson biodiesel. Art party
-						scenester stumptown, tumblr butcher vero sint qui sapiente accusamus tattooed echo park.
-					</p>
+				<div class="overflow-auto flex-grow-1 w-100 tab-pane fade" id="tabUrlsContent" role="tabpanel" aria-labelledby="tabUrls">
+					<div class="d-flex flex-column overflow-auto w-100 h-100">
+						<p>Food truck fixie locavore, accusamus mcsweeney's marfa nulla single-origin coffee squid. Exercitation +1
+							labore velit, blog sartorial PBR leggings next level wes anderson artisan four loko farm-to-table craft
+							beer twee. Qui photo booth letterpress, commodo enim craft beer mlkshk aliquip jean shorts ullamco ad
+							vinyl cillum PBR. Homo nostrud organic, assumenda labore aesthetic magna delectus mollit. Keytar
+							helvetica VHS salvia yr, vero magna velit sapiente labore stumptown. Vegan fanny pack odio cillum wes
+							anderson 8-bit, sustainable jean shorts beard ut DIY ethical culpa terry richardson biodiesel. Art party
+							scenester stumptown, tumblr butcher vero sint qui sapiente accusamus tattooed echo park.
+						</p>
+					</div>
 				</div>
-				<div class="tab-pane fade" id="tabStatisticContent" role="tabpanel" aria-labelledby="tabStatistic">
-					<p>Etsy mixtape wayfarers, ethical wes anderson tofu before they sold out mcsweeney's organic lomo retro
-						fanny pack lo-fi farm-to-table readymade. Messenger bag gentrify pitchfork tattooed craft beer, iphone
-						skateboard locavore carles etsy salvia banksy hoodie helvetica. DIY synth PBR banksy irony. Leggings
-						gentrify squid 8-bit cred pitchfork. Williamsburg banh mi whatever gluten-free, carles pitchfork
-						biodiesel fixie etsy retro mlkshk vice blog. Scenester cred you probably haven't heard of them, vinyl
-						craft beer blog stumptown. Pitchfork sustainable tofu synth chambray yr.
-					</p>
+				<div class="overflow-auto flex-grow-1 w-100 tab-pane fade" id="tabStatisticContent" role="tabpanel" aria-labelledby="tabStatistic">
+					<div class="d-flex flex-column overflow-auto w-100 h-100">
+						<p>Etsy mixtape wayfarers, ethical wes anderson tofu before they sold out mcsweeney's organic lomo retro
+							fanny pack lo-fi farm-to-table readymade. Messenger bag gentrify pitchfork tattooed craft beer, iphone
+							skateboard locavore carles etsy salvia banksy hoodie helvetica. DIY synth PBR banksy irony. Leggings
+							gentrify squid 8-bit cred pitchfork. Williamsburg banh mi whatever gluten-free, carles pitchfork
+							biodiesel fixie etsy retro mlkshk vice blog. Scenester cred you probably haven't heard of them, vinyl
+							craft beer blog stumptown. Pitchfork sustainable tofu synth chambray yr.
+						</p>
+					</div>
 				</div>
 			</div>
 		</div>
