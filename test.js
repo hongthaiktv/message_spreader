@@ -1,8 +1,18 @@
 const path = require('path');
 const express = require('express');
+const multer = require('multer');
+
 const app = express();
 const port = 3001;
 const rootDir = path.join(__dirname, "public");
+
+const storage = multer.diskStorage({
+	destination: path.join(rootDir, "uploads"),
+	filename: function (req, file, cb) {
+		cb(null, file.originalname);
+	}
+});
+const upload = multer({ storage });
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -11,7 +21,16 @@ app.use(express.static(rootDir));
 app.post("/post", (req, res) => {
 	console.log(req.headers);
 	console.log(req.body);
-	res.json({result: "server response"});
+	const msg = "post data received";
+	res.json({result: msg});
+});
+
+app.post("/upload", upload.single("file"), (req, res) => {
+	console.log(req.headers);
+	const msg = req.file ? req.file.path : "text only";
+	console.log(msg);
+	console.log(req.file);
+	res.json({result: msg});
 });
 
 app.listen(port, () => {

@@ -1,15 +1,23 @@
+const fs = require('fs');
 const express = require('express');
 const serveIndex = require('serve-index');
 const request = require('request');
 const path = require('path');
 const multer = require('multer');
 const { JSDOM, VirtualConsole } = require("jsdom");
+const Logger = require('./Logger.js');
+
 const app = express();
 const port = 3000;
 const rootDir = path.join(__dirname, "public");
-const upload = multer({ dest: `${rootDir}/uploads/` });
-const Logger = require('./Logger.js');
 const logger = new Logger("");
+const storage = multer.diskStorage({
+	destination: path.join(rootDir, "uploads"),
+	filename: function (req, file, cb) {
+		cb(null, file.originalname);
+	}
+});
+const upload = multer({ storage });
 
 let server;
 let puppet = {
@@ -69,6 +77,14 @@ app.get("/logger", (req, res) => {
 	logger.addClient(res, "log", {code: 5, total: puppet.total, success: puppet.success, failed: puppet.failed});
 });
 
+app.post("/upload", upload.single("file"), (req, res) => {
+	console.log(req.headers);
+	const msg = req.file ? req.file.path : "no file";
+	console.log(msg);
+	console.log(req.file);
+	res.json({result: msg});
+});
+
 app.get("/test", (req, res) => {
 	console.log(req.headers);
 	console.log(req.body);
@@ -104,8 +120,12 @@ function runPuppet(act, res) {
 			puppet.started = true;
 			puppet.counter = 0;
 			async function randRequest(time) {
-				//test post
-				randPost("catch this", time);
+				//test post json data
+				randPost("In God We Trust", time);
+				//test file upload
+// 				let fileUpload = 'resampled.jpg';
+// 				fileUpload = path.join(__dirname, 'assets', 'images', fileUpload);
+// 				randUpload(fileUpload, time);
 
 				function wait() {
 					return new Promise((resolve) => {
@@ -257,7 +277,10 @@ async function randPost(msg, time) {
 					headers: {
 						'User-Agent': 'Mozilla/5.0 (Android 15; Mobile; rv:78.0) Gecko/78.0 Firefox/78.0'
 					},
-					body: {message: msg}
+					body: {
+						message: msg,
+						location: "WF23+VH Vatican City"
+					}
 				};
 
 				request(options, function (error, response, body) {
@@ -273,5 +296,54 @@ async function randPost(msg, time) {
 	while (puppet.started) {
 		await wait();
 	}
+}
+
+async function randUpload(file, time) {
+	function wait() {
+		return new Promise((resolve) => {
+			let randTime = Math.floor(Math.random() * time + 1);
+			setTimeout(() => {
+				let rand;
+				if (puppet.counter < 10 && puppet[puppet.current].length >= 10) rand = Math.floor(Math.random() * 10);
+				else if (puppet.counter < 100 && puppet[puppet.current].length >= 100) rand = Math.floor(Math.random() * 100);
+				else if (puppet.counter < 1000 && puppet[puppet.current].length >= 1000) rand = Math.floor(Math.random() * 1000);
+				else if (puppet.counter < 10000 && puppet[puppet.current].length >= 10000) rand = Math.floor(Math.random() * 10000);
+				else if (puppet.counter < 100000 && puppet[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
+				else rand = Math.floor(Math.random() * puppet[puppet.current].length);
+
+				const url = `https://${puppet[puppet.current][rand]}`;
+				const options = {
+					method: "POST",
+					url: 'http://localhost:3001/upload',
+					strictSSL: false,
+					headers: {
+						'User-Agent': 'Mozilla/5.0 (Android 15; Mobile; rv:78.0) Gecko/78.0 Firefox/78.0',
+						"Content-Type": "multipart/form-data"
+					},
+					formData: {
+						file: {
+							value: fs.createReadStream(file),
+							options: {
+								filename: file.replace(/^.*\//g, ''),
+								contentType: 'image/jpeg'
+							}
+						}
+					}
+				};
+
+				request(options, function (error, response, body) {
+					if (error) {
+						console.error(error);
+						return;
+					}
+				});
+				resolve(`Upload complete: ${file}`);
+			}, randTime);
+		});
+	}
+	await wait();
+// 	while (puppet.started) {
+// 		await wait();
+// 	}
 }
 
