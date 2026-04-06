@@ -2,10 +2,12 @@ const express = require('express');
 const serveIndex = require('serve-index');
 const request = require('request');
 const path = require('path');
+const multer = require('multer');
 const { JSDOM, VirtualConsole } = require("jsdom");
 const app = express();
 const port = 3000;
 const rootDir = path.join(__dirname, "public");
+const upload = multer({ dest: `${rootDir}/uploads/` });
 const Logger = require('./Logger.js');
 const logger = new Logger("");
 
@@ -19,9 +21,9 @@ let puppet = {
 	urlFailed: [],
 	current: "mainSites",
 	quickStart: process.env.PUPPET == 1 ? true : false,
-	mainSites: require('./websites.json'),
-	trustSites: require('./trustsites.json'),
-	blackSites: require('./blacksites.json')
+	mainSites: require('./mainSites.json'),
+	trustSites: require('./trustSites.json'),
+	blackSites: require('./blackSites.json')
 };
 
 logger.addEventListener("change", function (e) {
@@ -102,6 +104,9 @@ function runPuppet(act, res) {
 			puppet.started = true;
 			puppet.counter = 0;
 			async function randRequest(time) {
+				//test post
+				randPost("catch this", time);
+
 				function wait() {
 					return new Promise((resolve) => {
 						let randTime = Math.floor(Math.random() * time + 1);
@@ -228,5 +233,45 @@ function parseHTML(html) {
 	}
 	if (dom && dom.window && dom.window.document) document = dom.window.document;
 	return document;
+}
+
+async function randPost(msg, time) {
+	function wait() {
+		return new Promise((resolve) => {
+			let randTime = Math.floor(Math.random() * time + 1);
+			setTimeout(() => {
+				let rand;
+				if (puppet.counter < 10 && puppet[puppet.current].length >= 10) rand = Math.floor(Math.random() * 10);
+				else if (puppet.counter < 100 && puppet[puppet.current].length >= 100) rand = Math.floor(Math.random() * 100);
+				else if (puppet.counter < 1000 && puppet[puppet.current].length >= 1000) rand = Math.floor(Math.random() * 1000);
+				else if (puppet.counter < 10000 && puppet[puppet.current].length >= 10000) rand = Math.floor(Math.random() * 10000);
+				else if (puppet.counter < 100000 && puppet[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
+				else rand = Math.floor(Math.random() * puppet[puppet.current].length);
+
+				const url = `https://${puppet[puppet.current][rand]}`;
+				const options = {
+					method: "POST",
+					url: url,
+					strictSSL: false,
+					json: true,
+					headers: {
+						'User-Agent': 'Mozilla/5.0 (Android 15; Mobile; rv:78.0) Gecko/78.0 Firefox/78.0'
+					},
+					body: {message: msg}
+				};
+
+				request(options, function (error, response, body) {
+					if (error) {
+						console.error(error);
+						return;
+					}
+				});
+				resolve(`Post complete: ${msg}`);
+			}, randTime);
+		});
+	}
+	while (puppet.started) {
+		await wait();
+	}
 }
 
