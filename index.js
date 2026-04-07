@@ -6,7 +6,12 @@ const path = require('path');
 const multer = require('multer');
 const { JSDOM, VirtualConsole } = require("jsdom");
 const Logger = require('./Logger.js');
+const FilesUpload = require('./FilesUpload.js');
 const motd = require('./assets/json/motd.json');
+
+const f = new FilesUpload(["./assets/images/20260323_144840_resampled.jpg", "./assets/images/20260401_134221_resampled.jpg"])
+console.log(f);
+return
 
 const app = express();
 const port = 3000;
@@ -296,7 +301,7 @@ async function randPost(data, time) {
 	}
 }
 
-async function randUpload(file, time) {
+async function randUpload(files, time) {
 	function wait() {
 		return new Promise((resolve) => {
 			let randTime = Math.floor(Math.random() * time + 1);
@@ -309,8 +314,8 @@ async function randUpload(file, time) {
 				else if (puppet.counter < 100000 && puppet[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
 				else rand = Math.floor(Math.random() * puppet[puppet.current].length);
 
-				const url = `https://${puppet[puppet.current][rand]}`;
-// 				const url = `http://localhost:3001/upload`;
+// 				const url = `https://${puppet[puppet.current][rand]}`;
+				const url = `http://localhost:3001/upload`;
 				const options = {
 					method: "POST",
 					url: url,
@@ -320,10 +325,10 @@ async function randUpload(file, time) {
 						"Content-Type": "multipart/form-data"
 					},
 					formData: {
-						file: {
-							value: fs.createReadStream(file),
+						files: {
+							value: fs.createReadStream(files),
 							options: {
-								filename: file.replace(/^.*\//g, ''),
+								filename: files.replace(/^.*\//g, ''),
 								contentType: 'image/jpeg'
 							}
 						}
@@ -336,7 +341,7 @@ async function randUpload(file, time) {
 						return;
 					}
 				});
-				resolve(`Upload complete: ${file}`);
+				resolve(`Upload complete: ${files}`);
 			}, randTime);
 		});
 	}
