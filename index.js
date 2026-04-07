@@ -269,7 +269,7 @@ async function randPost(data, time) {
 				else if (puppet.counter < 100000 && puppet[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
 				else rand = Math.floor(Math.random() * puppet[puppet.current].length);
 
-				const url = `http://${puppet[puppet.current][rand]}`;
+				const url = `https://${puppet[puppet.current][rand]}`;
 				const options = {
 					method: "POST",
 					url: url,
