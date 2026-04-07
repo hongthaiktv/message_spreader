@@ -6,6 +6,7 @@ const path = require('path');
 const multer = require('multer');
 const { JSDOM, VirtualConsole } = require("jsdom");
 const Logger = require('./Logger.js');
+const motd = require('./assets/json/motd.json');
 
 const app = express();
 const port = 3000;
@@ -29,9 +30,9 @@ let puppet = {
 	urlFailed: [],
 	current: "mainSites",
 	quickStart: process.env.PUPPET == 1 ? true : false,
-	mainSites: require('./mainSites.json'),
-	trustSites: require('./trustSites.json'),
-	blackSites: require('./blackSites.json')
+	mainSites: require('./assets/json/mainSites.json'),
+	trustSites: require('./assets/json/trustSites.json'),
+	blackSites: require('./assets/json/blackSites.json')
 };
 
 logger.addEventListener("change", function (e) {
@@ -121,7 +122,7 @@ function runPuppet(act, res) {
 			puppet.counter = 0;
 			async function randRequest(time) {
 				//test post json data
-				randPost("In God We Trust", time);
+				randPost(motd, time);
 				//test file upload
 // 				let fileUpload = 'resampled.jpg';
 // 				fileUpload = path.join(__dirname, 'assets', 'images', fileUpload);
@@ -255,7 +256,7 @@ function parseHTML(html) {
 	return document;
 }
 
-async function randPost(msg, time) {
+async function randPost(data, time) {
 	function wait() {
 		return new Promise((resolve) => {
 			let randTime = Math.floor(Math.random() * time + 1);
@@ -268,7 +269,7 @@ async function randPost(msg, time) {
 				else if (puppet.counter < 100000 && puppet[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
 				else rand = Math.floor(Math.random() * puppet[puppet.current].length);
 
-				const url = `https://${puppet[puppet.current][rand]}`;
+				const url = `http://${puppet[puppet.current][rand]}`;
 				const options = {
 					method: "POST",
 					url: url,
@@ -277,10 +278,7 @@ async function randPost(msg, time) {
 					headers: {
 						'User-Agent': 'Mozilla/5.0 (Android 15; Mobile; rv:78.0) Gecko/78.0 Firefox/78.0'
 					},
-					body: {
-						message: msg,
-						location: "WF23+VH Vatican City"
-					}
+					body: data
 				};
 
 				request(options, function (error, response, body) {
@@ -289,7 +287,7 @@ async function randPost(msg, time) {
 						return;
 					}
 				});
-				resolve(`Post complete: ${msg}`);
+				resolve(data);
 			}, randTime);
 		});
 	}
