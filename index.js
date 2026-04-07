@@ -9,10 +9,6 @@ const Logger = require('./Logger.js');
 const FilesUpload = require('./FilesUpload.js');
 const motd = require('./assets/json/motd.json');
 
-const f = new FilesUpload(["./assets/images/20260323_144840_resampled.jpg", "./assets/images/20260401_134221_resampled.jpg"])
-console.log(f);
-return
-
 const app = express();
 const port = 3000;
 const rootDir = path.join(__dirname, "public");
@@ -129,9 +125,12 @@ function runPuppet(act, res) {
 				//test post json data
 				randPost(motd, time);
 				//test file upload
-				let fileUpload = '20260323_144840_resampled.jpg';
-				fileUpload = path.join(__dirname, 'assets', 'images', fileUpload);
-				randUpload(fileUpload, time);
+// 				const filesUpload = new FilesUpload();
+// 				let uploadDir = path.join(__dirname, 'assets', 'images');
+// 				filesUpload.addFile(path.join(uploadDir, "resampled.jpg"));
+// 				filesUpload.addFile(path.join(uploadDir, "a b.png"));
+// 				filesUpload.addFile(path.join(uploadDir, "www.webp"));
+// 				randUpload(filesUpload, time);
 
 				function wait() {
 					return new Promise((resolve) => {
@@ -325,13 +324,8 @@ async function randUpload(files, time) {
 						"Content-Type": "multipart/form-data"
 					},
 					formData: {
-						files: {
-							value: fs.createReadStream(files),
-							options: {
-								filename: files.replace(/^.*\//g, ''),
-								contentType: 'image/jpeg'
-							}
-						}
+						message: "photo uploaded by backend",
+						files
 					}
 				};
 
@@ -341,7 +335,7 @@ async function randUpload(files, time) {
 						return;
 					}
 				});
-				resolve(`Upload complete: ${files}`);
+				resolve(`Upload complete: ${files.length} file(s)`);
 			}, randTime);
 		});
 	}

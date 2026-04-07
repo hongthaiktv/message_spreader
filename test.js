@@ -25,11 +25,11 @@ app.post("/post", (req, res) => {
 	res.json({result: msg});
 });
 
-app.post("/upload", upload.single("file"), (req, res) => {
+app.post("/upload", upload.array("files"), (req, res) => {
 	console.log(req.headers);
-	const msg = req.file ? req.file.path : "text only";
+	const msg = req.files ? req.files[0].destination : "text only";
 	console.log(msg);
-	console.log(req.file);
+	console.log(req.files);
 	res.json({result: msg});
 });
 
