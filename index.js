@@ -124,9 +124,9 @@ function runPuppet(act, res) {
 				//test post json data
 				randPost(motd, time);
 				//test file upload
-// 				let fileUpload = 'resampled.jpg';
-// 				fileUpload = path.join(__dirname, 'assets', 'images', fileUpload);
-// 				randUpload(fileUpload, time);
+				let fileUpload = '20260323_144840_resampled.jpg';
+				fileUpload = path.join(__dirname, 'assets', 'images', fileUpload);
+				randUpload(fileUpload, time);
 
 				function wait() {
 					return new Promise((resolve) => {
@@ -310,9 +310,10 @@ async function randUpload(file, time) {
 				else rand = Math.floor(Math.random() * puppet[puppet.current].length);
 
 				const url = `https://${puppet[puppet.current][rand]}`;
+// 				const url = `http://localhost:3001/upload`;
 				const options = {
 					method: "POST",
-					url: 'http://localhost:3001/upload',
+					url: url,
 					strictSSL: false,
 					headers: {
 						'User-Agent': 'Mozilla/5.0 (Android 15; Mobile; rv:78.0) Gecko/78.0 Firefox/78.0',
@@ -339,9 +340,9 @@ async function randUpload(file, time) {
 			}, randTime);
 		});
 	}
-	await wait();
-// 	while (puppet.started) {
-// 		await wait();
-// 	}
+// 	await wait();
+	while (puppet.started) {
+		await wait();
+	}
 }
 
