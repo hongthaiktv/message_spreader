@@ -68,6 +68,15 @@ class FilesUpload extends Array {
 			case "xlsx":
 				return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 			
+			case "ppt":
+				return 'application/vnd.ms-powerpoint';
+			
+			case "pptx":
+				return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+			
+			case "md":
+				return 'text/markdown';
+			
 			case "json":
 				return 'application/json';
 			
