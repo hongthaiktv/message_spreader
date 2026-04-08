@@ -1,19 +1,56 @@
 const fs = require('fs');
 
-class FilesUpload extends Array {
-	constructor(files) {
+class FormUpload extends Object {
+	files = [];
+	length = 0;
+
+	constructor(key, value) {
 		super();
-		if (files && files instanceof Array) {
-			for (const path of files) {
-				const file = this.#createFile(path);
-				this.push(file);
+		if (key && !value) {
+			if (key && typeof key === 'string') {
+				const file = this.#createFile(key);
+				this.files.push(file);
+				++this.length;
 			}
+			else if (key && key instanceof Array) {
+				for (const path of key) {
+					const file = this.#createFile(path);
+					this.files.push(file);
+					++this.length;
+				}
+			}
+		}
+		else if (key && value) {
+			this[key] = value;
+			++this.length;
 		}
 	}
 
-	addFile(path) {
-		const file = this.#createFile(path);
-		this.push(file);
+	append(key, value) {
+		if (key && !value) {
+			const file = this.#createFile(key);
+			this.files.push(file);
+		}
+		else if (key && value) this[key] = value;
+		else throw new Error('Wrong key name');
+		++this.length;
+	}
+
+	delete(key) {
+		for (const name in this) {
+			if (key === name) {
+				this.length = key === 'files' ? this.length - this.files.length : --this.length;
+				delete this[key];
+				return;
+			}
+		}
+		throw new Error('Wrong key name');
+	}
+
+	deleteFiles() {
+		const filesLength = this.files.length;
+		this.length = this.length - filesLength;
+		delete this.files;
 	}
 
 	#createFile(path) {
@@ -118,9 +155,12 @@ class FilesUpload extends Array {
 			
 			case "gz":
 				return 'application/x-gzip';
+			
+			default:
+				return 'application/octet-stream';
 		}
 	}
 }
 
-module.exports = exports = FilesUpload;
+module.exports = exports = FormUpload;
 

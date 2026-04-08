@@ -30,6 +30,7 @@ app.post("/upload", upload.array("files"), (req, res) => {
 	const msg = req.files ? req.files[0].destination : "text only";
 	console.log(msg);
 	console.log(req.files);
+	console.log(req.body.message);
 	res.json({result: msg});
 });
 

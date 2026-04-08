@@ -5,8 +5,8 @@ const request = require('request');
 const path = require('path');
 const multer = require('multer');
 const { JSDOM, VirtualConsole } = require("jsdom");
-const Logger = require('./Logger.js');
-const FilesUpload = require('./FilesUpload.js');
+const Logger = require('./plugin/Logger.js');
+const FormUpload = require('./plugin/FormUpload.js');
 const motd = require('./assets/json/motd.json');
 
 const app = express();
@@ -125,12 +125,9 @@ function runPuppet(act, res) {
 				//test post json data
 				randPost(motd, time);
 				//test file upload
-// 				const filesUpload = new FilesUpload();
-// 				let uploadDir = path.join(__dirname, 'assets', 'images');
-// 				filesUpload.addFile(path.join(uploadDir, "resampled.jpg"));
-// 				filesUpload.addFile(path.join(uploadDir, "a b.png"));
-// 				filesUpload.addFile(path.join(uploadDir, "www.webp"));
-// 				randUpload(filesUpload, time);
+// 				const uploadDir = path.join(__dirname, 'assets', 'images');
+// 				const image = path.join(uploadDir, "resampled.jpg");
+// 				randUpload(formData, time);
 
 				function wait() {
 					return new Promise((resolve) => {
@@ -300,7 +297,7 @@ async function randPost(data, time) {
 	}
 }
 
-async function randUpload(files, time) {
+async function randUpload(formData, time) {
 	function wait() {
 		return new Promise((resolve) => {
 			let randTime = Math.floor(Math.random() * time + 1);
@@ -323,10 +320,7 @@ async function randUpload(files, time) {
 						'User-Agent': 'Mozilla/5.0 (Android 15; Mobile; rv:78.0) Gecko/78.0 Firefox/78.0',
 						"Content-Type": "multipart/form-data"
 					},
-					formData: {
-						message: "photo uploaded by backend",
-						files
-					}
+					formData
 				};
 
 				request(options, function (error, response, body) {
@@ -335,7 +329,7 @@ async function randUpload(files, time) {
 						return;
 					}
 				});
-				resolve(`Upload complete: ${files.length} file(s)`);
+				resolve(`Upload complete: ${formData.length} file(s)`);
 			}, randTime);
 		});
 	}
