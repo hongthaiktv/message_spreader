@@ -1,11 +1,24 @@
 let SSE = false;
+let loggerScrollable = true;
+let loggerPrevPos = 0;
 
 const wHeight = window.innerHeight;
 document.body.style.height = `${wHeight}px`;
 
 listSite.onchange = function (e) {
-	const urls = document.querySelector("#listSite input:checked").id;
+	const urls = document.querySelector("#listSite input:checked").value;
 	puppet("change", urls);
+}
+
+logger.onscroll = function () {
+	let curPos = logger.scrollTop;
+	if (loggerScrollable && curPos < loggerPrevPos) {
+		loggerScrollable = false;
+	}
+	else if (logger.scrollHeight - curPos <= logger.offsetHeight) {
+		loggerScrollable = true;
+	}
+	loggerPrevPos = curPos;
 }
 
 //puppet
@@ -147,6 +160,8 @@ function log(data, type = "log") {
 			divCard.className = cardType;
 	}
 	logger.appendChild(divCard);
-	logger.scrollTop = logger.scrollHeight;
+	if (loggerScrollable) {
+		logger.scrollTop = logger.scrollHeight;
+	}
 }
 		

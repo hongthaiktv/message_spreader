@@ -178,7 +178,7 @@ function runPuppet(act, res) {
 										const para = document.querySelectorAll("p");
 										if (para.length) {
 											const rand = Math.floor(Math.random() * para.length);
-											if (para[rand].innerHTML) logger.addLog(para[rand].innerHTML, "info", {code: 10, total: puppet.total, success: puppet.success, failed: puppet.failed});
+											if (para[rand].innerText) logger.addLog(para[rand].innerHTML, "info", {code: 10, total: puppet.total, success: puppet.success, failed: puppet.failed});
 										}
 										else logger.addLog(`Paragraph not found: ${url}`, "log", {code: 2, total: puppet.total, success: puppet.success, failed: puppet.failed, url});
 									}
