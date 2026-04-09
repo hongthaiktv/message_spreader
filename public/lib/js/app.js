@@ -15,7 +15,7 @@ logger.onscroll = function () {
 	if (loggerScrollable && curPos < loggerPrevPos) {
 		loggerScrollable = false;
 	}
-	else if (logger.scrollHeight - curPos <= logger.offsetHeight) {
+	else if (!loggerScrollable && logger.scrollHeight - curPos <= logger.offsetHeight + 10) {
 		loggerScrollable = true;
 	}
 	loggerPrevPos = curPos;
@@ -92,6 +92,20 @@ function log(data, type = "log") {
 						break;
 
 					case 5:
+						if (data.current) {
+							const listSiteButtons = document.querySelectorAll("#listSite input");
+							for (const button of listSiteButtons) {
+								const list = button.value;
+								if (data.current === list) {
+									button.setAttribute("checked", true);
+									button.parentElement.className = "btn btn-light-blue form-check-label active";
+								}
+								else {
+									button.removeAttribute("checked");
+									button.parentElement.className = "btn btn-light-blue form-check-label";
+								}
+							}
+						}
 						cardContent = `Client added. Total: <span class="orange-text font-weight-bold">${data.totalClient}</span>`;
 						break;
 

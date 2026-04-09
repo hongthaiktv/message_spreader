@@ -5,8 +5,7 @@ const request = require('request');
 const path = require('path');
 const multer = require('multer');
 const { JSDOM, VirtualConsole } = require("jsdom");
-const Logger = require('./plugin/Logger.js');
-const FormUpload = require('./plugin/FormUpload.js');
+const { Logger, FormUpload } = require('./plugin/tutils/index.js');
 const motd = require('./assets/json/motd.json');
 
 const app = express();
@@ -76,7 +75,7 @@ app.get("/logger", (req, res) => {
 		"Content-Type": "text/event-stream",
 		"Cache-Control": "no-cache"
 	});
-	logger.addClient(res, "log", {code: 5, total: puppet.total, success: puppet.success, failed: puppet.failed});
+	logger.addClient(res, "log", {code: 5, current: puppet.current, total: puppet.total, success: puppet.success, failed: puppet.failed});
 });
 
 app.post("/upload", upload.single("file"), (req, res) => {
@@ -178,7 +177,7 @@ function runPuppet(act, res) {
 										const para = document.querySelectorAll("p");
 										if (para.length) {
 											const rand = Math.floor(Math.random() * para.length);
-											if (para[rand].innerText) logger.addLog(para[rand].innerHTML, "info", {code: 10, total: puppet.total, success: puppet.success, failed: puppet.failed});
+											if (para[rand].innerText !== '') logger.addLog(para[rand].innerHTML, "info", {code: 10, total: puppet.total, success: puppet.success, failed: puppet.failed});
 										}
 										else logger.addLog(`Paragraph not found: ${url}`, "log", {code: 2, total: puppet.total, success: puppet.success, failed: puppet.failed, url});
 									}
