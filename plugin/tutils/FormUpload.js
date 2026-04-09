@@ -123,6 +123,9 @@ class FormUpload extends Object {
 			case "aac":
 				return 'audio/aac';
 			
+			case "m4a":
+				return 'audio/mp4';
+			
 			case "mp3":
 				return 'audio/mpeg';
 			
