@@ -51,16 +51,17 @@ async function puppet(action, urls = "mainSites") {
 
 pupBtnStart.onclick = function(e) {
 	puppet("start");
+	$(this).toggleClass("d-none");
+	$("#pupBtnStop").toggleClass("d-none");
 };
 
 pupBtnStop.onclick = function(e) {
 	puppet("stop");
+	$(this).toggleClass("d-none");
+	$("#pupBtnStart").toggleClass("d-none");
 };
 
-pupBtnDisconnect.onclick = function(e) {
-	source.close();
-	SSE = false;
-	log("Logger disconnected.");
+pupBtnUpload.onclick = function(e) {
 };
 
 function log(data, type = "log") {
