@@ -52,13 +52,13 @@ async function puppet(action, urls = "mainSites") {
 pupBtnStart.onclick = function(e) {
 	puppet("start");
 	$(this).toggleClass("d-none");
-	$("#pupBtnStop").toggleClass("d-none");
+	$("#pupBtnStop").toggleClass("d-none")[0].focus();
 };
 
 pupBtnStop.onclick = function(e) {
 	puppet("stop");
 	$(this).toggleClass("d-none");
-	$("#pupBtnStart").toggleClass("d-none");
+	$("#pupBtnStart").toggleClass("d-none")[0].focus();
 };
 
 pupBtnUpload.onclick = function(e) {
