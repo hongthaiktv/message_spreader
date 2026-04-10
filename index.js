@@ -75,7 +75,7 @@ app.get("/logger", (req, res) => {
 		"Content-Type": "text/event-stream",
 		"Cache-Control": "no-cache"
 	});
-	logger.addClient(res, "log", {code: 5, current: puppet.current, total: puppet.total, success: puppet.success, failed: puppet.failed});
+	logger.addClient(res, "log", {code: 5, started: puppet.started, current: puppet.current, total: puppet.total, success: puppet.success, failed: puppet.failed});
 });
 
 app.post("/upload", upload.single("file"), (req, res) => {

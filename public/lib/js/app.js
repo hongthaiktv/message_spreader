@@ -107,6 +107,11 @@ function log(data, type = "log") {
 								}
 							}
 						}
+						if (!data.started) {
+							alert(data.started)
+							$("#pupBtnStart").toggleClass("d-none", true);
+							$("#pupBtnStop").toggleClass("d-none", false);
+						}
 						cardContent = `Client added. Total: <span class="orange-text font-weight-bold">${data.totalClient}</span>`;
 						break;
 

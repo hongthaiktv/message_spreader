@@ -11,10 +11,6 @@ body {
 	padding: 0.2em;
 }
 
-#sliderRate {
-	height: 50px;
-}
-
 #btnControlGroup > button {
 	font-size: 12px;
 }
