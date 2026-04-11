@@ -321,8 +321,8 @@ async function randUpload(formData, time) {
 				else if (puppet.counter < 100000 && puppet[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
 				else rand = Math.floor(Math.random() * puppet[puppet.current].length);
 
-				const url = `https://${puppet[puppet.current][rand]}`;
-// 				const url = `http://localhost:3001/upload`;
+// 				const url = `https://${puppet[puppet.current][rand]}`;
+				const url = `http://localhost:3001/upload`;
 				const options = {
 					method: "POST",
 					url: url,

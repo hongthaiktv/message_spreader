@@ -61,8 +61,25 @@ pupBtnStop.onclick = function(e) {
 	$("#pupBtnStart").toggleClass("d-none")[0].focus();
 };
 
-pupBtnUpload.onclick = function(e) {
-};
+pupBtnUpload.addEventListener("change", async function (e) {
+	const files = this.files;
+	const formData = new FormData();
+	formData.append("message", "Files uploaded by web browser.");
+	for (const file of files) {
+		formData.append("files", file);
+	}
+	const url = "http://localhost:3001/upload";
+	const response = await fetch(url, {
+		method: "POST",
+		body: formData
+	});
+	if (!response.ok) {
+		log(`Error upload: ${response.status}`, "error");
+		return;
+	}
+	const res = await response.json();
+	log(res.message, "success");
+});
 
 function log(data, type = "log") {
 	let divCard = document.createElement("DIV");

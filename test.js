@@ -27,9 +27,9 @@ app.post("/post", (req, res) => {
 
 app.post("/upload", upload.array("files"), (req, res) => {
 	console.log(req.headers);
-	const msg = req.files ? req.files[0].destination : "text only";
-	console.log(msg);
+	const msg = req.files ? `Total ${req.files.length} file(s) uploaded.` : "No file(s) uploaded.";
 	console.log(req.files);
+	console.log(msg);
 	console.log(req.body.message);
 	res.json({result: msg});
 });
