@@ -1,3 +1,5 @@
+const PROTO = "http", HOST = "localhost", PORT = 3000;
+const SERVER = location.href || `${PROTO}://${HOST}:${PORT}/`;
 let SSE = false;
 let loggerScrollable = true;
 let loggerPrevPos = 0;
@@ -10,12 +12,12 @@ listSite.onchange = function (e) {
 	puppet("change", urls);
 }
 
-logger.onscroll = function () {
-	let curPos = logger.scrollTop;
+loggerContent.onscroll = function () {
+	let curPos = loggerContent.scrollTop;
 	if (loggerScrollable && curPos < loggerPrevPos) {
 		loggerScrollable = false;
 	}
-	else if (!loggerScrollable && logger.scrollHeight - curPos <= logger.offsetHeight + 10) {
+	else if (!loggerScrollable && loggerContent.scrollHeight - curPos <= loggerContent.offsetHeight + 10) {
 		loggerScrollable = true;
 	}
 	loggerPrevPos = curPos;
@@ -23,7 +25,10 @@ logger.onscroll = function () {
 
 //puppet
 let source = new EventSource("http://localhost:3000/logger");
-source.onopen = e => SSE = true;
+source.onopen = e => {
+	SSE = true;
+	query("getDir", "uploads", "upload");
+}
 source.onmessage = e => log(JSON.parse(e.data));
 source.onerror = e => {
 	SSE = false;
@@ -68,7 +73,7 @@ pupBtnUpload.addEventListener("change", async function (e) {
 	for (const file of files) {
 		formData.append("files", file);
 	}
-	const url = "http://localhost:3001/upload";
+	const url = `${SERVER}uploads`;
 	const response = await fetch(url, {
 		method: "POST",
 		body: formData
@@ -78,21 +83,29 @@ pupBtnUpload.addEventListener("change", async function (e) {
 		return;
 	}
 	const res = await response.json();
-	log(res.message, "success");
+	log(res.message, "success", "upload");
+	query("getDir", "uploads", "upload");
 });
 
-tabUpload.onlick = async function () {
-	const url = "http://localhost:3001/upload";
+async function query(action = "getDir", dirName = "uploads", tab = "logger") {
+	const url = `${SERVER}query?action=${action}&dirName=${dirName}`;
 	const response = await fetch(url);
 	if (!response.ok) {
-		log(`Error get directory: ${response.status}`, "error");
+		const res = await response.json();
+		if (res instanceof Object && res.message) {
+			log(`Error ${response.status}: ${res.message}.`, "error", tab);
+		} else log(`Error ${response.status}: Getting directory failed.`, "error", tab);
 		return;
 	}
 	const res = await response.json();
-	log(res.message, "success");
+	log(res.message, "warning", tab);
+	const files = res.dirContent;
+	for (const file of files) {
+		log(file, "log", tab);
+	}
 }
 
-function log(data, type = "log") {
+function log(data, type = "log", tab = "logger") {
 	let divCard = document.createElement("DIV");
 	let cardContent, cardType;
 	if (data instanceof Object) {
@@ -206,9 +219,29 @@ function log(data, type = "log") {
 			divCard.innerHTML = cardContent;
 			divCard.className = cardType;
 	}
-	logger.appendChild(divCard);
-	if (loggerScrollable) {
-		logger.scrollTop = logger.scrollHeight;
+
+	switch (tab) {
+		case "logger":
+			loggerContent.appendChild(divCard);
+			if (loggerScrollable) {
+				loggerContent.scrollTop = loggerContent.scrollHeight;
+			}
+			break;
+	
+		case "url":
+			urlContent.appendChild(divCard);
+			urlContent.scrollTop = urlContent.scrollHeight;
+			break;
+
+		case "upload":
+			uploadContent.appendChild(divCard);
+			uploadContent.scrollTop = uploadContent.scrollHeight;
+			break;
+
+		case "statistic":
+			statisticContent.appendChild(divCard);
+			statisticContent.scrollTop = statisticContent.scrollHeight;
+			break;
 	}
 }
 		

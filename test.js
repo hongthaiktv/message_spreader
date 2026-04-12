@@ -48,7 +48,7 @@ app.get("/query", (req, res) => {
 	switch (action) {
 		case "getDir":
 			const dirContent = fs.readdirSync(dirPath);
-			result.message = `Total ${dirContent.length} file(s) and directories`;
+			result.message = `${dirName}: ${dirContent.length} file(s) and directories`;
 			result.dirContent = dirContent;
 			result.dirPath = dirPath;
 			result.dirName = dirName;

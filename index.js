@@ -8,13 +8,13 @@ const { JSDOM, VirtualConsole } = require("jsdom");
 const { Logger, FormUpload } = require('./plugin/tutils/index.js');
 const motd = require('./assets/json/motd.json');
 
-const uploadDir = path.join(__dirname, 'assets', 'images');
 const app = express();
 const port = 3000;
 const rootDir = path.join(__dirname, "public");
+const uploadDir = path.join(rootDir, "uploads");
 const logger = new Logger("");
 const storage = multer.diskStorage({
-	destination: path.join(rootDir, "uploads"),
+	destination: uploadDir,
 	filename: function (req, file, cb) {
 		cb(null, file.originalname);
 	}
@@ -56,6 +56,31 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(rootDir));
 
+app.get("/query", (req, res) => {
+	if (!req.query || !req.query.action) {
+		const message = "Missing query action";
+		res.status(500).json({message});
+		return;
+	}
+	const action = req.query.action;
+	const dirName = req.query.dirName || "uploads";
+	const result = {};
+	const dirPath = path.join(rootDir, dirName);
+	let message = "";
+	switch (action) {
+		case "getDir":
+			const dirContent = fs.readdirSync(dirPath);
+			result.message = message = `Directory "${dirName}" got ${dirContent.length} file(s) and directories`;
+			result.dirContent = dirContent;
+			result.dirPath = dirPath;
+			result.dirName = dirName;
+			result.total = dirContent.length;
+			break;
+	}
+	console.log(message);
+	res.json(result);
+});
+
 app.post("/post", (req, res) => {
 	console.log(req.headers);
 	console.log(req.body);
@@ -79,12 +104,13 @@ app.get("/logger", (req, res) => {
 	logger.addClient(res, "log", {code: 5, started: puppet.started, current: puppet.current, total: puppet.total, success: puppet.success, failed: puppet.failed});
 });
 
-app.post("/upload", upload.single("file"), (req, res) => {
+app.post("/uploads", upload.array("files"), (req, res) => {
 	console.log(req.headers);
-	const msg = req.file ? req.file.path : "no file";
-	console.log(msg);
-	console.log(req.file);
-	res.json({result: msg});
+	const message = req.files ? `Total ${req.files.length} file(s) uploaded.` : "No file(s) uploaded.";
+	console.log(req.files);
+	console.log(message);
+	console.log(req.body.message);
+	res.json({message});
 });
 
 app.get("/test", (req, res) => {
