@@ -56,6 +56,9 @@
 					<span><i class="fas fa-upload text-primary mr-1" aria-hidden="true"></i> UPLOAD</span>
 					<input id="pupBtnUpload" type="file" multiple>
 				</div>
+				<div class="file-path-wrapper d-none">
+					<input class="file-path validate" type="text" placeholder="Choose file(s)">
+				</div>
 			</div>
 		</div>
 
@@ -64,17 +67,20 @@
 		<div id="layoutTabs" class="d-flex flex-column overflow-auto flex-grow-1 w-100">
 			<ul class="nav nav-tabs nav-justified md-tabs color-light-blue-active" id="tabButtons" role="tablist">
 				<li class="nav-item">
-					<a class="nav-link active font-weight-bold" id="tabLogger" data-toggle="tab" href="#tabLoggerContent" role="tab" aria-controls="tabLoggerContent" aria-selected="true">Logger</a>
+					<a id="tabLogger" class="nav-link active font-weight-bold" data-toggle="tab" href="#tabLoggerContent" role="tab" aria-controls="tabLoggerContent" aria-selected="true">Logger</a>
 				</li>
 				<li class="nav-item">
-					<a class="nav-link font-weight-bold" id="tabUrls" data-toggle="tab" href="#tabUrlsContent" role="tab" aria-controls="tabUrlsContent" aria-selected="false">URLs</a>
+					<a id="tabUrls" class="nav-link font-weight-bold" data-toggle="tab" href="#tabUrlsContent" role="tab" aria-controls="tabUrlsContent" aria-selected="false">URLs</a>
 				</li>
 				<li class="nav-item">
-					<a class="nav-link font-weight-bold" id="tabStatistic" data-toggle="tab" href="#tabStatisticContent" role="tab" aria-controls="tabStatisticContent" aria-selected="false">Statistic</a>
+					<a id="tabUpload" class="nav-link font-weight-bold" data-toggle="tab" href="#tabUploadContent" role="tab" aria-controls="tabUploadContent" aria-selected="false">Upload</a>
+				</li>
+				<li class="nav-item">
+					<a id="tabStatistic" class="nav-link font-weight-bold" data-toggle="tab" href="#tabStatisticContent" role="tab" aria-controls="tabStatisticContent" aria-selected="false">Statistic</a>
 				</li>
 			</ul>
-			<div class="d-flex flex-column overflow-auto flex-grow-1 w-100 tab-content card pt-4 color-light-blue pb-0" id="tabsContainer">
-				<div class="overflow-auto flex-grow-1 w-100 tab-pane fade show active" id="tabLoggerContent" role="tabpanel" aria-labelledby="tabLogger">
+			<div id="tabsContainer" class="d-flex flex-column overflow-auto flex-grow-1 w-100 tab-content card pt-4 color-light-blue pb-0">
+				<div id="tabLoggerContent" class="overflow-auto flex-grow-1 w-100 tab-pane fade show active" role="tabpanel" aria-labelledby="tabLogger">
 					<div class="d-flex flex-column overflow-auto w-100 h-100">
 						<div id="logger" class="overflow-auto flex-grow-1 w-100"></div>
 						<div id="puppet-status" class="btn-group w-100" role="group" aria-label="Puppet status">
@@ -84,12 +90,17 @@
 						</div>
 					</div>
 				</div>
-				<div class="overflow-auto flex-grow-1 w-100 tab-pane fade" id="tabUrlsContent" role="tabpanel" aria-labelledby="tabUrls">
+				<div id="tabUrlsContent" class="overflow-auto flex-grow-1 w-100 tab-pane fade" role="tabpanel" aria-labelledby="tabUrls">
 					<div class="d-flex flex-column overflow-auto w-100 h-100">
 						<p></p>
 					</div>
 				</div>
-				<div class="overflow-auto flex-grow-1 w-100 tab-pane fade" id="tabStatisticContent" role="tabpanel" aria-labelledby="tabStatistic">
+				<div id="tabUploadContent" class="overflow-auto flex-grow-1 w-100 tab-pane fade" role="tabpanel" aria-labelledby="tabUpload">
+					<div class="d-flex flex-column overflow-auto w-100 h-100">
+						<div id="uploadContent" class="overflow-auto flex-grow-1 w-100"></div>
+					</div>
+				</div>
+				<div id="tabStatisticContent" class="overflow-auto flex-grow-1 w-100 tab-pane fade" role="tabpanel" aria-labelledby="tabStatistic">
 					<div class="d-flex flex-column overflow-auto w-100 h-100">
 						<p></p>
 					</div>

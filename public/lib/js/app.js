@@ -81,6 +81,17 @@ pupBtnUpload.addEventListener("change", async function (e) {
 	log(res.message, "success");
 });
 
+tabUpload.onlick = async function () {
+	const url = "http://localhost:3001/upload";
+	const response = await fetch(url);
+	if (!response.ok) {
+		log(`Error get directory: ${response.status}`, "error");
+		return;
+	}
+	const res = await response.json();
+	log(res.message, "success");
+}
+
 function log(data, type = "log") {
 	let divCard = document.createElement("DIV");
 	let cardContent, cardType;

@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const multer = require('multer');
@@ -32,6 +33,28 @@ app.post("/upload", upload.array("files"), (req, res) => {
 	console.log(msg);
 	console.log(req.body.message);
 	res.json({result: msg});
+});
+
+app.get("/query", (req, res) => {
+	if (!req.query || !req.query.action) {
+		const message = "Missing query action";
+		res.status(500).json({message});
+		return;
+	}
+	const action = req.query.action;
+	const dirName = req.query.dirName || "upload";
+	const result = {};
+	const dirPath = path.join(__dirname, "assets", dirName);
+	switch (action) {
+		case "getDir":
+			const dirContent = fs.readdirSync(dirPath);
+			result.message = `Total ${dirContent.length} file(s) and directories`;
+			result.dirContent = dirContent;
+			result.dirPath = dirPath;
+			result.dirName = dirName;
+			break;
+	}
+	res.json(result);
 });
 
 app.listen(port, () => {

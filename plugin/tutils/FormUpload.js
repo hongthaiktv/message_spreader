@@ -32,7 +32,7 @@ class FormUpload extends Object {
 			this.files.push(file);
 		}
 		else if (key && value) this[key] = value;
-		else throw new Error('Wrong key name');
+		else throw new Error('Wrong argument(s).');
 		++this.length;
 	}
 
@@ -54,6 +54,10 @@ class FormUpload extends Object {
 	}
 
 	#createFile(path) {
+		return fs.createReadStream(path);
+
+		//for file with extra option (see https://www.npmjs.com/package/form-data)
+/* 		
 		return {
 			value: fs.createReadStream(path),
 			options: {
@@ -61,8 +65,9 @@ class FormUpload extends Object {
 				contentType: this.#checkType(path)
 			}
 		};
+*/ 
 	}
-
+/* 
 	#checkType(path) {
 		const ext = path.replace(/^.*\./g, '');
 		switch (ext) {
@@ -163,6 +168,7 @@ class FormUpload extends Object {
 				return 'application/octet-stream';
 		}
 	}
+*/ 
 }
 
 module.exports = exports = FormUpload;

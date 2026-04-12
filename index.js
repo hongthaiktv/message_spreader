@@ -328,8 +328,7 @@ async function randUpload(formData, time) {
 					url: url,
 					strictSSL: false,
 					headers: {
-						'User-Agent': 'Mozilla/5.0 (Android 15; Mobile; rv:78.0) Gecko/78.0 Firefox/78.0',
-						"Content-Type": "multipart/form-data"
+						'User-Agent': 'Mozilla/5.0 (Android 15; Mobile; rv:78.0) Gecko/78.0 Firefox/78.0'
 					},
 					formData
 				};
