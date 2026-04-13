@@ -27,7 +27,7 @@ loggerContent.onscroll = function () {
 let source = new EventSource("http://localhost:3000/logger");
 source.onopen = e => {
 	SSE = true;
-	query("getDir", "uploads", "upload");
+	query("getDir", "upload", "upload");
 }
 source.onmessage = e => log(JSON.parse(e.data));
 source.onerror = e => {
@@ -36,7 +36,7 @@ source.onerror = e => {
 };
 async function puppet(action, urls = "mainSites") {
 	let data = {action, urls};
-	const response = await fetch("http://localhost:3000/puppet", {
+	const response = await fetch(`${SERVER}puppet`, {
 		method: "POST",
 		body: JSON.stringify(data),
 		headers: {
@@ -73,7 +73,7 @@ pupBtnUpload.addEventListener("change", async function (e) {
 	for (const file of files) {
 		formData.append("files", file);
 	}
-	const url = `${SERVER}uploads`;
+	const url = `${SERVER}upload`;
 	const response = await fetch(url, {
 		method: "POST",
 		body: formData
@@ -84,10 +84,10 @@ pupBtnUpload.addEventListener("change", async function (e) {
 	}
 	const res = await response.json();
 	log(res.message, "success", "upload");
-	query("getDir", "uploads", "upload");
+	query("getDir", "upload", "upload");
 });
 
-async function query(action = "getDir", dirName = "uploads", tab = "logger") {
+async function query(action = "getDir", dirName = "upload", tab = "logger") {
 	const url = `${SERVER}query?action=${action}&dirName=${dirName}`;
 	const response = await fetch(url);
 	if (!response.ok) {

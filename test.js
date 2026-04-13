@@ -8,12 +8,12 @@ const port = 3001;
 const rootDir = path.join(__dirname, "public");
 
 const storage = multer.diskStorage({
-	destination: path.join(rootDir, "uploads"),
+	destination: path.join(rootDir, "upload"),
 	filename: function (req, file, cb) {
 		cb(null, file.originalname);
 	}
 });
-const upload = multer({ storage });
+const uploader = multer({ storage });
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -26,13 +26,13 @@ app.post("/post", (req, res) => {
 	res.json({result: msg});
 });
 
-app.post("/upload", upload.array("files"), (req, res) => {
+app.post("/upload", uploader.array("files"), (req, res) => {
 	console.log(req.headers);
-	const msg = req.files ? `Total ${req.files.length} file(s) uploaded.` : "No file(s) uploaded.";
+	const message = req.files ? `Total ${req.files.length} file(s) uploaded.` : "No file(s) uploaded.";
 	console.log(req.files);
-	console.log(msg);
+	console.log(message);
 	console.log(req.body.message);
-	res.json({result: msg});
+	res.json({message});
 });
 
 app.get("/query", (req, res) => {

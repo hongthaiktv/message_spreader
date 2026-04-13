@@ -11,7 +11,7 @@ const motd = require('./assets/json/motd.json');
 const app = express();
 const port = 3000;
 const rootDir = path.join(__dirname, "public");
-const uploadDir = path.join(rootDir, "uploads");
+const uploadDir = path.join(rootDir, "upload");
 const logger = new Logger("");
 const storage = multer.diskStorage({
 	destination: uploadDir,
@@ -19,7 +19,7 @@ const storage = multer.diskStorage({
 		cb(null, file.originalname);
 	}
 });
-const upload = multer({ storage });
+const uploader = multer({ storage });
 
 let server;
 let puppet = {
@@ -63,7 +63,7 @@ app.get("/query", (req, res) => {
 		return;
 	}
 	const action = req.query.action;
-	const dirName = req.query.dirName || "uploads";
+	const dirName = req.query.dirName || "upload";
 	const result = {};
 	const dirPath = path.join(rootDir, dirName);
 	let message = "";
@@ -81,18 +81,6 @@ app.get("/query", (req, res) => {
 	res.json(result);
 });
 
-app.post("/post", (req, res) => {
-	console.log(req.headers);
-	console.log(req.body);
-	res.json({result: "server response"});
-});
-
-app.post("/puppet", (req, res) => {
-	const reqAct = req.body.action;
-	if (reqAct === "change") puppet.current = req.body.urls || "mainSites";
-	runPuppet(reqAct, res);
-});
-
 app.get("/logger", (req, res) => {
 	res.on("close", () => {
 		logger.removeClient(res, "log", {code: 6});
@@ -104,19 +92,19 @@ app.get("/logger", (req, res) => {
 	logger.addClient(res, "log", {code: 5, started: puppet.started, current: puppet.current, total: puppet.total, success: puppet.success, failed: puppet.failed});
 });
 
-app.post("/uploads", upload.array("files"), (req, res) => {
+app.post("/puppet", (req, res) => {
+	const reqAct = req.body.action;
+	if (reqAct === "change") puppet.current = req.body.urls || "mainSites";
+	runPuppet(reqAct, res);
+});
+
+app.post("/upload", uploader.array("files"), (req, res) => {
 	console.log(req.headers);
 	const message = req.files ? `Total ${req.files.length} file(s) uploaded.` : "No file(s) uploaded.";
 	console.log(req.files);
 	console.log(message);
 	console.log(req.body.message);
 	res.json({message});
-});
-
-app.get("/test", (req, res) => {
-	console.log(req.headers);
-	console.log(req.body);
-	res.send("test");
 });
 
 app.use(serveIndex(rootDir, {
@@ -347,8 +335,8 @@ async function randUpload(formData, time) {
 				else if (puppet.counter < 100000 && puppet[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
 				else rand = Math.floor(Math.random() * puppet[puppet.current].length);
 
-// 				const url = `https://${puppet[puppet.current][rand]}`;
-				const url = `http://localhost:3001/upload`;
+				const url = `https://${puppet[puppet.current][rand]}`;
+// 				const url = `http://localhost:3001/upload`;
 				const options = {
 					method: "POST",
 					url: url,
