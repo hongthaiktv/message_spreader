@@ -64,21 +64,20 @@ app.get("/query", (req, res) => {
 	}
 	const action = req.query.action;
 	const dirName = req.query.dirName || "upload";
-	const result = {};
 	const dirPath = path.join(rootDir, dirName);
 	let message = "";
 	switch (action) {
 		case "getDir":
-			const dirContent = fs.readdirSync(dirPath);
-			result.message = message = `Directory "${dirName}" got ${dirContent.length} file(s) and directories`;
-			result.dirContent = dirContent;
-			result.dirPath = dirPath;
-			result.dirName = dirName;
-			result.total = dirContent.length;
+			const dirInfo = getDir(dirPath);
+			if (dirInfo.isError) {
+				console.error(dirInfo.message);
+				res.status(500).json(dirInfo);
+				return;
+			}
+			console.log(dirInfo.message);
+			res.json(dirInfo);
 			break;
 	}
-	console.log(message);
-	res.json(result);
 });
 
 app.get("/logger", (req, res) => {
@@ -117,6 +116,23 @@ app.get("*", (req, res) => res.status(404).sendFile(path.join(rootDir, "404.html
 server = app.listen(port, () => {
 	console.log(`Web server running at http://localhost:${port}`);
 });
+
+function getDir(dirPath) {
+	const dirName = dirPath.replace(/^.*\//g, '');
+	const listFiles = [], listDirs = [], listLinks = [];
+	try {
+		const files = fs.readdirSync(dirPath, {withFileTypes: true});
+		for (const file of files) {
+			if (file.isFile()) listFiles.push(file.name);
+			else if (file.isDirectory()) listDirs.push(file.name);
+			else if (file.isSymbolicLink()) listLinks.push(file.name);
+		}
+		const message = `Directory "${dirName}" got ${listDirs.length} directori(es), ${listFiles.length} file(s), ${listLinks.length} link(s)`;
+		return {message, listDirs, listFiles, listLinks, dirPath, dirName, total: listDirs.length + listFiles.length + listLinks.length};
+	} catch(err) {
+		return {message: err.toString(), isError: true, ...err};
+	}
+}
 
 function runPuppet(act, res) {
 	let msg = "";
