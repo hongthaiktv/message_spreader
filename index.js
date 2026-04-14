@@ -36,6 +36,8 @@ let puppet = {
 	blackSites: require('./assets/json/blackSites.json')
 };
 
+getDir(uploadDir, true);
+
 logger.addEventListener("change", function (e) {
 	const { action, log, client } = e.detail;
 	const msg = `data: ${JSON.stringify(log)}\n\n`;
@@ -70,7 +72,6 @@ app.get("/query", (req, res) => {
 		case "getDir":
 			const dirInfo = getDir(dirPath);
 			if (dirInfo.isError) {
-				console.error(dirInfo.message);
 				res.status(500).json(dirInfo);
 				return;
 			}
@@ -98,11 +99,9 @@ app.post("/puppet", (req, res) => {
 });
 
 app.post("/upload", uploader.array("files"), (req, res) => {
-	console.log(req.headers);
-	const message = req.files ? `Total ${req.files.length} file(s) uploaded.` : "No file(s) uploaded.";
-	console.log(req.files);
+	const message = req.files && req.files.length ? `Total ${req.files.length} file(s) uploaded.` : "No file(s) uploaded.";
 	console.log(message);
-	console.log(req.body.message);
+	if (req.body && req.body.message) console.log(req.body.message);
 	res.json({message});
 });
 
@@ -117,20 +116,31 @@ server = app.listen(port, () => {
 	console.log(`Web server running at http://localhost:${port}`);
 });
 
-function getDir(dirPath) {
+function getDir(dirPath, created = false) {
 	const dirName = dirPath.replace(/^.*\//g, '');
-	const listFiles = [], listDirs = [], listLinks = [];
+	const content = [], dirs = [], files = [], links = [];
+	const pathContent = [], pathDirs = [], pathFiles = [], pathLinks = [];
 	try {
-		const files = fs.readdirSync(dirPath, {withFileTypes: true});
-		for (const file of files) {
-			if (file.isFile()) listFiles.push(file.name);
-			else if (file.isDirectory()) listDirs.push(file.name);
-			else if (file.isSymbolicLink()) listLinks.push(file.name);
+		const dirContent = fs.readdirSync(dirPath, {withFileTypes: true});
+		for (const file of dirContent) {
+			content.push(file.name);
+			pathContent.push(path.join(dirPath, file.name));
+			if (file.isFile()) {files.push(file.name); pathFiles.push(path.join(dirPath, file.name));}
+			else if (file.isDirectory()) {dirs.push(file.name); pathDirs.push(path.join(dirPath, file.name));}
+			else if (file.isSymbolicLink()) {links.push(file.name); pathLinks.push(path.join(dirPath, file.name));}
 		}
-		const message = `Directory "${dirName}" got ${listDirs.length} directori(es), ${listFiles.length} file(s), ${listLinks.length} link(s)`;
-		return {message, listDirs, listFiles, listLinks, dirPath, dirName, total: listDirs.length + listFiles.length + listLinks.length};
+		const message = `Directory "${dirName}" got ${dirs.length} directori(es), ${files.length} file(s), ${links.length} link(s). Total: ${content.length}`;
+		return {message, content, dirs, files, links, pathContent, pathDirs, pathFiles, pathLinks, dirName, dirPath, total: content.length};
 	} catch(err) {
-		return {message: err.toString(), isError: true, ...err};
+		if (err.errno === -2 && created) {
+			fs.mkdirSync(dirPath, {recursive: true});
+			const message = `Directory created: ${dirPath}`;
+			console.log(message);
+			return {message, created, dirName, dirPath, total: 0};
+		}
+		const message = err.toString();
+		console.error(message);
+		return {message, isError: true, ...err};
 	}
 }
 
@@ -326,17 +336,10 @@ async function randPost(data, time) {
 async function randUpload(formData, time) {
 	if (typeof formData === "string") {
 		const dirPath = formData;
-		fs.readdir(dirPath, function (err, files) {
-			if (err) {
-				console.error(err);
-				return;
-			}
-			files.forEach(function (file, index) {
-				files[index] = path.join(dirPath, file);
-			});
-			formData = new FormUpload(files);
-			formData.append("message", `Files upload path: ${dirPath}`);
-		});
+		const dirInfo = getDir(dirPath);
+		if (dirInfo.isError) return;
+		formData = new FormUpload(dirInfo.pathFiles);
+		formData.append("message", `Path upload: ${dirPath}`);
 	}
 
 	function wait() {
@@ -352,7 +355,7 @@ async function randUpload(formData, time) {
 				else rand = Math.floor(Math.random() * puppet[puppet.current].length);
 
 				const url = `https://${puppet[puppet.current][rand]}`;
-// 				const url = `http://localhost:3001/upload`;
+// 				const url = `http://localhost:3000/upload`;
 				const options = {
 					method: "POST",
 					url: url,

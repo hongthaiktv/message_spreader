@@ -99,21 +99,21 @@ async function query(action = "getDir", dirName = "upload", tab = "logger") {
 	}
 	const res = await response.json();
 	log(res.message, "warning", tab);
-	if (res.listDirs.length) {
-		log(`<span class="text-primary font-weight-bold">Directories:</span> <span class="orange-text font-weight-bold">${res.listDirs.length}</span>`, "log", tab);
-		for (const dir of res.listDirs) {
+	if (res.dirs.length) {
+		log(`<span class="text-primary font-weight-bold">Directories:</span> <span class="orange-text font-weight-bold">${res.dirs.length}</span>`, "log", tab);
+		for (const dir of res.dirs) {
 			log(dir, "log", tab);
 		}
 	}
-	if (res.listFiles.length) {
-		log(`<span class="text-secondary font-weight-bold">Files:</span> <span class="orange-text font-weight-bold">${res.listFiles.length}</span>`, "log", tab);
-		for (const file of res.listFiles) {
+	if (res.files.length) {
+		log(`<span class="text-secondary font-weight-bold">Files:</span> <span class="orange-text font-weight-bold">${res.files.length}</span>`, "log", tab);
+		for (const file of res.files) {
 			log(file, "log", tab);
 		}
 	}
-	if (res.listLinks.length) {
-		log(`<span class="text-danger font-weight-bold">Links:</span> <span class="orange-text font-weight-bold">${res.listLinks.length}</span>`, "log", tab);
-		for (const link of res.listLinks) {
+	if (res.links.length) {
+		log(`<span class="text-danger font-weight-bold">Links:</span> <span class="orange-text font-weight-bold">${res.links.length}</span>`, "log", tab);
+		for (const link of res.links) {
 			log(link, "log", tab);
 		}
 	}
