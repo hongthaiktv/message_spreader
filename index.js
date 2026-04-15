@@ -8,10 +8,12 @@ const { JSDOM, VirtualConsole } = require("jsdom");
 const { Logger, FormUpload } = require('./plugin/tutils/index.js');
 const motd = require('./assets/json/motd.json');
 
-const app = express();
-const port = 3000;
 const rootDir = path.join(__dirname, "public");
 const uploadDir = path.join(rootDir, "upload");
+getDir(uploadDir, true);
+
+const app = express();
+const port = 3000;
 const logger = new Logger("");
 const storage = multer.diskStorage({
 	destination: uploadDir,
@@ -35,8 +37,6 @@ let puppet = {
 	trustSites: require('./assets/json/trustSites.json'),
 	blackSites: require('./assets/json/blackSites.json')
 };
-
-getDir(uploadDir, true);
 
 logger.addEventListener("change", function (e) {
 	const { action, log, client } = e.detail;
@@ -133,6 +133,11 @@ function getDir(dirPath, created = false) {
 		return {message, content, dirs, files, links, pathContent, pathDirs, pathFiles, pathLinks, dirName, dirPath, total: content.length};
 	} catch(err) {
 		if (err.errno === -2 && created) {
+			try {
+				fs.unlinkSync(dirPath);
+			} catch(err) {
+				console.error(err.toString());
+			}
 			fs.mkdirSync(dirPath, {recursive: true});
 			const message = `Directory created: ${dirPath}`;
 			console.log(message);
