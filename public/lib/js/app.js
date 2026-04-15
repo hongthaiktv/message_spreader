@@ -29,7 +29,16 @@ source.onopen = e => {
 	SSE = true;
 	query("getDir", "upload", "upload");
 }
-source.onmessage = e => log(JSON.parse(e.data));
+source.onmessage = e => {
+	const data = JSON.parse(e.data);
+	log(data);
+	switch (data.code) {
+		case 1:
+			const link = `<span class="text-danger">${data.errorCode}</span> : <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a>`;
+			log(link, "log", "url");
+			break;
+	}
+};
 source.onerror = e => {
 	SSE = false;
 	log("Logger disconnected.");
@@ -125,18 +134,28 @@ function log(data, type = "log", tab = "logger") {
 	if (data instanceof Object) {
 		cardContent = data.message;
 		cardType = data.type;
-		if (data.total) cTotalRequest.innerText = data.total;
+		if (data.total) {
+			cTotalRequest.innerText = data.total;
+			$(".tabUrlCounterTotal").text(data.total);
+		}
 		if (data.success) cTotalSuccess.innerText = data.success;
-		if (data.failed) cTotalFailed.innerText = data.failed;
+		if (data.failed) {
+			cTotalFailed.innerText = data.failed;
+			tabUrlCounterFailed.innerText = data.failed;
+		}
 		switch (cardType) {
 			case "error":
-				if (data.code === 1) cardContent = `Failed (<span class="text-danger font-weight-bold">${data.failed}</span>/<span class="text-default font-weight-bold">${data.total}</span>) : <span class="text-danger font-weight-bold">${data.errorCode}</span> : <a class="text-primary" target="_blank" href="${data.url}">${data.url}</a>`;
+				switch (data.code) {
+					case 1:
+						cardContent = `Failed (<span class="text-danger font-weight-bold">${data.failed}</span>/<span class="text-default font-weight-bold">${data.total}</span>) : <span class="text-danger font-weight-bold">${data.errorCode}</span> : <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a>`;
+						break;
+				}
 				break;
 
 			case "log":
 				switch (data.code) {
 					case 2:
-						cardContent = `Paragraph not found: <a class="text-primary" target="_blank" href="${data.url}">${data.url}</a>`;
+						cardContent = `Paragraph not found: <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a>`;
 						break;
 
 					case 3:
@@ -144,7 +163,7 @@ function log(data, type = "log", tab = "logger") {
 						break;
 
 					case 4:
-						cardContent = `Rank ${data.pageRank}: <a class="text-primary" target="_blank" href="${data.url}">${data.url}</a>`;
+						cardContent = `Rank ${data.pageRank}: <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a>`;
 						break;
 
 					case 5:
@@ -194,7 +213,7 @@ function log(data, type = "log", tab = "logger") {
 		if (data.urlFailed && data.urlFailed.length) {
 			cardContent += `<br><span class="text-danger font-weight-bold">URLs failed:</span>`;
 			for (const url of data.urlFailed) {
-				cardContent += `<br><a class="text-primary" target="_blank" href="${url}">${url}</a>`;
+				cardContent += `<br><a class="app-text-link" target="_blank" href="${url}">${url}</a>`;
 			}
 		}
 	} else {
