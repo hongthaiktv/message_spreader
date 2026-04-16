@@ -23,6 +23,18 @@ loggerContent.onscroll = function () {
 	loggerPrevPos = curPos;
 }
 
+btnTotalRequest.onclick = function (e) {
+	$("#tabCounterAll").tab("show");
+};
+
+btnTotalSuccess.onclick = function (e) {
+	$("#tabCounterSuccess").tab("show");
+};
+
+btnTotalFailed.onclick = function (e) {
+	$("#tabCounterFailed").tab("show");
+};
+
 //puppet
 let source = new EventSource("http://localhost:3000/logger");
 source.onopen = e => {
