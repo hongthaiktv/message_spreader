@@ -26,6 +26,7 @@ const uploader = multer({ storage });
 let server;
 let puppet = {
 	started: false,
+	rate: 10,
 	total: 0,
 	counter: 0,
 	success: 0,
@@ -94,7 +95,15 @@ app.get("/logger", (req, res) => {
 
 app.post("/puppet", (req, res) => {
 	const reqAct = req.body.action;
-	if (reqAct === "change") puppet.current = req.body.urls || "mainSites";
+	switch (reqAct) {
+		case "changeList":
+			puppet.current = req.body.list || "mainSites";
+			break;
+
+		case "changeRate":
+			puppet.rate = req.body.rate;
+			break;
+	}
 	runPuppet(reqAct, res);
 });
 
@@ -166,74 +175,11 @@ function runPuppet(act, res) {
 			msg = `Puppet starting with "${puppet.current}"...`;
 			puppet.started = true;
 			puppet.counter = 0;
-			async function randRequest(time) {
-				randPost(motd, time);
-				randUpload(uploadDir, time);
 
-				function wait() {
-					return new Promise((resolve) => {
-						let randTime = Math.floor(Math.random() * time + 1);
-						setTimeout(() => {
-							let rand;
-							if (puppet.counter < 10 && puppet[puppet.current].length >= 10) rand = Math.floor(Math.random() * 10);
-							else if (puppet.counter < 100 && puppet[puppet.current].length >= 100) rand = Math.floor(Math.random() * 100);
-							else if (puppet.counter < 1000 && puppet[puppet.current].length >= 1000) rand = Math.floor(Math.random() * 1000);
-							else if (puppet.counter < 10000 && puppet[puppet.current].length >= 10000) rand = Math.floor(Math.random() * 10000);
-							else if (puppet.counter < 100000 && puppet[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
-							else rand = Math.floor(Math.random() * puppet[puppet.current].length);
+			randRequest();
+			randPost(motd);
+			randUpload(uploadDir);
 
-							const url = `https://${puppet[puppet.current][rand]}`;
-							const pageRank = rand + 1;
-							const msg = `Rank ${pageRank}: ${url}`;
-							logger.addLog(msg, "log", { code: 4, pageRank, url });
-							const options = {
-								url: url,
-								strictSSL: false,
-								headers: {
-									'User-Agent': 'Mozilla/5.0 (Android 15; Mobile; rv:78.0) Gecko/78.0 Firefox/78.0'
-								}
-							};
-
-							++puppet.total;
-							++puppet.counter;
-							request(options, function (error, response, body) {
-								if (error) {
-									puppet.urlFailed.push(url);
-									++puppet.failed;
-									const msg = `Failed (${puppet.failed}/${puppet.total}) : ${error.code} : ${url}`;
-									logger.addLog(msg, "error", {code: 1, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: error.code, url});
-									console.error(error);
-									return;
-								}
-								if (response.statusCode !== 200) {
-									puppet.urlFailed.push(url);
-									++puppet.failed;
-									const msg = `Failed (${puppet.failed}/${puppet.total}) : ${response.statusCode} : ${url}`;
-									logger.addLog(msg, "error", {code: 1, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: response.statusCode, url});
-								} else {
-									const document = parseHTML(body); 
-									++puppet.success;
-									const msg = `Success (${puppet.success}/${puppet.total})`;
-									logger.addLog(msg, "log", {code: 3, success: puppet.success, total: puppet.total});
-									if (document) {
-										const para = document.querySelectorAll("p");
-										if (para.length) {
-											const rand = Math.floor(Math.random() * para.length);
-											if (para[rand].innerText !== '') logger.addLog(para[rand].innerHTML, "info", {code: 10, total: puppet.total, success: puppet.success, failed: puppet.failed});
-										}
-										else logger.addLog(`Paragraph not found: ${url}`, "log", {code: 2, total: puppet.total, success: puppet.success, failed: puppet.failed, url});
-									}
-								}
-							});
-							resolve(puppet);
-						}, randTime);
-					});
-				}
-				while (puppet.started) {
-					await wait();
-				}
-			}
-			randRequest(10000);
 			logger.addLog(msg, "success", {
 				code: 7,
 				current: puppet.current
@@ -262,7 +208,7 @@ function runPuppet(act, res) {
 			});
 			break;
 
-		case "change":
+		case "changeList":
 			msg = `Puppet URLs list changed to "${puppet.current}"`;
 			puppet.counter = 0;
 			logger.addLog(msg, "success", {code: 9, current: puppet.current});
@@ -271,6 +217,17 @@ function runPuppet(act, res) {
 				message: msg,
 				type: "success",
 				current: puppet.current
+			});
+			break;
+
+		case "changeRate":
+			msg = `Puppet rate changed to "${puppet.rate}"`;
+			logger.addLog(msg, "success", {code: 10, rate: puppet.rate});
+			if (res) res.json({
+				code: 10,
+				message: msg,
+				type: "success",
+				rate: puppet.rate
 			});
 			break;
 
@@ -298,10 +255,77 @@ function parseHTML(html) {
 	return document;
 }
 
-async function randPost(data, time) {
+async function randRequest() {
 	function wait() {
 		return new Promise((resolve) => {
-			let randTime = Math.floor(Math.random() * time + 1);
+			const time = puppet.rate === 0 ? 500 : puppet.rate * 1000;
+			const randTime = Math.floor(Math.random() * time + 1);
+			setTimeout(() => {
+				let rand;
+				if (puppet.counter < 10 && puppet[puppet.current].length >= 10) rand = Math.floor(Math.random() * 10);
+				else if (puppet.counter < 100 && puppet[puppet.current].length >= 100) rand = Math.floor(Math.random() * 100);
+				else if (puppet.counter < 1000 && puppet[puppet.current].length >= 1000) rand = Math.floor(Math.random() * 1000);
+				else if (puppet.counter < 10000 && puppet[puppet.current].length >= 10000) rand = Math.floor(Math.random() * 10000);
+				else if (puppet.counter < 100000 && puppet[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
+				else rand = Math.floor(Math.random() * puppet[puppet.current].length);
+
+				const url = `https://${puppet[puppet.current][rand]}`;
+				const pageRank = rand + 1;
+				const msg = `Rank ${pageRank}: ${url}`;
+				logger.addLog(msg, "log", { code: 4, pageRank, url });
+				const options = {
+					url: url,
+					strictSSL: false,
+					headers: {
+						'User-Agent': 'Mozilla/5.0 (Android 15; Mobile; rv:78.0) Gecko/78.0 Firefox/78.0'
+					}
+				};
+
+				++puppet.total;
+				++puppet.counter;
+				request(options, function (error, response, body) {
+					if (error) {
+						puppet.urlFailed.push(url);
+						++puppet.failed;
+						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${error.code} : ${url}`;
+						logger.addLog(msg, "error", {code: 1, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: error.code, url});
+						console.error(error);
+						return;
+					}
+					if (response.statusCode !== 200) {
+						puppet.urlFailed.push(url);
+						++puppet.failed;
+						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${response.statusCode} : ${url}`;
+						logger.addLog(msg, "error", {code: 1, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: response.statusCode, url});
+					} else {
+						const document = parseHTML(body); 
+						++puppet.success;
+						const msg = `Success (${puppet.success}/${puppet.total})`;
+						logger.addLog(msg, "log", {code: 3, success: puppet.success, total: puppet.total});
+						if (document) {
+							const para = document.querySelectorAll("p");
+							if (para.length) {
+								const rand = Math.floor(Math.random() * para.length);
+								if (para[rand].innerText !== '') logger.addLog(para[rand].innerHTML, "info", {code: 10, total: puppet.total, success: puppet.success, failed: puppet.failed});
+							}
+							else logger.addLog(`Paragraph not found: ${url}`, "log", {code: 2, total: puppet.total, success: puppet.success, failed: puppet.failed, url});
+						}
+					}
+				});
+				resolve(puppet);
+			}, randTime);
+		});
+	}
+	while (puppet.started) {
+		await wait();
+	}
+}
+
+async function randPost(data) {
+	function wait() {
+		return new Promise((resolve) => {
+			const time = puppet.rate === 0 ? 500 : puppet.rate * 1000;
+			const randTime = Math.floor(Math.random() * time + 1);
 			setTimeout(() => {
 				let rand;
 				if (puppet.counter < 10 && puppet[puppet.current].length >= 10) rand = Math.floor(Math.random() * 10);
@@ -338,7 +362,7 @@ async function randPost(data, time) {
 	}
 }
 
-async function randUpload(formData, time) {
+async function randUpload(formData) {
 	if (typeof formData === "string") {
 		const dirPath = formData;
 		const dirInfo = getDir(dirPath);
@@ -349,7 +373,8 @@ async function randUpload(formData, time) {
 
 	function wait() {
 		return new Promise((resolve) => {
-			let randTime = Math.floor(Math.random() * time + 1);
+			const time = puppet.rate === 0 ? 500 : puppet.rate * 1000;
+			const randTime = Math.floor(Math.random() * time + 1);
 			setTimeout(() => {
 				let rand;
 				if (puppet.counter < 10 && puppet[puppet.current].length >= 10) rand = Math.floor(Math.random() * 10);

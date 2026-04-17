@@ -35,15 +35,15 @@
 			</label>
 		</div>
 
-		<div id="sliderRate" class="d-flex justify-content-center mt-3">
+		<div class="d-flex justify-content-center mt-3 w-100">
 			<span>
 				<i class="fas fa-retweet text-primary mr-1"></i>
 				<span class="font-weight-bold text-primary mr-1">Rate:</span>
 			</span>
-			<span class="font-weight-bold orange-text ml-2">10</span><span class="font-weight-bold orange-text mr-3">s</span>
-			<span class="font-weight-bold text-primary mr-1">0</span>
+			<span class="d-flex font-weight-bold orange-text ml-2 mr-3"><span id="repeatRate" class="text-right">10</span>s</span>
+			<span class="font-weight-bold text-primary mr-1">1</span>
 			<form class="range-field w-50">
-				<input class="border1" type="range" min="0" max="60" />
+				<input id="sliderRate" class="border1" type="range" value="10" min="1" max="60" />
 			</form>
 			<span class="font-weight-bold text-primary ml-1">60</span>
 		</div>

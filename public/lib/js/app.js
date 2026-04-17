@@ -8,8 +8,8 @@ const wHeight = window.innerHeight;
 document.body.style.height = `${wHeight}px`;
 
 listSite.onchange = function (e) {
-	const urls = document.querySelector("#listSite input:checked").value;
-	puppet("change", urls);
+	const list = document.querySelector("#listSite input:checked").value;
+	puppet("changeList", list);
 }
 
 loggerContent.onscroll = function () {
@@ -35,6 +35,12 @@ btnTotalFailed.onclick = function (e) {
 	$("#tabCounterFailed").tab("show");
 };
 
+sliderRate.onchange = function (e) {
+	const rate = +this.value;
+	repeatRate.innerText = rate;
+	puppet("changeRate", rate);
+};
+
 //puppet
 let source = new EventSource("http://localhost:3000/logger");
 source.onopen = e => {
@@ -55,8 +61,19 @@ source.onerror = e => {
 	SSE = false;
 	log("Logger disconnected.");
 };
-async function puppet(action, urls = "mainSites") {
-	let data = {action, urls};
+async function puppet(action, value) {
+	let data;
+	switch (action) {
+		case "changeList":
+			data = {action, list: value || "mainSites"};
+			break;
+	
+		case "changeRate":
+			data = {action, rate: value};
+			break;
+		default:
+			data = {action};
+	}
 	const response = await fetch(`${SERVER}puppet`, {
 		method: "POST",
 		body: JSON.stringify(data),
@@ -218,6 +235,9 @@ function log(data, type = "log", tab = "logger") {
 
 					case 9:
 						cardContent = `Puppet URLs list changed to "<span class="orange-text font-weight-bold">${data.current}</span>".`;
+						break;
+
+					case 10:
 						break;
 				}
 				break;
