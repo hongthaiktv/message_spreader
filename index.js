@@ -24,19 +24,21 @@ const storage = multer.diskStorage({
 const uploader = multer({ storage });
 
 let server;
-let puppet = {
+const listSites = {
+	mainSites: require('./assets/json/mainSites.json'),
+	trustSites: require('./assets/json/trustSites.json'),
+	blackSites: require('./assets/json/blackSites.json'),
+	urlFailed: []
+};
+const puppet = {
 	started: false,
 	rate: 10,
 	total: 0,
 	counter: 0,
 	success: 0,
 	failed: 0,
-	urlFailed: [],
 	current: "mainSites",
-	quickStart: process.env.PUPPET == 1 ? true : false,
-	mainSites: require('./assets/json/mainSites.json'),
-	trustSites: require('./assets/json/trustSites.json'),
-	blackSites: require('./assets/json/blackSites.json')
+	quickStart: process.env.PUPPET == 1 ? true : false
 };
 
 logger.addEventListener("change", function (e) {
@@ -90,7 +92,7 @@ app.get("/logger", (req, res) => {
 		"Content-Type": "text/event-stream",
 		"Cache-Control": "no-cache"
 	});
-	logger.addClient(res, "log", {code: 5, started: puppet.started, current: puppet.current, total: puppet.total, success: puppet.success, failed: puppet.failed});
+	logger.addClient(res, "log", {code: 5, urlFailed: listSites.urlFailed, ...puppet});
 });
 
 app.post("/puppet", (req, res) => {
@@ -195,8 +197,8 @@ function runPuppet(act, res) {
 		case "stop":
 			msg = `Puppet stopped with ${puppet.total} request, ${puppet.success} success, ${puppet.failed} failed`;
 			puppet.started = false;
-			logger.addLog(msg, "success", {code: 8, total: puppet.total, success: puppet.success, failed: puppet.failed, urlFailed: puppet.urlFailed});
-			console.log('URL failed:', puppet.urlFailed);
+			logger.addLog(msg, "success", {code: 8, total: puppet.total, success: puppet.success, failed: puppet.failed, urlFailed: listSites.urlFailed});
+			console.log('URL failed:', listSites.urlFailed);
 			if (res) res.json({
 				code: 8,
 				message: msg,
@@ -204,7 +206,7 @@ function runPuppet(act, res) {
 				total: puppet.total,
 				success: puppet.success,
 				failed: puppet.failed,
-				urlFailed: puppet.urlFailed
+				urlFailed: listSites.urlFailed
 			});
 			break;
 
@@ -221,7 +223,7 @@ function runPuppet(act, res) {
 			break;
 
 		case "changeRate":
-			msg = `Puppet rate changed to "${puppet.rate}"`;
+			msg = `Puppet rate changed to "${puppet.rate}s"`;
 			logger.addLog(msg, "success", {code: 10, rate: puppet.rate});
 			if (res) res.json({
 				code: 10,
@@ -262,14 +264,14 @@ async function randRequest() {
 			const randTime = Math.floor(Math.random() * time + 1);
 			setTimeout(() => {
 				let rand;
-				if (puppet.counter < 10 && puppet[puppet.current].length >= 10) rand = Math.floor(Math.random() * 10);
-				else if (puppet.counter < 100 && puppet[puppet.current].length >= 100) rand = Math.floor(Math.random() * 100);
-				else if (puppet.counter < 1000 && puppet[puppet.current].length >= 1000) rand = Math.floor(Math.random() * 1000);
-				else if (puppet.counter < 10000 && puppet[puppet.current].length >= 10000) rand = Math.floor(Math.random() * 10000);
-				else if (puppet.counter < 100000 && puppet[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
-				else rand = Math.floor(Math.random() * puppet[puppet.current].length);
+				if (puppet.counter < 10 && listSites[puppet.current].length >= 10) rand = Math.floor(Math.random() * 10);
+				else if (puppet.counter < 100 && listSites[puppet.current].length >= 100) rand = Math.floor(Math.random() * 100);
+				else if (puppet.counter < 1000 && listSites[puppet.current].length >= 1000) rand = Math.floor(Math.random() * 1000);
+				else if (puppet.counter < 10000 && listSites[puppet.current].length >= 10000) rand = Math.floor(Math.random() * 10000);
+				else if (puppet.counter < 100000 && listSites[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
+				else rand = Math.floor(Math.random() * listSites[puppet.current].length);
 
-				const url = `https://${puppet[puppet.current][rand]}`;
+				const url = `https://${listSites[puppet.current][rand]}`;
 				const pageRank = rand + 1;
 				const msg = `Rank ${pageRank}: ${url}`;
 				logger.addLog(msg, "log", { code: 4, pageRank, url });
@@ -285,7 +287,7 @@ async function randRequest() {
 				++puppet.counter;
 				request(options, function (error, response, body) {
 					if (error) {
-						puppet.urlFailed.push(url);
+						listSites.urlFailed.push(url);
 						++puppet.failed;
 						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${error.code} : ${url}`;
 						logger.addLog(msg, "error", {code: 1, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: error.code, url});
@@ -293,7 +295,7 @@ async function randRequest() {
 						return;
 					}
 					if (response.statusCode !== 200) {
-						puppet.urlFailed.push(url);
+						listSites.urlFailed.push(url);
 						++puppet.failed;
 						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${response.statusCode} : ${url}`;
 						logger.addLog(msg, "error", {code: 1, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: response.statusCode, url});
@@ -328,14 +330,14 @@ async function randPost(data) {
 			const randTime = Math.floor(Math.random() * time + 1);
 			setTimeout(() => {
 				let rand;
-				if (puppet.counter < 10 && puppet[puppet.current].length >= 10) rand = Math.floor(Math.random() * 10);
-				else if (puppet.counter < 100 && puppet[puppet.current].length >= 100) rand = Math.floor(Math.random() * 100);
-				else if (puppet.counter < 1000 && puppet[puppet.current].length >= 1000) rand = Math.floor(Math.random() * 1000);
-				else if (puppet.counter < 10000 && puppet[puppet.current].length >= 10000) rand = Math.floor(Math.random() * 10000);
-				else if (puppet.counter < 100000 && puppet[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
-				else rand = Math.floor(Math.random() * puppet[puppet.current].length);
+				if (puppet.counter < 10 && listSites[puppet.current].length >= 10) rand = Math.floor(Math.random() * 10);
+				else if (puppet.counter < 100 && listSites[puppet.current].length >= 100) rand = Math.floor(Math.random() * 100);
+				else if (puppet.counter < 1000 && listSites[puppet.current].length >= 1000) rand = Math.floor(Math.random() * 1000);
+				else if (puppet.counter < 10000 && listSites[puppet.current].length >= 10000) rand = Math.floor(Math.random() * 10000);
+				else if (puppet.counter < 100000 && listSites[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
+				else rand = Math.floor(Math.random() * listSites[puppet.current].length);
 
-				const url = `https://${puppet[puppet.current][rand]}`;
+				const url = `https://${listSites[puppet.current][rand]}`;
 				const options = {
 					method: "POST",
 					url: url,
@@ -377,14 +379,14 @@ async function randUpload(formData) {
 			const randTime = Math.floor(Math.random() * time + 1);
 			setTimeout(() => {
 				let rand;
-				if (puppet.counter < 10 && puppet[puppet.current].length >= 10) rand = Math.floor(Math.random() * 10);
-				else if (puppet.counter < 100 && puppet[puppet.current].length >= 100) rand = Math.floor(Math.random() * 100);
-				else if (puppet.counter < 1000 && puppet[puppet.current].length >= 1000) rand = Math.floor(Math.random() * 1000);
-				else if (puppet.counter < 10000 && puppet[puppet.current].length >= 10000) rand = Math.floor(Math.random() * 10000);
-				else if (puppet.counter < 100000 && puppet[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
-				else rand = Math.floor(Math.random() * puppet[puppet.current].length);
+				if (puppet.counter < 10 && listSites[puppet.current].length >= 10) rand = Math.floor(Math.random() * 10);
+				else if (puppet.counter < 100 && listSites[puppet.current].length >= 100) rand = Math.floor(Math.random() * 100);
+				else if (puppet.counter < 1000 && listSites[puppet.current].length >= 1000) rand = Math.floor(Math.random() * 1000);
+				else if (puppet.counter < 10000 && listSites[puppet.current].length >= 10000) rand = Math.floor(Math.random() * 10000);
+				else if (puppet.counter < 100000 && listSites[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
+				else rand = Math.floor(Math.random() * listSites[puppet.current].length);
 
-				const url = `https://${puppet[puppet.current][rand]}`;
+				const url = `https://${listSites[puppet.current][rand]}`;
 // 				const url = `http://localhost:3000/upload`;
 				const options = {
 					method: "POST",

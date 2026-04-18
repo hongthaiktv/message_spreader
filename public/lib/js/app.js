@@ -214,6 +214,11 @@ function log(data, type = "log", tab = "logger") {
 							$("#pupBtnStart").toggleClass("d-none", true);
 							$("#pupBtnStop").toggleClass("d-none", false);
 						}
+						if (data.rate) {
+							$("#repeatRate").text(data.rate);
+							$("#sliderRate").val(data.rate);
+							$("#sliderRate").range();
+						}
 						cardContent = `Client added. Total: <span class="orange-text font-weight-bold">${data.totalClient}</span>`;
 						break;
 
