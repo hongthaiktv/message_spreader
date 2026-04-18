@@ -23,15 +23,26 @@ loggerContent.onscroll = function () {
 	loggerPrevPos = curPos;
 }
 
+tabButtons.onclick = function (e) {
+	$(this).attr("class", "nav nav-tabs nav-justified md-tabs color-light-blue-active");
+	$("#tabsContainer").attr("class", "d-flex flex-column overflow-auto flex-grow-1 w-100 tab-content card pt-4 pb-0 color-light-blue");
+};
+
 btnTotalRequest.onclick = function (e) {
+	$("#tabButtons").toggleClass("color-light-blue-active", false).toggleClass("orange darken-4", true);
+	$("#tabsContainer").toggleClass("color-light-blue", false).toggleClass("orange darken-2", true);
 	$("#tabCounterAll").tab("show");
 };
 
 btnTotalSuccess.onclick = function (e) {
+	$("#tabButtons").toggleClass("color-light-blue-active", false).toggleClass("success-color-dark", true);
+	$("#tabsContainer").toggleClass("color-light-blue", false).toggleClass("green lighten-1", true);
 	$("#tabCounterSuccess").tab("show");
 };
 
 btnTotalFailed.onclick = function (e) {
+	$("#tabButtons").toggleClass("color-light-blue-active", false).toggleClass("danger-color-dark", true);
+	$("#tabsContainer").toggleClass("color-light-blue", false).toggleClass("red lighten-1", true);
 	$("#tabCounterFailed").tab("show");
 };
 
@@ -50,10 +61,20 @@ source.onopen = e => {
 source.onmessage = e => {
 	const data = JSON.parse(e.data);
 	log(data);
+	let logData;
 	switch (data.code) {
 		case 1:
-			const link = `<span class="text-danger">${data.errorCode}</span> : <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a>`;
-			log(link, "log", "url");
+			logData = `<div class="white-text my-2"><span class="warning-color-dark rounded p-1">${data.errorCode}</span> : <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a></div>`;
+			log(logData, "log", "counterFailed");
+			logData = `<div class="white-text my-2"><span class="danger-color-dark rounded p-1">${data.errorCode}</span> : <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a></div>`;
+			log(logData, "log", "counterAll");
+			break;
+
+		case 10: case 2:
+			logData = `<div class="white-text my-2"><span class="secondary-color-dark rounded p-1">Rank ${data.pageRank}</span> : <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a></div>`;
+			log(logData, "log", "counterSuccess");
+			logData = `<div class="white-text my-2"><span class="success-color-dark rounded p-1">Rank ${data.pageRank}</span> : <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a></div>`;
+			log(logData, "log", "counterAll");
 			break;
 	}
 };
@@ -71,6 +92,7 @@ async function puppet(action, value) {
 		case "changeRate":
 			data = {action, rate: value};
 			break;
+
 		default:
 			data = {action};
 	}
@@ -157,21 +179,16 @@ async function query(action = "getDir", dirName = "upload", tab = "logger") {
 	}
 }
 
-function log(data, type = "log", tab = "logger") {
+function log(data, type, tab = "logger") {
 	let divCard = document.createElement("DIV");
 	let cardContent, cardType;
 	if (data instanceof Object) {
 		cardContent = data.message;
-		cardType = data.type;
-		if (data.total) {
-			cTotalRequest.innerText = data.total;
-			$(".tabUrlCounterTotal").text(data.total);
-		}
-		if (data.success) cTotalSuccess.innerText = data.success;
-		if (data.failed) {
-			cTotalFailed.innerText = data.failed;
-			tabUrlCounterFailed.innerText = data.failed;
-		}
+		cardType = type || data.type || "log";
+		if (data.total) $(".counter-total").text(data.total);
+		if (data.success) $(".counter-success").text(data.success);
+		if (data.failed) $(".counter-failed").text(data.failed);
+		
 		switch (cardType) {
 			case "error":
 				switch (data.code) {
@@ -241,9 +258,6 @@ function log(data, type = "log", tab = "logger") {
 					case 9:
 						cardContent = `Puppet URLs list changed to "<span class="orange-text font-weight-bold">${data.current}</span>".`;
 						break;
-
-					case 10:
-						break;
 				}
 				break;
 		}
@@ -255,7 +269,7 @@ function log(data, type = "log", tab = "logger") {
 		}
 	} else {
 		cardContent = data;
-		cardType = type;
+		cardType = type || "log";
 	}
 
 	switch (cardType) {
@@ -303,9 +317,29 @@ function log(data, type = "log", tab = "logger") {
 			urlContent.scrollTop = urlContent.scrollHeight;
 			break;
 
+		case "motd":
+			motdContent.appendChild(divCard);
+			motdContent.scrollTop = motdContent.scrollHeight;
+			break;
+
 		case "upload":
 			uploadContent.appendChild(divCard);
 			uploadContent.scrollTop = uploadContent.scrollHeight;
+			break;
+
+		case "counterAll":
+			counterAllContent.appendChild(divCard);
+			counterAllContent.scrollTop = counterAllContent.scrollHeight;
+			break;
+
+		case "counterSuccess":
+			counterSuccessContent.appendChild(divCard);
+			counterSuccessContent.scrollTop = counterSuccessContent.scrollHeight;
+			break;
+
+		case "counterFailed":
+			counterFailedContent.appendChild(divCard);
+			counterFailedContent.scrollTop = counterFailedContent.scrollHeight;
 			break;
 
 		case "statistic":

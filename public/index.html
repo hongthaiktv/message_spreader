@@ -65,7 +65,7 @@
 		<hr class="w-100">
 
 		<div id="layoutTabs" class="d-flex flex-column overflow-auto flex-grow-1 w-100">
-			<ul class="nav nav-tabs nav-justified md-tabs color-light-blue-active" id="tabButtons" role="tablist">
+			<ul id="tabButtons" class="nav nav-tabs nav-justified md-tabs color-light-blue-active" role="tablist">
 				<li class="nav-item">
 					<a id="tabLogger" class="nav-link font-weight-bold active" data-toggle="tab" href="#tabLoggerContent" role="tab" aria-controls="tabLoggerContent" aria-selected="true">Logger</a>
 				</li>
@@ -91,26 +91,19 @@
 					<a id="tabStatistic" class="nav-link font-weight-bold" data-toggle="tab" href="#tabStatisticContent" role="tab" aria-controls="tabStatisticContent" aria-selected="false">Statistic</a>
 				</li>
 			</ul>
-			<div id="tabsContainer" class="d-flex flex-column overflow-auto flex-grow-1 w-100 tab-content card pt-4 color-light-blue pb-0">
+			<div id="tabsContainer" class="d-flex flex-column overflow-auto flex-grow-1 w-100 tab-content card pt-4 pb-0 color-light-blue">
 				<div id="tabLoggerContent" class="overflow-auto flex-grow-1 w-100 tab-pane fade show active" role="tabpanel" aria-labelledby="tabLogger">
 					<div class="d-flex flex-column overflow-auto w-100 h-100">
 						<div id="loggerContent" class="overflow-auto flex-grow-1 w-100"></div>
 						<div id="puppet-status" class="btn-group w-100" role="group" aria-label="Puppet status">
-							<button id="btnTotalRequest" type="button" class="btn btn-orange btn-rounded py-2"><div class="flex-center font-weight-bold"><i class="fas fa-paper-plane pr-2" aria-hidden="true"></i><span id="cTotalRequest">0</span></div></button>
-							<button id="btnTotalSuccess" type="button" class="btn btn-success btn-rounded py-2"><div class="flex-center font-weight-bold"><i class="fas fa-check-circle pr-2" aria-hidden="true"></i><span id="cTotalSuccess">0</span></div></button>
-							<button id="btnTotalFailed" type="button" class="btn btn-danger btn-rounded py-2"><div class="flex-center font-weight-bold"><i class="fas fa-times-circle pr-2" aria-hidden="true"></i><span id="cTotalFailed">0</span></div></button>
+							<button id="btnTotalRequest" type="button" class="btn btn-orange btn-rounded py-2"><div class="flex-center font-weight-bold"><i class="fas fa-paper-plane pr-2" aria-hidden="true"></i><span class="counter-total">0</span></div></button>
+							<button id="btnTotalSuccess" type="button" class="btn btn-success btn-rounded py-2"><div class="flex-center font-weight-bold"><i class="fas fa-check-circle pr-2" aria-hidden="true"></i><span class="counter-success">0</span></div></button>
+							<button id="btnTotalFailed" type="button" class="btn btn-danger btn-rounded py-2"><div class="flex-center font-weight-bold"><i class="fas fa-times-circle pr-2" aria-hidden="true"></i><span class="counter-failed">0</span></div></button>
 						</div>
 					</div>
 				</div>
 				<div id="tabUrlContent" class="overflow-auto flex-grow-1 w-100 tab-pane fade" role="tabpanel" aria-labelledby="tabUrl">
 					<div class="d-flex flex-column overflow-auto w-100 h-100">
-						<div class="card gradient-card mb-1">
-							<div class="card-body px-3 py-2 mask young-passion-gradient">
-								<p class="card-text text-white font-weight-bold">
-									Failed (<span id="tabUrlCounterFailed" class="text-danger">0</span>/<span class="text-default tabUrlCounterTotal">0</span>)
-								</p>
-							</div>
-						</div>
 						<div id="urlContent" class="overflow-auto flex-grow-1 w-100"></div>
 					</div>
 				</div>
@@ -125,17 +118,26 @@
 					</div>
 				</div>
 				<div id="tabCounterAllContent" class="overflow-auto flex-grow-1 w-100 tab-pane fade" role="tabpanel" aria-labelledby="tabCounterAll">
-					<div class="d-flex flex-column overflow-auto w-100 h-100">
+					<div class="d-flex flex-column overflow-auto align-items-center w-100 h-100">
+						<div class="card text-center text-white color-light-blue-active mt-1 mb-1 w-75">
+							<div class="card-header font-weight-bold p-1">Total: <span class="orange-text counter-total">0</span>/<span class="text-success counter-success">0</span>/<span class="text-danger counter-failed">0</span></div>
+						</div>
 						<div id="counterAllContent" class="overflow-auto flex-grow-1 w-100"></div>
 					</div>
 				</div>
 				<div id="tabCounterSuccessContent" class="overflow-auto flex-grow-1 w-100 tab-pane fade" role="tabpanel" aria-labelledby="tabCounterSuccess">
-					<div class="d-flex flex-column overflow-auto w-100 h-100">
+					<div class="d-flex flex-column overflow-auto align-items-center w-100 h-100">
+						<div class="card text-center text-white color-light-blue-active mt-1 mb-1 w-50">
+							<div class="card-header font-weight-bold p-1">Success: <span class="text-success counter-success">0</span>/<span class="orange-text counter-total">0</span></div>
+						</div>
 						<div id="counterSuccessContent" class="overflow-auto flex-grow-1 w-100"></div>
 					</div>
 				</div>
 				<div id="tabCounterFailedContent" class="overflow-auto flex-grow-1 w-100 tab-pane fade" role="tabpanel" aria-labelledby="tabCounterFailed">
-					<div class="d-flex flex-column overflow-auto w-100 h-100">
+					<div class="d-flex flex-column overflow-auto align-items-center w-100 h-100">
+						<div class="card text-center text-white color-light-blue-active mt-1 mb-1 w-50">
+							<div class="card-header font-weight-bold p-1">Failed: <span class="text-danger counter-failed">0</span>/<span class="orange-text counter-total">0</span></div>
+						</div>
 						<div id="counterFailedContent" class="overflow-auto flex-grow-1 w-100"></div>
 					</div>
 				</div>
