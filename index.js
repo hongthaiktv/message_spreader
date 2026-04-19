@@ -306,9 +306,9 @@ async function randRequest() {
 						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${response.statusCode} : ${url}`;
 						logger.addLog(msg, "error", {code: 1, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: response.statusCode, url});
 					} else {
-						const document = parseHTML(body); 
 						listSites.urlSuccess.push({url, pageRank, message: response.statusMessage, statusCode: response.statusCode});
 						++puppet.success;
+						const document = parseHTML(body); 
 						const msg = `Success (${puppet.success}/${puppet.total})`;
 						logger.addLog(msg, "log", {code: 3, success: puppet.success, total: puppet.total});
 						if (document) {
