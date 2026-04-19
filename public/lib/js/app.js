@@ -60,19 +60,9 @@ source.onopen = e => {
 }
 source.onmessage = e => {
 	const data = JSON.parse(e.data);
-	if (data.total) $(".counter-total").text(data.total);
-	if (data.success) $(".counter-success").text(data.success);
-	if (data.failed) $(".counter-failed").text(data.failed);
 	log(data);
 	let logData;
 	switch (data.code) {
-		case 1:
-			logData = `<div class="white-text my-2"><span class="warning-color-dark rounded p-1">${data.errorCode}</span> : <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a></div>`;
-			log(logData, "log", "counterFailed");
-			logData = `<div class="white-text my-2"><span class="danger-color-dark rounded p-1">${data.errorCode}</span> : <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a></div>`;
-			log(logData, "log", "counterAll");
-			break;
-
 		case 10: case 2:
 			logData = `<div class="white-text my-2"><span class="secondary-color-dark rounded p-1">Rank ${data.pageRank}</span> : <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a></div>`;
 			log(logData, "log", "counterSuccess");
@@ -80,11 +70,28 @@ source.onmessage = e => {
 			log(logData, "log", "counterAll");
 			break;
 
+		case 1:
+			logData = `<div class="white-text my-2"><span class="warning-color-dark rounded p-1">${data.errorCode}</span> : <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a></div>`;
+			log(logData, "log", "counterFailed");
+			logData = `<div class="white-text my-2"><span class="danger-color-dark rounded p-1">${data.errorCode}</span> : <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a></div>`;
+			log(logData, "log", "counterAll");
+			break;
+
 		case 5:
+			if (data.urlSuccess && data.urlSuccess.length) {
+				for (const {url, pageRank} of data.urlSuccess) {
+					logData = `<div class="white-text my-2"><span class="secondary-color-dark rounded p-1">Rank ${pageRank}</span> : <a class="app-text-link" target="_blank" href="${url}">${url}</a></div>`;
+					log(logData, "log", "counterSuccess");
+					logData = `<div class="white-text my-2"><span class="success-color-dark rounded p-1">Rank ${pageRank}</span> : <a class="app-text-link" target="_blank" href="${url}">${url}</a></div>`;
+					log(logData, "log", "counterAll");
+				}
+			}
 			if (data.urlFailed && data.urlFailed.length) {
-				for (const url of data.urlFailed) {
-					logData = `<div class="white-text my-2"><span class="warning-color-dark rounded p-1">${"abc"}</span> : <a class="app-text-link" target="_blank" href="${url}">${url}</a></div>`;
+				for (const {url, errorCode} of data.urlFailed) {
+					logData = `<div class="white-text my-2"><span class="warning-color-dark rounded p-1">${errorCode}</span> : <a class="app-text-link" target="_blank" href="${url}">${url}</a></div>`;
 					log(logData, "log", "counterFailed");
+					logData = `<div class="white-text my-2"><span class="danger-color-dark rounded p-1">${errorCode}</span> : <a class="app-text-link" target="_blank" href="${url}">${url}</a></div>`;
+					log(logData, "log", "counterAll");
 				}
 			}
 			break;
@@ -197,9 +204,10 @@ function log(data, type, tab = "logger") {
 	if (data instanceof Object) {
 		cardContent = data.message;
 		cardType = type || data.type || "log";
-// 		if (data.total) $(".counter-total").text(data.total);
-// 		if (data.success) $(".counter-success").text(data.success);
-// 		if (data.failed) $(".counter-failed").text(data.failed);
+
+		if (data.total) $(".counter-total").text(data.total);
+		if (data.success) $(".counter-success").text(data.success);
+		if (data.failed) $(".counter-failed").text(data.failed);
 		
 		switch (cardType) {
 			case "error":
@@ -246,7 +254,6 @@ function log(data, type, tab = "logger") {
 						if (data.rate) {
 							$("#repeatRate").text(data.rate);
 							$("#sliderRate").val(data.rate);
-							$("#sliderRate").range();
 						}
 						cardContent = `Client added. Total: <span class="orange-text font-weight-bold">${data.totalClient}</span>`;
 						break;
@@ -276,12 +283,6 @@ function log(data, type, tab = "logger") {
 						break;
 				}
 				break;
-		}
-		if (data.urlFailed && data.urlFailed.length) {
-			cardContent += `<br><span class="text-danger font-weight-bold">URLs failed:</span>`;
-			for (const url of data.urlFailed) {
-				cardContent += `<br><a class="app-text-link" target="_blank" href="${url}">${url}</a>`;
-			}
 		}
 	} else {
 		cardContent = data;

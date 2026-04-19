@@ -28,7 +28,8 @@ const listSites = {
 	mainSites: require('./assets/json/mainSites.json'),
 	trustSites: require('./assets/json/trustSites.json'),
 	blackSites: require('./assets/json/blackSites.json'),
-	urlFailed: []
+	urlFailed: [],
+	urlSuccess: []
 };
 const puppet = {
 	started: false,
@@ -92,7 +93,7 @@ app.get("/logger", (req, res) => {
 		"Content-Type": "text/event-stream",
 		"Cache-Control": "no-cache"
 	});
-	logger.addClient(res, "log", {code: 5, urlFailed: listSites.urlFailed, ...puppet});
+	logger.addClient(res, "log", {code: 5, urlSuccess: listSites.urlSuccess, urlFailed: listSites.urlFailed, ...puppet});
 });
 
 app.post("/puppet", (req, res) => {
@@ -197,8 +198,12 @@ function runPuppet(act, res) {
 		case "stop":
 			msg = `Puppet stopped with ${puppet.total} request, ${puppet.success} success, ${puppet.failed} failed`;
 			puppet.started = false;
-			logger.addLog(msg, "success", {code: 8, total: puppet.total, success: puppet.success, failed: puppet.failed, urlFailed: listSites.urlFailed});
-			console.log('URL failed:', listSites.urlFailed);
+			logger.addLog(msg, "success", {code: 8, total: puppet.total, success: puppet.success, failed: puppet.failed, urlSuccess: listSites.urlSuccess, urlFailed: listSites.urlFailed});
+			const urlFailed = [];
+			for (const {url} of listSites.urlFailed) {
+				urlFailed.push(url);
+			}
+			console.log('URL failed:', urlFailed);
 			if (res) res.json({
 				code: 8,
 				message: msg,
@@ -206,6 +211,7 @@ function runPuppet(act, res) {
 				total: puppet.total,
 				success: puppet.success,
 				failed: puppet.failed,
+				urlSuccess: listSites.urlSuccess,
 				urlFailed: listSites.urlFailed
 			});
 			break;
@@ -287,7 +293,7 @@ async function randRequest() {
 				++puppet.counter;
 				request(options, function (error, response, body) {
 					if (error) {
-						listSites.urlFailed.push(url);
+						listSites.urlFailed.push({url, message: error.toString(), errorCode: error.code, errorNo: error.errno, syscall: error.syscall, hostname: error.hostname});
 						++puppet.failed;
 						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${error.code} : ${url}`;
 						logger.addLog(msg, "error", {code: 1, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: error.code, url});
@@ -295,12 +301,13 @@ async function randRequest() {
 						return;
 					}
 					if (response.statusCode !== 200) {
-						listSites.urlFailed.push(url);
+						listSites.urlFailed.push({url, message: response.statusMessage, errorCode: response.statusCode});
 						++puppet.failed;
 						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${response.statusCode} : ${url}`;
 						logger.addLog(msg, "error", {code: 1, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: response.statusCode, url});
 					} else {
 						const document = parseHTML(body); 
+						listSites.urlSuccess.push({url, pageRank, message: response.statusMessage, statusCode: response.statusCode});
 						++puppet.success;
 						const msg = `Success (${puppet.success}/${puppet.total})`;
 						logger.addLog(msg, "log", {code: 3, success: puppet.success, total: puppet.total});
