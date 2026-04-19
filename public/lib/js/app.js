@@ -60,6 +60,9 @@ source.onopen = e => {
 }
 source.onmessage = e => {
 	const data = JSON.parse(e.data);
+	if (data.total) $(".counter-total").text(data.total);
+	if (data.success) $(".counter-success").text(data.success);
+	if (data.failed) $(".counter-failed").text(data.failed);
 	log(data);
 	let logData;
 	switch (data.code) {
@@ -75,6 +78,15 @@ source.onmessage = e => {
 			log(logData, "log", "counterSuccess");
 			logData = `<div class="white-text my-2"><span class="success-color-dark rounded p-1">Rank ${data.pageRank}</span> : <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a></div>`;
 			log(logData, "log", "counterAll");
+			break;
+
+		case 5:
+			if (data.urlFailed && data.urlFailed.length) {
+				for (const url of data.urlFailed) {
+					logData = `<div class="white-text my-2"><span class="warning-color-dark rounded p-1">${"abc"}</span> : <a class="app-text-link" target="_blank" href="${url}">${url}</a></div>`;
+					log(logData, "log", "counterFailed");
+				}
+			}
 			break;
 	}
 };
@@ -185,9 +197,9 @@ function log(data, type, tab = "logger") {
 	if (data instanceof Object) {
 		cardContent = data.message;
 		cardType = type || data.type || "log";
-		if (data.total) $(".counter-total").text(data.total);
-		if (data.success) $(".counter-success").text(data.success);
-		if (data.failed) $(".counter-failed").text(data.failed);
+// 		if (data.total) $(".counter-total").text(data.total);
+// 		if (data.success) $(".counter-success").text(data.success);
+// 		if (data.failed) $(".counter-failed").text(data.failed);
 		
 		switch (cardType) {
 			case "error":
@@ -257,6 +269,10 @@ function log(data, type, tab = "logger") {
 
 					case 9:
 						cardContent = `Puppet URLs list changed to "<span class="orange-text font-weight-bold">${data.current}</span>".`;
+						break;
+
+					case 10:
+						cardContent = `Puppet rate changed to "<span class="orange-text font-weight-bold">${data.rate}s</span>".`;
 						break;
 				}
 				break;

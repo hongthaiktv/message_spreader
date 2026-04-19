@@ -42,7 +42,7 @@ const puppet = {
 };
 
 logger.addEventListener("change", function (e) {
-	const { action, log, client } = e.detail;
+	const { action, log } = e.detail;
 	const msg = `data: ${JSON.stringify(log)}\n\n`;
 
 	switch (action) {
@@ -308,7 +308,7 @@ async function randRequest() {
 							const para = document.querySelectorAll("p");
 							if (para.length) {
 								const rand = Math.floor(Math.random() * para.length);
-								if (para[rand].innerText !== '') logger.addLog(para[rand].innerHTML, "info", {code: 10, pageRank, url, total: puppet.total, success: puppet.success, failed: puppet.failed});
+								if (para[rand].innerText !== '') logger.addLog(para[rand].innerHTML, "info", {code: 20, pageRank, url, total: puppet.total, success: puppet.success, failed: puppet.failed});
 							}
 							else logger.addLog(`Paragraph not found: ${url}`, "log", {code: 2, pageRank, url, total: puppet.total, success: puppet.success, failed: puppet.failed});
 						}
