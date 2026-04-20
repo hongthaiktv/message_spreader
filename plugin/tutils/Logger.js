@@ -21,11 +21,11 @@ class Logger extends EventTarget {
 		this.dispatchEvent(ev);
 	}
 
-	addClient(client, type = "log", logData = {}) {
+	addClient(client, type = "log", logData = {}, output = true) {
 		this.#clients.push(client);
 		const total = this.#clients.length;
 		const msg = `${this.#prefix}Client added. Total: ${total}`;
-		console.log(msg);
+		if (output) console.log(msg);
 		if (!logData instanceof Object) {
 			console.error("Wrong log data!");
 			return;
@@ -40,7 +40,7 @@ class Logger extends EventTarget {
 		return this.#clients;
 	}
 
-	addLog(log, type = "log", logData = {}) {
+	addLog(log, type = "log", logData = {}, output = true) {
 		log = log.trim();
 		if (!log) return;
 		this.#logs.push(log);
@@ -51,7 +51,7 @@ class Logger extends EventTarget {
 		}
 		logData.message = msg;
 		logData.type = type;
-		console.log(msg);
+		if (output) console.log(msg);
 		this.#update("update", logData);
 	}
 
@@ -59,7 +59,7 @@ class Logger extends EventTarget {
 		return this.#logs;
 	}
 
-	removeClient(client, type = "log", logData = {}) {
+	removeClient(client, type = "log", logData = {}, output = true) {
 		let msg, total;
 		const clients = this.#clients;
 		if (clients.includes(client)) {
@@ -67,7 +67,7 @@ class Logger extends EventTarget {
 			clients.splice(index, 1);
 			total = clients.length;
 			msg = `${this.#prefix}Client disconnected. Left: ${total}`;
-			console.log(msg);
+			if (output) console.log(msg);
 		}
 		if (!logData instanceof Object) {
 			console.error("Wrong log data!");

@@ -79,8 +79,7 @@ source.onmessage = e => {
 
 		case 5:
 			if (data.urlSuccess && data.urlSuccess.length) {
-				for (const {url, pageRank, code} of data.urlSuccess) {
-					if (code) alert(code)
+				for (const {url, pageRank} of data.urlSuccess) {
 					logData = `<div class="white-text my-2"><span class="secondary-color-dark rounded p-1">Rank ${pageRank}</span> : <a class="app-text-link" target="_blank" href="${url}">${url}</a></div>`;
 					log(logData, "log", "counterSuccess");
 					logData = `<div class="white-text my-2"><span class="success-color-dark rounded p-1">Rank ${pageRank}</span> : <a class="app-text-link" target="_blank" href="${url}">${url}</a></div>`;

@@ -33,6 +33,7 @@ const listSites = {
 };
 const puppet = {
 	started: false,
+	quiet: false,
 	rate: 10,
 	total: 0,
 	counter: 0,
@@ -277,10 +278,12 @@ async function randRequest() {
 				else if (puppet.counter < 100000 && listSites[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
 				else rand = Math.floor(Math.random() * listSites[puppet.current].length);
 
-				const url = `https://${listSites[puppet.current][rand]}`;
+				const protocol = "https://";
+				const host = listSites[puppet.current][rand];
+				const url = /^http/i.test(host) ? host : `${protocol}${host}`;
 				const pageRank = rand + 1;
 				const msg = `Rank ${pageRank}: ${url}`;
-				logger.addLog(msg, "log", { code: 4, pageRank, url });
+				if (!puppet.quiet) logger.addLog(msg, "log", { code: 4, pageRank, url });
 				const options = {
 					url: url,
 					strictSSL: false,
@@ -314,24 +317,44 @@ async function randRequest() {
 						listSites.urlSuccess.push(urlData);
 						++puppet.success;
 						const msg = `Success (${puppet.success}/${puppet.total})`;
-						console.log(msg);
+						if (!puppet.quiet) console.log(msg);
 						const document = parseHTML(body); 
 						if (document) {
 							const paras = document.querySelectorAll("p");
 							if (paras.length) {
 								const rand = Math.floor(Math.random() * paras.length);
-								const para = paras[rand];
-								console.log("para:", paras.length, rand, para.textContent);
-								if (para !== '') {
+								const para = paras[rand].textContent?.trim();
+								if (para) {
+									console.log(para);
 									const code = 20;
-									logger.addLog(para, "info", {code, pageRank, url, total: puppet.total, success: puppet.success, failed: puppet.failed});
+									const paraHTML = paras[rand].innerHTML;
+									logger.addLog(paraHTML, "info", {code, pageRank, url, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
 									urlData.code = code;
 									urlData.message = "paragraph";
 								}
 							}
-							else {
+							else if (document.querySelectorAll("img").length) {
+								const images = document.querySelectorAll("img");
+								const rand = Math.floor(Math.random() * images.length);
+								let image = images[rand];
+								let imgSrc = image.src;
+								if (!/^http/i.test(imgSrc)) {
+									if (/^\/\//i.test(imgSrc)) {
+										const imgPath = imgSrc.slice(2);
+										imgSrc = `${protocol}${imgPath}`;
+									}
+									else if (/^\//i.test(imgSrc)) {
+										const imgPath = imgSrc.slice(1);
+										imgSrc = `${protocol}${path.join(host, imgPath)}`;
+									}
+								}
+								console.log("img src:", imgSrc);
+								image.src = imgSrc;
+								image = image.outerHTML;
+								console.log(image);
+								if (!puppet.quiet) console.log("Image found:", url);
 								const code = 21;
-								logger.addLog(`Paragraph not found: ${url}`, "log", {code, pageRank, url, total: puppet.total, success: puppet.success, failed: puppet.failed});
+								logger.addLog(image, "info", {code, pageRank, url, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
 								urlData.code = code;
 								urlData.message = "image";
 							}
@@ -361,7 +384,8 @@ async function randPost(data) {
 				else if (puppet.counter < 100000 && listSites[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
 				else rand = Math.floor(Math.random() * listSites[puppet.current].length);
 
-				const url = `https://${listSites[puppet.current][rand]}`;
+				let url = listSites[puppet.current][rand];
+				if (!/^http/i.test(url)) url = `https://${url}`;
 				const options = {
 					method: "POST",
 					url: url,
@@ -410,8 +434,8 @@ async function randUpload(formData) {
 				else if (puppet.counter < 100000 && listSites[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
 				else rand = Math.floor(Math.random() * listSites[puppet.current].length);
 
-				const url = `https://${listSites[puppet.current][rand]}`;
-// 				const url = `http://localhost:3000/upload`;
+				let url = listSites[puppet.current][rand];
+				if (!/^http/i.test(url)) url = `https://${url}`;
 				const options = {
 					method: "POST",
 					url: url,
