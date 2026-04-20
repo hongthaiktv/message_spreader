@@ -255,7 +255,7 @@ function parseHTML(html) {
 	let dom, document;
 	const virtualConsole = new VirtualConsole();
 	try {
-		dom = new JSDOM(html, { virtualConsole });
+		dom = new JSDOM(html, { virtualConsole, pretendToBeVisual: true });
 	} catch(err) {
 		console.error("Error parsing HTML:", err);
 	}
@@ -293,31 +293,48 @@ async function randRequest() {
 				++puppet.counter;
 				request(options, function (error, response, body) {
 					if (error) {
-						listSites.urlFailed.push({url, message: error.toString(), errorCode: error.code, errorNo: error.errno, syscall: error.syscall, hostname: error.hostname});
+						const code = 1;
+						const message = error.toString();
+						listSites.urlFailed.push({code, message, url, errorCode: error.code});
 						++puppet.failed;
 						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${error.code} : ${url}`;
-						logger.addLog(msg, "error", {code: 1, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: error.code, url});
+						logger.addLog(msg, "error", {code, url, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: error.code});
 						console.error(error);
 						return;
 					}
 					if (response.statusCode !== 200) {
-						listSites.urlFailed.push({url, message: response.statusMessage, errorCode: response.statusCode});
+						const code = 1;
+						const message = response.statusMessage;
+						listSites.urlFailed.push({code, message, url, errorCode: response.statusCode});
 						++puppet.failed;
 						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${response.statusCode} : ${url}`;
-						logger.addLog(msg, "error", {code: 1, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: response.statusCode, url});
+						logger.addLog(msg, "error", {code, url, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: response.statusCode});
 					} else {
-						listSites.urlSuccess.push({url, pageRank, message: response.statusMessage, statusCode: response.statusCode});
+						const urlData = {url, pageRank};
+						listSites.urlSuccess.push(urlData);
 						++puppet.success;
-						const document = parseHTML(body); 
 						const msg = `Success (${puppet.success}/${puppet.total})`;
-						logger.addLog(msg, "log", {code: 3, success: puppet.success, total: puppet.total});
+						console.log(msg);
+						const document = parseHTML(body); 
 						if (document) {
-							const para = document.querySelectorAll("p");
-							if (para.length) {
-								const rand = Math.floor(Math.random() * para.length);
-								if (para[rand].innerText !== '') logger.addLog(para[rand].innerHTML, "info", {code: 20, pageRank, url, total: puppet.total, success: puppet.success, failed: puppet.failed});
+							const paras = document.querySelectorAll("p");
+							if (paras.length) {
+								const rand = Math.floor(Math.random() * paras.length);
+								const para = paras[rand];
+								console.log("para:", paras.length, rand, para.textContent);
+								if (para !== '') {
+									const code = 20;
+									logger.addLog(para, "info", {code, pageRank, url, total: puppet.total, success: puppet.success, failed: puppet.failed});
+									urlData.code = code;
+									urlData.message = "paragraph";
+								}
 							}
-							else logger.addLog(`Paragraph not found: ${url}`, "log", {code: 2, pageRank, url, total: puppet.total, success: puppet.success, failed: puppet.failed});
+							else {
+								const code = 21;
+								logger.addLog(`Paragraph not found: ${url}`, "log", {code, pageRank, url, total: puppet.total, success: puppet.success, failed: puppet.failed});
+								urlData.code = code;
+								urlData.message = "image";
+							}
 						}
 					}
 				});

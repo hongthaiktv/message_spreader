@@ -63,7 +63,7 @@ source.onmessage = e => {
 	log(data);
 	let logData;
 	switch (data.code) {
-		case 10: case 2:
+		case 20: case 21:
 			logData = `<div class="white-text my-2"><span class="secondary-color-dark rounded p-1">Rank ${data.pageRank}</span> : <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a></div>`;
 			log(logData, "log", "counterSuccess");
 			logData = `<div class="white-text my-2"><span class="success-color-dark rounded p-1">Rank ${data.pageRank}</span> : <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a></div>`;
@@ -79,7 +79,8 @@ source.onmessage = e => {
 
 		case 5:
 			if (data.urlSuccess && data.urlSuccess.length) {
-				for (const {url, pageRank} of data.urlSuccess) {
+				for (const {url, pageRank, code} of data.urlSuccess) {
+					if (code) alert(code)
 					logData = `<div class="white-text my-2"><span class="secondary-color-dark rounded p-1">Rank ${pageRank}</span> : <a class="app-text-link" target="_blank" href="${url}">${url}</a></div>`;
 					log(logData, "log", "counterSuccess");
 					logData = `<div class="white-text my-2"><span class="success-color-dark rounded p-1">Rank ${pageRank}</span> : <a class="app-text-link" target="_blank" href="${url}">${url}</a></div>`;
@@ -220,7 +221,7 @@ function log(data, type, tab = "logger") {
 
 			case "log":
 				switch (data.code) {
-					case 2:
+					case 21:
 						cardContent = `Paragraph not found: <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a>`;
 						break;
 
