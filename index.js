@@ -278,9 +278,8 @@ async function randRequest() {
 				else if (puppet.counter < 100000 && listSites[puppet.current].length >= 100000) rand = Math.floor(Math.random() * 100000);
 				else rand = Math.floor(Math.random() * listSites[puppet.current].length);
 
-				const protocol = "https://";
-				const host = listSites[puppet.current][rand];
-				const url = /^http/i.test(host) ? host : `${protocol}${host}`;
+				const link = linkParse(listSites[puppet.current][rand]);
+				const url = link.url;
 				const pageRank = rand + 1;
 				const msg = `Rank ${pageRank}: ${url}`;
 				if (!puppet.quiet) logger.addLog(msg, "log", { code: 4, pageRank, url });
@@ -337,21 +336,8 @@ async function randRequest() {
 								const images = document.querySelectorAll("img");
 								const rand = Math.floor(Math.random() * images.length);
 								let image = images[rand];
-								let imgSrc = image.src;
-								if (!/^http/i.test(imgSrc)) {
-									if (/^\/\//i.test(imgSrc)) {
-										const imgPath = imgSrc.slice(2);
-										imgSrc = `${protocol}${imgPath}`;
-									}
-									else if (/^\//i.test(imgSrc)) {
-										const imgPath = imgSrc.slice(1);
-										imgSrc = `${protocol}${path.join(host, imgPath)}`;
-									}
-								}
-								console.log("img src:", imgSrc);
-								image.src = imgSrc;
+								image.src = link.src(image.src);
 								image = image.outerHTML;
-								console.log(image);
 								if (!puppet.quiet) console.log("Image found:", url);
 								const code = 21;
 								logger.addLog(image, "info", {code, pageRank, url, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
@@ -459,5 +445,30 @@ async function randUpload(formData) {
 	while (puppet.started) {
 		await wait();
 	}
+}
+
+function linkParse(origin) {
+	let protocol = "https://";
+	let host = origin;
+	if (/^http/i.test(host)) {
+		protocol = /^.*:\/\//i.exec(host)[0];
+		host = host.replace(protocol, "");
+	}
+	const url = `${protocol}${host}`;
+	return {protocol, host, url, origin,
+		src: function (url) {
+			if (/^data/i.test(url) || /^http/i.test(url)) return url;
+			else {
+				if (/^\/\//i.test(url)) {
+					const srcPath = url.slice(2);
+					return `${this.protocol}${srcPath}`;
+				}
+				else if (/^\//i.test(url)) {
+					const srcPath = url.slice(1);
+					return `${this.protocol}${path.join(this.host, srcPath)}`;
+				} else return `${this.protocol}${path.join(this.host, url)}`;
+			}
+		}
+	};
 }
 

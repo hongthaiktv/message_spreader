@@ -208,7 +208,7 @@ function log(data, type, tab = "logger") {
 		if (data.total) $(".counter-total").text(data.total);
 		if (data.success) $(".counter-success").text(data.success);
 		if (data.failed) $(".counter-failed").text(data.failed);
-
+		
 		switch (cardType) {
 			case "error":
 				switch (data.code) {
@@ -309,21 +309,11 @@ function log(data, type, tab = "logger") {
 					logType = "aqua-gradient-rgba";
 					break;
 			}
-			switch (data.code) {
-				case 21:
-					divCard.innerHTML = `
-					<div class="card-body px-3 py-2 mask text-center ${logType}">
-						${$(cardContent).removeAttr("style").attr("class", "img-fluid z-depth-1 rounded")[0].outerHTML}
-					</div>
-					`;
-					break;
-				default:
-					divCard.innerHTML = `
-					<div class="card-body px-3 py-2 mask ${logType}">
-						<p class="card-text text-white">${cardContent}</p>
-					</div>
-					`;
-			}
+			divCard.innerHTML = `
+			<div class="card-body px-3 py-2 mask ${logType}">
+			  <p class="card-text text-white">${cardContent}</p>
+			</div>
+			`;
 			divCard.className = `card gradient-card mb-2 ${cardType}`;
 			break;
 		default:

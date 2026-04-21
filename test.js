@@ -5,7 +5,7 @@ const multer = require('multer');
 
 const app = express();
 const port = 3001;
-const rootDir = path.join(__dirname, "public");
+const rootDir = path.join(__dirname, "pub_test");
 
 const storage = multer.diskStorage({
 	destination: path.join(rootDir, "upload"),

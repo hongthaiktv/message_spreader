@@ -1,0 +1,52 @@
+body {
+	width: 100vw;
+	padding: 0.5em;
+}
+
+#repeatRate {
+	width: 1.2em;
+}
+
+#tabButtons {
+	padding: 0.5em;
+}
+
+#tabButtons a {
+	padding: 0.2em;
+}
+
+#btnControlGroup {
+	font-size: 12px;
+}
+
+.color-light-blue {
+	color: white;
+	background-color: #82b1ff;
+}
+
+.color-light-blue-active {
+	background-color: #1c71ff;
+}
+
+.app-text-link {
+	color: #1c71ff;
+}
+
+.minw-25 { min-width: 25%; }
+.minw-50 { min-width: 50%; }
+.minw-75 { min-width: 75%; }
+.minw-100 { min-width: 100%; }
+.minh-25 { min-height: 25%; }
+.minh-50 { min-height: 50%; }
+.minh-75 { min-height: 75%; }
+.minh-100 { min-height: 100%; }
+
+.maxw-25 { max-width: 25%; }
+.maxw-50 { max-width: 50%; }
+.maxw-75 { max-width: 75%; }
+.maxw-100 { max-width: 100%; }
+.maxh-25 { max-height: 25%; }
+.maxh-50 { max-height: 50%; }
+.maxh-75 { max-height: 75%; }
+.maxh-100 { max-height: 100%; }
+
