@@ -252,6 +252,31 @@ function runPuppet(act, res) {
 	}
 }
 
+function linkParse(origin) {
+	let protocol = "https://";
+	let host = origin;
+	if (/^http.*:\/\//i.test(host)) {
+		protocol = /^.*:\/\//i.exec(host)[0];
+		host = host.replace(protocol, "");
+	}
+	const url = `${protocol}${host}`;
+	return {protocol, host, url, origin,
+		src: function (url) {
+			if (/^data/i.test(url) || /^http/i.test(url)) return url;
+			else {
+				if (/^\/\//i.test(url)) {
+					const srcPath = url.slice(2);
+					return `${this.protocol}${srcPath}`;
+				}
+				else if (/^\//i.test(url)) {
+					const srcPath = url.slice(1);
+					return `${this.protocol}${path.join(this.host, srcPath)}`;
+				} else return `${this.protocol}${path.join(this.host, url)}`;
+			}
+		}
+	};
+}
+
 function parseHTML(html) {
 	let dom, document;
 	const virtualConsole = new VirtualConsole();
@@ -262,6 +287,15 @@ function parseHTML(html) {
 	}
 	if (dom && dom.window && dom.window.document) document = dom.window.document;
 	return document;
+}
+
+function clear() {
+	puppet.total = 0;
+	puppet.counter = 0;
+	puppet.success = 0;
+	puppet.failed = 0;
+	listSites.urlFailed.length = 0;
+	listSites.urlSuccess.length = 0;
 }
 
 async function randRequest() {
@@ -445,30 +479,5 @@ async function randUpload(formData) {
 	while (puppet.started) {
 		await wait();
 	}
-}
-
-function linkParse(origin) {
-	let protocol = "https://";
-	let host = origin;
-	if (/^http.*:\/\//i.test(host)) {
-		protocol = /^.*:\/\//i.exec(host)[0];
-		host = host.replace(protocol, "");
-	}
-	const url = `${protocol}${host}`;
-	return {protocol, host, url, origin,
-		src: function (url) {
-			if (/^data/i.test(url) || /^http/i.test(url)) return url;
-			else {
-				if (/^\/\//i.test(url)) {
-					const srcPath = url.slice(2);
-					return `${this.protocol}${srcPath}`;
-				}
-				else if (/^\//i.test(url)) {
-					const srcPath = url.slice(1);
-					return `${this.protocol}${path.join(this.host, srcPath)}`;
-				} else return `${this.protocol}${path.join(this.host, url)}`;
-			}
-		}
-	};
 }
 
