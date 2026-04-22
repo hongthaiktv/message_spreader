@@ -215,6 +215,7 @@ function runPuppet(act, res) {
 				urlSuccess: listSites.urlSuccess,
 				urlFailed: listSites.urlFailed
 			});
+			clear();
 			break;
 
 		case "changeList":
@@ -304,6 +305,10 @@ async function randRequest() {
 			const time = puppet.rate === 0 ? 500 : puppet.rate * 1000;
 			const randTime = Math.floor(Math.random() * time + 1);
 			setTimeout(() => {
+				if (!puppet.started) {
+					resolve(puppet);
+					return;
+				}
 				let rand;
 				if (puppet.counter < 10 && listSites[puppet.current].length >= 10) rand = Math.floor(Math.random() * 10);
 				else if (puppet.counter < 100 && listSites[puppet.current].length >= 100) rand = Math.floor(Math.random() * 100);
@@ -328,6 +333,7 @@ async function randRequest() {
 				++puppet.total;
 				++puppet.counter;
 				request(options, function (error, response, body) {
+					if (!puppet.started) return;
 					if (error) {
 						const code = 1;
 						const message = error.toString();
