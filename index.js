@@ -450,7 +450,7 @@ async function randUpload(formData) {
 function linkParse(origin) {
 	let protocol = "https://";
 	let host = origin;
-	if (/^http/i.test(host)) {
+	if (/^http.*:\/\//i.test(host)) {
 		protocol = /^.*:\/\//i.exec(host)[0];
 		host = host.replace(protocol, "");
 	}
