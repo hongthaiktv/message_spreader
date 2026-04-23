@@ -46,10 +46,23 @@ btnTotalFailed.onclick = function (e) {
 	$("#tabCounterFailed").tab("show");
 };
 
-sliderRate.onchange = function (e) {
+sliderRate.oninput = function (e) {
 	const rate = +this.value;
 	repeatRate.innerText = rate;
+};
+
+sliderRate.onchange = function (e) {
+	const rate = +this.value;
 	puppet("changeRate", rate);
+};
+
+sliderCounter.oninput = function (e) {
+	const rate = +this.value;
+	counterPoint.innerText = rate;
+};
+
+sliderCounter.onchange = function (e) {
+	const rate = +this.value;
 };
 
 //puppet
