@@ -40,10 +40,16 @@ class Logger extends EventTarget {
 		return this.#clients;
 	}
 
-	addLog(log, type = "log", logData = {}, output = true) {
+	addLog(log, type = "log", logData = {}, output) {
+		let options = {
+			output: true,
+			record: false
+		};
+		if (typeof output === "boolean") options.output = output;
+		else if (output instanceof Object) options = {...options, ...output};
 		log = log.trim();
 		if (!log) return;
-		this.#logs.push(log);
+		if (options.record) this.#logs.push(log);
 		const msg = `${this.#prefix}${log}`;
 		if (!logData instanceof Object) {
 			console.error("Wrong log data!");
@@ -51,7 +57,7 @@ class Logger extends EventTarget {
 		}
 		logData.message = msg;
 		logData.type = type;
-		if (output) console.log(msg);
+		if (options.output) console.log(msg);
 		this.#update("update", logData);
 	}
 
