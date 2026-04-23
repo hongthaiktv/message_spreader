@@ -3,8 +3,17 @@ body {
 	padding: 0.5em;
 }
 
-#repeatRate {
-	width: 1.2em;
+.w-char-3 {
+	width: 4.5em;
+}
+
+#counterPoint {
+	width: 7em;
+}
+
+#iconCounterList {
+	width: 2.8em;
+	text-align: center;
 }
 
 #tabButtons {

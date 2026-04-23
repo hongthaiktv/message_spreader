@@ -8,8 +8,11 @@ const wHeight = window.innerHeight;
 document.body.style.height = `${wHeight}px`;
 
 listSite.onchange = function (e) {
-	const list = document.querySelector("#listSite input:checked").value;
-	puppet("changeList", list);
+	const list = e.target;
+	const listName = list.value;
+	const listIcon = list.previousElementSibling.className;
+	iconCounterList.className = listIcon;
+	puppet("changeList", listName);
 }
 
 loggerContent.onscroll = function () {
@@ -57,12 +60,51 @@ sliderRate.onchange = function (e) {
 };
 
 sliderCounter.oninput = function (e) {
-	const rate = +this.value;
-	counterPoint.innerText = rate;
+	let point = +this.value;
+	switch (point) {
+		case 1:
+			counterPoint.innerText = 10;
+			break;
+	
+		case 2:
+			point = 10;
+			counterPoint.innerText = 100;
+			break;
+	
+		case 3:
+			point = 100;
+			counterPoint.innerText = "1K";
+			break;
+
+		case 4:
+			point = 1000;
+			counterPoint.innerText = "10K";
+			break;
+
+		case 5:
+			point = 10000;
+			counterPoint.innerText = "100K";
+			break;
+
+		case 6:
+			point = 100000;
+			counterPoint.innerText = "1M";
+			break;
+
+		case 7:
+			point = 1000000;
+			counterPoint.innerText = "10M";
+			break;
+
+		case 8:
+			point = 10000000;
+			counterPoint.innerText = "100M";
+			break;
+	}
 };
 
 sliderCounter.onchange = function (e) {
-	const rate = +this.value;
+	const point = +this.value;
 };
 
 //puppet
