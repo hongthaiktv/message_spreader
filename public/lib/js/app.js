@@ -98,6 +98,24 @@ switchQuiet.onchange = function () {
 	const enable = this.checked;
 }
 
+tabCounterAllHeader.onclick = function () {
+	$("#tabButtons").toggleClass("orange darken-4", false).toggleClass("success-color-dark", true);
+	$("#tabsContainer").toggleClass("orange darken-2", false).toggleClass("green lighten-1", true);
+	$("#tabCounterSuccess").tab("show");
+}
+
+tabCounterSuccessHeader.onclick = function () {
+	$("#tabButtons").toggleClass("success-color-dark", false).toggleClass("danger-color-dark", true);
+	$("#tabsContainer").toggleClass("green lighten-1", false).toggleClass("red lighten-1", true);
+	$("#tabCounterFailed").tab("show");
+}
+
+tabCounterFailedHeader.onclick = function () {
+	$("#tabButtons").toggleClass("danger-color-dark", false).toggleClass("orange darken-4", true);
+	$("#tabsContainer").toggleClass("red lighten-1", false).toggleClass("orange darken-2", true);
+	$("#tabCounterAll").tab("show");
+}
+
 //puppet
 let source = new EventSource("http://localhost:3000/logger");
 source.onopen = e => {
