@@ -39,26 +39,36 @@
 			<div class="d-flex justify-content-center align-items-center font-weight-bold text-primary mr-1 w-50">
 				<i class="fas fa-retweet mr-1"></i>Rate:
 				<span class="d-inline-flex justify-content-center orange-text w-char-3 ml-1 mr-2"><span id="repeatRate"></span>s</span>
-				<input id="sliderRate" class="custom-range" type="range" value="10" min="1" max="60" />
+				<input id="sliderRate" class="custom-range" type="range" value="10" min="1" max="30" />
 			</div>
 			<div class="d-flex justify-content-center align-items-center font-weight-bold text-primary ml-1 w-50">
-				<i id="iconCounterList" class="fas fa-clipboard-list mr-1"></i>Max:
+				<i class="fas fa-sort-amount-up mr-1"></i>Top:
 				<span id="counterPoint" class="orange-text text-center ml-1 mr-2"></span>
-				<input id="sliderCounter" class="custom-range" type="range" value="1" min="1" max="8" />
+				<input id="sliderCounter" class="custom-range" type="range" value="1" min="1" max="6" />
 			</div>
 		</div>
 
-		<div id="groupControlButtons" class="d-flex justify-content-center">
-			<button id="pupBtnStart" class="btn btn-light btn-sm px-3"><i class="fas fa-play-circle text-primary mr-1"></i> START</button>
-			<button id="pupBtnStop" class="btn btn-light btn-sm px-3 d-none"><i class="fas fa-stop-circle text-danger mr-1"></i> STOP</button>
-			<div class="file-field">
-				<div class="btn btn-light btn-sm px-3">
-					<span><i class="fas fa-upload text-primary mr-1" aria-hidden="true"></i> UPLOAD</span>
-					<input id="pupBtnUpload" type="file" multiple>
+		<div id="groupControlButtons" class="d-flex justify-content-between align-items-center">
+			<div class="d-flex justify-content-center flex-grow-1">
+				<button id="pupBtnStart" class="btn btn-light btn-sm px-3"><i class="fas fa-play-circle text-primary mr-1"></i> START</button>
+				<button id="pupBtnStop" class="btn btn-light btn-sm px-3 d-none"><i class="fas fa-stop-circle text-danger mr-1"></i> STOP</button>
+				<div class="file-field">
+					<div class="btn btn-light btn-sm px-3">
+						<span><i class="fas fa-upload text-primary mr-1" aria-hidden="true"></i> UPLOAD</span>
+						<input id="pupBtnUpload" type="file" multiple>
+					</div>
+					<div class="file-path-wrapper d-none">
+						<input class="file-path validate" type="text" placeholder="Choose file(s)">
+					</div>
 				</div>
-				<div class="file-path-wrapper d-none">
-					<input class="file-path validate" type="text" placeholder="Choose file(s)">
-				</div>
+			</div>
+
+			<div class="switch text-primary font-weight-bold">
+				<label class="m-0">
+					Quiet
+					<input id="switchQuiet" type="checkbox" checked>
+					<span class="lever"></span>
+				</label>
 			</div>
 		</div>
 

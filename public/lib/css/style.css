@@ -8,12 +8,7 @@ body {
 }
 
 #counterPoint {
-	width: 7em;
-}
-
-#iconCounterList {
-	width: 2.8em;
-	text-align: center;
+	width: 6em;
 }
 
 #tabButtons {
@@ -59,3 +54,5 @@ body {
 .maxh-75 { max-height: 75%; }
 .maxh-100 { max-height: 100%; }
 
+.switch label input[type="checkbox"]:checked+.lever{background-color:rgba(66,133,244,0.25)}
+.switch label input[type="checkbox"]:checked+.lever:after{left:1.5rem;background-color:#007bff}

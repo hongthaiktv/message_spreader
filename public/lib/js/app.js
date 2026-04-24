@@ -8,10 +8,7 @@ const wHeight = window.innerHeight;
 document.body.style.height = `${wHeight}px`;
 
 listSite.onchange = function (e) {
-	const list = e.target;
-	const listName = list.value;
-	const listIcon = list.previousElementSibling.className;
-	iconCounterList.className = listIcon;
+	const listName = e.target.value;
 	puppet("changeList", listName);
 }
 
@@ -90,22 +87,16 @@ sliderCounter.oninput = function (e) {
 			point = 100000;
 			counterPoint.innerText = "1M";
 			break;
-
-		case 7:
-			point = 1000000;
-			counterPoint.innerText = "10M";
-			break;
-
-		case 8:
-			point = 10000000;
-			counterPoint.innerText = "100M";
-			break;
 	}
 };
 
-sliderCounter.onchange = function (e) {
+sliderCounter.onchange = function () {
 	const point = +this.value;
 };
+
+switchQuiet.onchange = function () {
+	const enable = this.checked;
+}
 
 //puppet
 let source = new EventSource("http://localhost:3000/logger");
