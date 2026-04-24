@@ -107,6 +107,10 @@ app.post("/puppet", (req, res) => {
 		case "changeRate":
 			puppet.rate = req.body.rate;
 			break;
+
+		case "changeCounter":
+			puppet.counter = req.body.counter;
+			break;
 	}
 	runPuppet(reqAct, res);
 });
@@ -178,7 +182,6 @@ function runPuppet(act, res) {
 			}
 			msg = `Puppet starting with "${puppet.current}"...`;
 			puppet.started = true;
-			puppet.counter = 0;
 
 			randRequest();
 			randPost(motd);
@@ -186,20 +189,22 @@ function runPuppet(act, res) {
 
 			logger.addLog(msg, "success", {
 				code: 7,
-				current: puppet.current
+				current: puppet.current,
+				counter: puppet.counter
 			});
 			if (res) res.json({
 				code: 7,
 				message: msg,
 				type: "success",
-				current: puppet.current
+				current: puppet.current,
+				counter: puppet.counter
 			});
 			break;
 
 		case "stop":
 			msg = `Puppet stopped with ${puppet.total} request, ${puppet.success} success, ${puppet.failed} failed`;
 			puppet.started = false;
-			logger.addLog(msg, "success", {code: 8, total: puppet.total, success: puppet.success, failed: puppet.failed, urlSuccess: listSites.urlSuccess, urlFailed: listSites.urlFailed});
+			logger.addLog(msg, "success", {code: 8, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, urlSuccess: listSites.urlSuccess, urlFailed: listSites.urlFailed});
 			const urlFailed = [];
 			for (const {url} of listSites.urlFailed) {
 				urlFailed.push(url);
@@ -209,6 +214,7 @@ function runPuppet(act, res) {
 				code: 8,
 				message: msg,
 				type: "success",
+				counter: puppet.counter,
 				total: puppet.total,
 				success: puppet.success,
 				failed: puppet.failed,
@@ -221,12 +227,13 @@ function runPuppet(act, res) {
 		case "changeList":
 			msg = `Puppet URLs list changed to "${puppet.current}"`;
 			puppet.counter = 0;
-			logger.addLog(msg, "success", {code: 9, current: puppet.current});
+			logger.addLog(msg, "success", {code: 9, current: puppet.current, counter: puppet.counter});
 			if (res) res.json({
 				code: 9,
 				message: msg,
 				type: "success",
-				current: puppet.current
+				current: puppet.current,
+				counter: puppet.counter
 			});
 			break;
 
@@ -238,6 +245,17 @@ function runPuppet(act, res) {
 				message: msg,
 				type: "success",
 				rate: puppet.rate
+			});
+			break;
+
+		case "changeCounter":
+			msg = `Puppet counter changed to "${puppet.counter}"`;
+			logger.addLog(msg, "success", {code: 11, counter: puppet.counter});
+			if (res) res.json({
+				code: 11,
+				message: msg,
+				type: "success",
+				counter: puppet.counter
 			});
 			break;
 
@@ -297,6 +315,7 @@ function clear() {
 	puppet.failed = 0;
 	listSites.urlFailed.length = 0;
 	listSites.urlSuccess.length = 0;
+	logger.clear();
 }
 
 async function randRequest() {
@@ -340,8 +359,7 @@ async function randRequest() {
 						listSites.urlFailed.push({code, message, url, errorCode: error.code});
 						++puppet.failed;
 						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${error.code} : ${url}`;
-						logger.addLog(msg, "error", {code, url, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: error.code});
-						console.error(error);
+						logger.addLog(msg, "error", {code, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: error.code});
 						return;
 					}
 					if (response.statusCode !== 200) {
@@ -350,7 +368,7 @@ async function randRequest() {
 						listSites.urlFailed.push({code, message, url, errorCode: response.statusCode});
 						++puppet.failed;
 						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${response.statusCode} : ${url}`;
-						logger.addLog(msg, "error", {code, url, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: response.statusCode});
+						logger.addLog(msg, "error", {code, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: response.statusCode});
 					} else {
 						const urlData = {url, pageRank};
 						listSites.urlSuccess.push(urlData);
@@ -367,7 +385,7 @@ async function randRequest() {
 									console.log(para);
 									const code = 20;
 									const paraHTML = paras[rand].innerHTML;
-									logger.addLog(paraHTML, "info", {code, pageRank, url, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
+									logger.addLog(paraHTML, "info", {code, pageRank, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
 									urlData.code = code;
 									urlData.message = "paragraph";
 								}
@@ -380,7 +398,7 @@ async function randRequest() {
 								image = image.outerHTML;
 								if (!puppet.quiet) console.log("Image found:", url);
 								const code = 21;
-								logger.addLog(image, "info", {code, pageRank, url, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
+								logger.addLog(image, "info", {code, pageRank, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
 								urlData.code = code;
 								urlData.message = "image";
 							}
@@ -425,7 +443,7 @@ async function randPost(data) {
 
 				request(options, function (error, response, body) {
 					if (error) {
-						console.error(error);
+						console.error(error.toString());
 						return;
 					}
 				});
@@ -474,7 +492,7 @@ async function randUpload(formData) {
 
 				request(options, function (error, response, body) {
 					if (error) {
-						console.error(error);
+						console.error(error.toString());
 						return;
 					}
 				});

@@ -23,40 +23,40 @@ loggerContent.onscroll = function () {
 	loggerPrevPos = curPos;
 }
 
-tabButtons.onclick = function (e) {
+tabButtons.onclick = function () {
 	$(this).attr("class", "nav nav-tabs nav-justified md-tabs color-light-blue-active");
 	$("#tabsContainer").attr("class", "d-flex flex-column overflow-auto flex-grow-1 w-100 tab-content card pt-4 pb-0 color-light-blue");
 };
 
-btnTotalRequest.onclick = function (e) {
+btnTotalRequest.onclick = function () {
 	$("#tabButtons").toggleClass("color-light-blue-active", false).toggleClass("orange darken-4", true);
 	$("#tabsContainer").toggleClass("color-light-blue", false).toggleClass("orange darken-2", true);
 	$("#tabCounterAll").tab("show");
 };
 
-btnTotalSuccess.onclick = function (e) {
+btnTotalSuccess.onclick = function () {
 	$("#tabButtons").toggleClass("color-light-blue-active", false).toggleClass("success-color-dark", true);
 	$("#tabsContainer").toggleClass("color-light-blue", false).toggleClass("green lighten-1", true);
 	$("#tabCounterSuccess").tab("show");
 };
 
-btnTotalFailed.onclick = function (e) {
+btnTotalFailed.onclick = function () {
 	$("#tabButtons").toggleClass("color-light-blue-active", false).toggleClass("danger-color-dark", true);
 	$("#tabsContainer").toggleClass("color-light-blue", false).toggleClass("red lighten-1", true);
 	$("#tabCounterFailed").tab("show");
 };
 
-sliderRate.oninput = function (e) {
+sliderRate.oninput = function () {
 	const rate = +this.value;
 	repeatRate.innerText = rate;
 };
 
-sliderRate.onchange = function (e) {
+sliderRate.onchange = function () {
 	const rate = +this.value;
 	puppet("changeRate", rate);
 };
 
-sliderCounter.oninput = function (e) {
+sliderCounter.oninput = function () {
 	let point = +this.value;
 	switch (point) {
 		case 1:
@@ -64,34 +64,30 @@ sliderCounter.oninput = function (e) {
 			break;
 	
 		case 2:
-			point = 10;
 			counterPoint.innerText = 100;
 			break;
 	
 		case 3:
-			point = 100;
 			counterPoint.innerText = "1K";
 			break;
 
 		case 4:
-			point = 1000;
 			counterPoint.innerText = "10K";
 			break;
 
 		case 5:
-			point = 10000;
 			counterPoint.innerText = "100K";
 			break;
 
 		case 6:
-			point = 100000;
 			counterPoint.innerText = "1M";
 			break;
 	}
 };
 
 sliderCounter.onchange = function () {
-	const point = +this.value;
+	const counter = convertCounter(+this.value);
+	puppet("changeCounter", counter);
 };
 
 switchQuiet.onchange = function () {
@@ -174,6 +170,10 @@ async function puppet(action, value) {
 	
 		case "changeRate":
 			data = {action, rate: value};
+			break;
+
+		case "changeCounter":
+			data = {action, counter: value};
 			break;
 
 		default:
@@ -262,6 +262,51 @@ async function query(action = "getDir", dirName = "upload", tab = "logger") {
 	}
 }
 
+function checkCounter(counter, apply = false) {
+	let result;
+	switch (true) {
+		case counter < 10:
+			result = {top: 10, point: 1};
+			break;
+
+		case counter < 100:
+			result = {top: 100, point: 2};
+			break;
+
+		case counter < 1000:
+			result = {top: "1K", point: 3};
+			break;
+
+		case counter < 10000:
+			result = {top: "10K", point: 4};
+			break;
+
+		case counter < 100000:
+			result = {top: "100K", point: 5};
+			break;
+
+		case counter < 1000000:
+			result = {top: "1M", point: 6};
+			break;
+	}
+	if (apply) {
+		counterPoint.innerText = result.top;
+		sliderCounter.value = result.point;
+	}
+	return result;
+}
+
+function convertCounter(point) {
+	switch (point) {
+		case 1: return 1;
+		case 2: return 10;
+		case 3: return 100;
+		case 4: return 1000;
+		case 5: return 10000;
+		case 6: return 100000;
+	}
+}
+
 function log(data, type, tab = "logger") {
 	let divCard = document.createElement("DIV");
 	let cardContent, cardType;
@@ -272,6 +317,7 @@ function log(data, type, tab = "logger") {
 		if (data.total) $(".counter-total").text(data.total);
 		if (data.success) $(".counter-success").text(data.success);
 		if (data.failed) $(".counter-failed").text(data.failed);
+		if (!Number.isNaN(data.counter)) checkCounter(data.counter, true);
 
 		switch (cardType) {
 			case "error":
@@ -344,6 +390,10 @@ function log(data, type, tab = "logger") {
 
 					case 10:
 						cardContent = `Puppet rate changed to "<span class="orange-text font-weight-bold">${data.rate}s</span>".`;
+						break;
+
+					case 11:
+						cardContent = `Puppet top sites changed to "<span class="orange-text font-weight-bold">${checkCounter(data.counter).top}</span>".`;
 						break;
 				}
 				break;

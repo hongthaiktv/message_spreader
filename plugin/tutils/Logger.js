@@ -88,6 +88,10 @@ class Logger extends EventTarget {
 	setPrefix(name) {
 		this.#prefix = name;
 	}
+
+	clear() {
+		this.#logs.length = 0;
+	}
 }
 
 module.exports = exports = Logger;
