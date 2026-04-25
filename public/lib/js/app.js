@@ -92,6 +92,7 @@ sliderCounter.onchange = function () {
 
 switchQuiet.onchange = function () {
 	const enable = this.checked;
+	puppet("changeMode", enable);
 }
 
 tabCounterAllHeader.onclick = function () {
@@ -174,6 +175,10 @@ async function puppet(action, value) {
 
 		case "changeCounter":
 			data = {action, counter: value};
+			break;
+
+		case "changeMode":
+			data = {action, quiet: value};
 			break;
 
 		default:
@@ -368,6 +373,9 @@ function log(data, type, tab = "logger") {
 							$("#repeatRate").text(data.rate);
 							$("#sliderRate").val(data.rate);
 						}
+						if (typeof data.quiet === "boolean") {
+							$("#switchQuiet")[0].checked = data.quiet;
+						}
 						cardContent = `Client added. Total: <span class="orange-text font-weight-bold">${data.totalClient}</span>`;
 						break;
 
@@ -397,6 +405,11 @@ function log(data, type, tab = "logger") {
 
 					case 11:
 						cardContent = `Puppet top sites changed to "<span class="orange-text font-weight-bold">${checkCounter(data.counter).top}</span>".`;
+						break;
+
+					case 12:
+						cardContent = `Puppet mode changed to "<span class="orange-text font-weight-bold">${data.mode}</span>".`;
+						switchQuiet.checked = data.quiet;
 						break;
 				}
 				break;

@@ -40,6 +40,7 @@ const puppet = {
 	success: 0,
 	failed: 0,
 	current: "mainSites",
+	mode: "normal",
 	quickStart: process.env.PUPPET == 1 ? true : false
 };
 
@@ -110,6 +111,11 @@ app.post("/puppet", (req, res) => {
 
 		case "changeCounter":
 			puppet.counter = req.body.counter;
+			break;
+
+		case "changeMode":
+			puppet.quiet = req.body.quiet;
+			puppet.mode = puppet.quiet ? "quiet" : "normal";
 			break;
 	}
 	runPuppet(reqAct, res);
@@ -256,6 +262,18 @@ function runPuppet(act, res) {
 				message: msg,
 				type: "success",
 				counter: puppet.counter
+			});
+			break;
+
+		case "changeMode":
+			msg = `Puppet mode changed to "${puppet.mode}"`;
+			logger.addLog(msg, "success", {code: 12, mode: puppet.mode, quiet: puppet.quiet});
+			if (res) res.json({
+				code: 12,
+				message: msg,
+				type: "success",
+				mode: puppet.mode,
+				quiet: puppet.quiet
 			});
 			break;
 
