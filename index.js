@@ -95,7 +95,7 @@ app.get("/logger", (req, res) => {
 		"Content-Type": "text/event-stream",
 		"Cache-Control": "no-cache"
 	});
-	logger.addClient(res, "log", {code: 5, urlSuccess: listSites.urlSuccess, urlFailed: listSites.urlFailed, ...puppet});
+	logger.addClient(res, "log", {code: 5, sitesLength: listSites[puppet.current].length, urlSuccess: listSites.urlSuccess, urlFailed: listSites.urlFailed, ...puppet});
 });
 
 app.post("/puppet", (req, res) => {
@@ -243,13 +243,14 @@ function runPuppet(act, res) {
 		case "changeList":
 			msg = `Puppet URLs list changed to "${puppet.current}"`;
 			puppet.counter = 0;
-			logger.addLog(msg, "success", {code: 9, current: puppet.current, counter: puppet.counter});
+			logger.addLog(msg, "success", {code: 9, current: puppet.current, counter: puppet.counter, sitesLength: listSites[puppet.current].length});
 			if (res) res.json({
 				code: 9,
 				message: msg,
 				type: "success",
 				current: puppet.current,
-				counter: puppet.counter
+				counter: puppet.counter,
+				sitesLength: listSites[puppet.current].length
 			});
 			break;
 

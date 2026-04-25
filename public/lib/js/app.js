@@ -304,6 +304,17 @@ function checkCounter(counter, apply = false) {
 	return result;
 }
 
+function convertSitesLength(length) {
+	switch (true) {
+		case length <= 10: return 1;
+		case length <= 100: return 2;
+		case length <= 1000: return 3;
+		case length <= 10000: return 4;
+		case length <= 100000: return 5;
+		default: return 6;
+	}
+}
+
 function convertCounter(point) {
 	switch (point) {
 		case 1: return 1;
@@ -376,6 +387,11 @@ function log(data, type, tab = "logger") {
 						if (typeof data.quiet === "boolean") {
 							$("#switchQuiet")[0].checked = data.quiet;
 						}
+						if (Number.isFinite(data.sitesLength) && Number.isFinite(data.counter)) {
+							const point = checkCounter(data.counter).point;
+							const max = convertSitesLength(data.sitesLength);
+							$("#sliderCounter").attr("max", max).val(point);
+						}
 						cardContent = `Client added. Total: <span class="orange-text font-weight-bold">${data.totalClient}</span>`;
 						break;
 
@@ -396,6 +412,11 @@ function log(data, type, tab = "logger") {
 						break;
 
 					case 9:
+						if (Number.isFinite(data.sitesLength) && Number.isFinite(data.counter)) {
+							const point = checkCounter(data.counter).point;
+							const max = convertSitesLength(data.sitesLength);
+							$("#sliderCounter").attr("max", max).val(point);
+						}
 						cardContent = `Puppet URLs list changed to "<span class="orange-text font-weight-bold">${data.current}</span>".`;
 						break;
 
