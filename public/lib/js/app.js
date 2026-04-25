@@ -288,6 +288,9 @@ function checkCounter(counter, apply = false) {
 		case counter < 1000000:
 			result = {top: "1M", point: 6};
 			break;
+
+		default:
+			result = {top: "1M+", point: 6};
 	}
 	if (apply) {
 		counterPoint.innerText = result.top;
@@ -317,7 +320,7 @@ function log(data, type, tab = "logger") {
 		if (data.total) $(".counter-total").text(data.total);
 		if (data.success) $(".counter-success").text(data.success);
 		if (data.failed) $(".counter-failed").text(data.failed);
-		if (!Number.isNaN(data.counter)) checkCounter(data.counter, true);
+		if (Number.isFinite(data.counter)) checkCounter(data.counter, true);
 
 		switch (cardType) {
 			case "error":
