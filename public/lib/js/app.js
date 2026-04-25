@@ -114,7 +114,7 @@ tabCounterFailedHeader.onclick = function () {
 }
 
 //puppet
-let source = new EventSource("http://localhost:3000/logger");
+let source = new EventSource(`${SERVER}logger`);
 source.onopen = e => {
 	SSE = true;
 	query("getDir", "upload", "upload");

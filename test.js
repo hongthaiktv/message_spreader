@@ -1,2 +1,2 @@
-const b = {};
-console.log(b instanceof Object);
+const v = "1";
+console.log(v.trim());
