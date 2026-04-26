@@ -123,6 +123,7 @@ source.onopen = e => {
 source.onmessage = e => {
 	const data = JSON.parse(e.data);
 	log(data);
+	if (switchQuiet.checked) return;
 	let logData;
 	switch (data.code) {
 		case 20: case 21:
@@ -351,6 +352,7 @@ function log(data, type, tab = "logger") {
 			case "error":
 				switch (data.code) {
 					case 1:
+						if (switchQuiet.checked) return;
 						cardContent = `Failed (<span class="text-danger font-weight-bold">${data.failed}</span>/<span class="text-default font-weight-bold">${data.total}</span>) : <span class="text-danger font-weight-bold">${data.errorCode}</span> : <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a>`;
 						break;
 				}
@@ -358,10 +360,6 @@ function log(data, type, tab = "logger") {
 
 			case "log":
 				switch (data.code) {
-					case 21:
-						cardContent = `Paragraph not found: <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a>`;
-						break;
-
 					case 3:
 						cardContent = `Success (<span class="text-success font-weight-bold">${data.success}</span>/<span class="text-default font-weight-bold">${data.total}</span>)`;
 						break;

@@ -33,7 +33,7 @@ const listSites = {
 };
 const puppet = {
 	started: false,
-	quiet: false,
+	quiet: true,
 	rate: 10,
 	total: 0,
 	counter: 0,
@@ -381,7 +381,8 @@ async function randRequest() {
 						listSites.urlFailed.push({code, message, url, errorCode: error.code});
 						++puppet.failed;
 						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${error.code} : ${url}`;
-						logger.addLog(msg, "error", {code, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: error.code});
+						if (!puppet.quiet) logger.addLog(msg, "error", {code, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: error.code});
+						else logger.addLog("", "error", {code, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
 						return;
 					}
 					if (response.statusCode !== 200) {
@@ -390,7 +391,8 @@ async function randRequest() {
 						listSites.urlFailed.push({code, message, url, errorCode: response.statusCode});
 						++puppet.failed;
 						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${response.statusCode} : ${url}`;
-						logger.addLog(msg, "error", {code, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: response.statusCode});
+						if (!puppet.quiet) logger.addLog(msg, "error", {code, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: response.statusCode});
+						else logger.addLog("", "error", {code, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
 					} else {
 						const urlData = {url, pageRank};
 						listSites.urlSuccess.push(urlData);
@@ -458,7 +460,7 @@ async function randPost(data) {
 
 				request(options, function (error, response, body) {
 					if (error) {
-						console.error("====> Post:", error.toString());
+// 						if (!puppet.quiet) console.error("====> Post:", error.toString());
 						return;
 					}
 				});
@@ -500,7 +502,7 @@ async function randUpload(formData) {
 
 				request(options, function (error, response, body) {
 					if (error) {
-						console.error("====> Upload:", error.toString());
+// 						if (!puppet.quiet) console.error("====> Upload:", error.toString());
 						return;
 					}
 				});

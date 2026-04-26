@@ -48,7 +48,6 @@ class Logger extends EventTarget {
 		if (typeof output === "boolean") options.output = output;
 		else if (output instanceof Object) options = {...options, ...output};
 		log = log.trim();
-		if (!log) return;
 		if (options.record) this.#logs.push(log);
 		const msg = `${this.#prefix}${log}`;
 		if (!logData instanceof Object) {
@@ -57,7 +56,7 @@ class Logger extends EventTarget {
 		}
 		logData.message = msg;
 		logData.type = type;
-		if (options.output) console.log(msg);
+		if (log && options.output) console.log(msg);
 		this.#update("update", logData);
 	}
 
