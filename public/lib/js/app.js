@@ -1,5 +1,6 @@
 const PROTO = "http", HOST = "localhost", PORT = 3000;
 const SERVER = location.href || `${PROTO}://${HOST}:${PORT}/`;
+const APPSETTING = {};
 let SSE = false;
 let loggerScrollable = true;
 let loggerPrevPos = 0;
@@ -267,52 +268,59 @@ async function query(action = "getDir", dirName = "upload", tab = "logger") {
 	}
 }
 
-function checkCounter(counter, apply = false) {
-	let result;
+function checkCounter(counter, length, apply = false) {
+	let top = convertSitesLength(length).top;
+	let point = convertSitesLength(length).point;
 	switch (true) {
 		case counter < 10:
-			result = {top: 10, point: 1};
+			top = 10;
+			point = 1;
 			break;
 
 		case counter < 100:
-			result = {top: 100, point: 2};
+			top = point >= 2 ? 100 : top;
+			point = point >= 2 ? 2 : point;
 			break;
 
 		case counter < 1000:
-			result = {top: "1K", point: 3};
+			top = point >= 3 ? "1K" : top;
+			point = point >= 3 ? 3 : point;
 			break;
 
 		case counter < 10000:
-			result = {top: "10K", point: 4};
+			top = point >= 4 ? "10K" : top;
+			point = point >= 4 ? 4 : point;
 			break;
 
 		case counter < 100000:
-			result = {top: "100K", point: 5};
+			top = point >= 5 ? "100K" : top;
+			point = point >= 5 ? 5 : point;
 			break;
 
 		case counter < 1000000:
-			result = {top: "1M", point: 6};
+			top = point >= 6 ? "1M" : top;
+			point = point >= 6 ? 6 : point;
 			break;
-
-		default:
-			result = {top: "1M+", point: 6};
 	}
 	if (apply) {
-		counterPoint.innerText = result.top;
-		sliderCounter.value = result.point;
+		counterPoint.innerText = top;
+		sliderCounter.value = point;
 	}
-	return result;
+	return {top, point};
 }
 
 function convertSitesLength(length) {
+	let top, point;
 	switch (true) {
-		case length <= 10: return 1;
-		case length <= 100: return 2;
-		case length <= 1000: return 3;
-		case length <= 10000: return 4;
-		case length <= 100000: return 5;
-		default: return 6;
+		case length <= 10: top = 10; point = 1; break;
+		case length <= 100: top = 100; point = 2; break;
+		case length <= 1000: top = "1K"; point = 3; break;
+		case length <= 10000: top = "10K"; point = 4; break;
+		case length <= 100000: top = "100K"; point = 5; break;
+		case length <= 1000000: top = "1M"; point = 6; break;
+		default: top = "1M+"; point = 6;
 	}
+	return {top, point};
 }
 
 function convertCounter(point) {
@@ -332,11 +340,12 @@ function log(data, type, tab = "logger") {
 	if (data instanceof Object) {
 		cardContent = data.message;
 		cardType = type || data.type || "log";
+		if (data.sitesLength) APPSETTING.sitesLength = data.sitesLength;
 
 		if (data.total) $(".counter-total").text(data.total);
 		if (data.success) $(".counter-success").text(data.success);
 		if (data.failed) $(".counter-failed").text(data.failed);
-		if (Number.isFinite(data.counter)) checkCounter(data.counter, true);
+		if (Number.isFinite(data.counter)) checkCounter(data.counter, APPSETTING.sitesLength, true);
 
 		switch (cardType) {
 			case "error":
@@ -387,10 +396,9 @@ function log(data, type, tab = "logger") {
 						if (typeof data.quiet === "boolean") {
 							$("#switchQuiet")[0].checked = data.quiet;
 						}
-						if (Number.isFinite(data.sitesLength) && Number.isFinite(data.counter)) {
-							const point = checkCounter(data.counter).point;
-							const max = convertSitesLength(data.sitesLength);
-							$("#sliderCounter").attr("max", max).val(point);
+						if (Number.isFinite(data.sitesLength)) {
+							const max = convertSitesLength(data.sitesLength).point;
+							$("#sliderCounter").attr("max", max);
 						}
 						cardContent = `Client added. Total: <span class="orange-text font-weight-bold">${data.totalClient}</span>`;
 						break;
@@ -412,10 +420,9 @@ function log(data, type, tab = "logger") {
 						break;
 
 					case 9:
-						if (Number.isFinite(data.sitesLength) && Number.isFinite(data.counter)) {
-							const point = checkCounter(data.counter).point;
-							const max = convertSitesLength(data.sitesLength);
-							$("#sliderCounter").attr("max", max).val(point);
+						if (Number.isFinite(data.sitesLength)) {
+							const max = convertSitesLength(data.sitesLength).point;
+							$("#sliderCounter").attr("max", max);
 						}
 						cardContent = `Puppet URLs list changed to "<span class="orange-text font-weight-bold">${data.current}</span>".`;
 						break;
@@ -425,7 +432,7 @@ function log(data, type, tab = "logger") {
 						break;
 
 					case 11:
-						cardContent = `Puppet top sites changed to "<span class="orange-text font-weight-bold">${checkCounter(data.counter).top}</span>".`;
+						cardContent = `Puppet top sites changed to "<span class="orange-text font-weight-bold">${checkCounter(data.counter, APPSETTING.sitesLength).top}</span>".`;
 						break;
 
 					case 12:
