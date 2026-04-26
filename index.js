@@ -172,14 +172,15 @@ function getDir(dirPath, created = false) {
 	}
 }
 
-function getRandomInList() {
-	if (puppet.counter < 10 && listSites[puppet.current].length >= 10) return Math.floor(Math.random() * 10);
-	else if (puppet.counter < 100 && listSites[puppet.current].length >= 100) return Math.floor(Math.random() * 100);
-	else if (puppet.counter < 1000 && listSites[puppet.current].length >= 1000) return Math.floor(Math.random() * 1000);
-	else if (puppet.counter < 10000 && listSites[puppet.current].length >= 10000) return Math.floor(Math.random() * 10000);
-	else if (puppet.counter < 100000 && listSites[puppet.current].length >= 100000) return Math.floor(Math.random() * 100000);
-	else if (puppet.counter < 1000000 && listSites[puppet.current].length >= 1000000) return Math.floor(Math.random() * 1000000);
-	else return Math.floor(Math.random() * listSites[puppet.current].length);
+function getRandomInList(list) {
+	const length = list.length;
+	if (puppet.counter < 10 && length >= 10) return Math.floor(Math.random() * 10);
+	else if (puppet.counter < 100 && length >= 100) return Math.floor(Math.random() * 100);
+	else if (puppet.counter < 1000 && length >= 1000) return Math.floor(Math.random() * 1000);
+	else if (puppet.counter < 10000 && length >= 10000) return Math.floor(Math.random() * 10000);
+	else if (puppet.counter < 100000 && length >= 100000) return Math.floor(Math.random() * 100000);
+	else if (puppet.counter < 1000000 && length >= 1000000) return Math.floor(Math.random() * 1000000);
+	else return Math.floor(Math.random() * length);
 }
 
 function runPuppet(act, res) {
@@ -357,7 +358,7 @@ async function randRequest() {
 					resolve(puppet);
 					return;
 				}
-				const rand = getRandomInList();
+				const rand = getRandomInList(listSites[puppet.current]);
 				const link = linkParse(listSites[puppet.current][rand]);
 				const url = link.url;
 				const pageRank = rand + 1;
@@ -444,7 +445,7 @@ async function randPost(data) {
 			const time = puppet.rate === 0 ? 500 : puppet.rate * 1000;
 			const randTime = Math.floor(Math.random() * time + 1);
 			setTimeout(() => {
-				const rand = getRandomInList();
+				const rand = getRandomInList(listSites[puppet.current]);
 				let url = listSites[puppet.current][rand];
 				if (!/^http/i.test(url)) url = `https://${url}`;
 				const options = {
@@ -487,7 +488,7 @@ async function randUpload(formData) {
 			const time = puppet.rate === 0 ? 500 : puppet.rate * 1000;
 			const randTime = Math.floor(Math.random() * time + 1);
 			setTimeout(() => {
-				const rand = getRandomInList();
+				const rand = getRandomInList(listSites[puppet.current]);
 				let url = listSites[puppet.current][rand];
 				if (!/^http/i.test(url)) url = `https://${url}`;
 				const options = {
