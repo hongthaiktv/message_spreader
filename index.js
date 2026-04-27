@@ -430,7 +430,8 @@ async function randRequest() {
 										image.src = link.src(image.src);
 									}
 									const paraHTML = para.innerHTML;
-									logger.addLog(paraHTML, "info", {code, pageRank, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
+									if (!puppet.quiet) logger.addLog(paraHTML, "info", {code, pageRank, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
+									else logger.addLog(paraHTML, "info", {code, quiet: puppet.quiet, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
 									urlData.code = code;
 									urlData.message = "paragraph";
 								}
@@ -441,9 +442,11 @@ async function randRequest() {
 								let image = images[rand];
 								image.src = link.src(image.src);
 								image = image.outerHTML;
-								if (!puppet.quiet) console.log("Image found:", url);
 								const code = 21;
-								logger.addLog(image, "info", {code, pageRank, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
+								if (!puppet.quiet) {
+									console.log("Image found:", url);
+									logger.addLog(image, "info", {code, pageRank, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
+								} else logger.addLog(image, "info", {code, quiet: puppet.quiet, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
 								urlData.code = code;
 								urlData.message = "image";
 							}

@@ -462,14 +462,6 @@ function log(data, type, tab = "logger") {
 						break;
 				}
 				break;
-
-// 			case "info":
-// 				switch (data.code) {
-// 					case 20:
-// 						if (cardContent === "") return;
-// 						break;
-// 				}
-// 				break;
 		}
 	} else {
 		cardContent = data;
@@ -496,22 +488,59 @@ function log(data, type, tab = "logger") {
 					logType = "aqua-gradient-rgba";
 					break;
 			}
-			switch (data.code) {
-				case 21:
-					divCard.innerHTML = `
-					<div class="card-body px-3 py-2 mask text-center ${logType}">
-						${$(cardContent).removeAttr("style").attr("class", "img-fluid z-depth-1 rounded")[0].outerHTML}
-					</div>
-					`;
-					break;
-				default:
-					divCard.innerHTML = `
-					<div class="card-body px-3 py-2 mask ${logType}">
-						<p class="card-text text-white">${cardContent}</p>
-					</div>
-					`;
+			if (data instanceof Object) {
+				switch (data.code) {
+					case 20:
+						if (!data.quiet) {
+							divCard.innerHTML = `
+							<div class="card-body px-3 py-2 mask">
+								<p class="card-text text-white">${cardContent}</p>
+							</div>
+							<div class="card-footer rgba-white-light px-3 py-1">
+								<a class="app-text-link ${$(`<div>${cardContent}</div>`).find("a").length ? "" : "stretched-link"}" target="_blank" href="${data.url}">${data.url}</a>
+							</div>
+							`;
+						} else {
+							divCard.innerHTML = `
+							<div class="card-body px-3 py-2 mask">
+								<p class="card-text text-white">${cardContent}</p>
+							</div>
+							`;
+						}
+						break;
+					case 21:
+						if (!data.quiet) {
+							divCard.innerHTML = `
+							<div class="card-body px-3 py-2 mask text-center">
+								${$(cardContent).removeAttr("style").attr("class", "img-fluid z-depth-1 rounded-lg")[0].outerHTML}
+							</div>
+							<div class="card-footer rgba-white-light px-3 py-1">
+								<a class="app-text-link stretched-link" target="_blank" href="${data.url}">${data.url}</a>
+							</div>
+							`;
+						} else {
+							divCard.innerHTML = `
+							<div class="card-body px-3 py-2 mask text-center">
+								${$(cardContent).removeAttr("style").attr("class", "img-fluid z-depth-1 rounded-lg")[0].outerHTML}
+							</div>
+							`;
+						}
+						break;
+					default:
+						divCard.innerHTML = `
+						<div class="card-body px-3 py-2 mask">
+							<p class="card-text text-white">${cardContent}</p>
+						</div>
+						`;
+				}
+			} else {
+				divCard.innerHTML = `
+				<div class="card-body px-3 py-2 mask">
+					<p class="card-text text-white">${cardContent}</p>
+				</div>
+				`;
 			}
-			divCard.className = `card gradient-card mb-2 ${cardType}`;
+			divCard.className = `card gradient-card ${logType} rounded-lg my-2 ${cardType}`;
 			break;
 		default:
 			divCard.innerHTML = cardContent;
