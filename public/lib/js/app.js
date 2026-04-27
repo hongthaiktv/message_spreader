@@ -497,7 +497,7 @@ function log(data, type, tab = "logger") {
 								<p class="card-text text-white">${cardContent}</p>
 							</div>
 							<div class="card-footer rgba-white-light px-3 py-1">
-								<a class="app-text-link ${$(`<div>${cardContent}</div>`).find("a").length ? "" : "stretched-link"}" target="_blank" href="${data.url}">${data.url}</a>
+								<a class="app-text-link${$(`<div>${cardContent}</div>`).find("a").length ? "" : " stretched-link"}" target="_blank" href="${data.url}">${data.url}</a>
 							</div>
 							`;
 						} else {
