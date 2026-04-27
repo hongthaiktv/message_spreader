@@ -81,8 +81,10 @@ app.get("/query", (req, res) => {
 				res.status(500).json(dirInfo);
 				return;
 			}
-			console.log(dirInfo.message);
-			res.json(dirInfo);
+			if (!puppet.quiet) {
+				console.log(dirInfo.message);
+				res.json(dirInfo);
+			} else res.json({quiet: puppet.quiet});
 			break;
 	}
 });
@@ -153,7 +155,7 @@ function getDir(dirPath, created = false) {
 			else if (file.isSymbolicLink()) {links.push(file.name); pathLinks.push(path.join(dirPath, file.name));}
 		}
 		const message = `Directory "${dirName}" got ${dirs.length} directori(es), ${files.length} file(s), ${links.length} link(s). Total: ${content.length}`;
-		return {message, content, dirs, files, links, pathContent, pathDirs, pathFiles, pathLinks, dirName, dirPath, total: content.length};
+		return {code: 22, message, content, dirs, files, links, pathContent, pathDirs, pathFiles, pathLinks, dirName, dirPath, total: content.length};
 	} catch(err) {
 		if (err.errno === -2 && created) {
 			try {
@@ -164,11 +166,11 @@ function getDir(dirPath, created = false) {
 			fs.mkdirSync(dirPath, {recursive: true});
 			const message = `Directory created: ${dirPath}`;
 			console.log(message);
-			return {message, created, dirName, dirPath, total: 0};
+			return {code: 22, message, created, dirName, dirPath, total: 0};
 		}
 		const message = err.toString();
 		console.error(message);
-		return {message, isError: true, ...err};
+		return {code: 42, message, isError: true, ...err};
 	}
 }
 

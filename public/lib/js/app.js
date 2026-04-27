@@ -248,7 +248,11 @@ async function query(action = "getDir", dirName = "upload", tab = "logger") {
 		return;
 	}
 	const res = await response.json();
-	log(res.message, "warning", tab);
+	if (res.quiet) return;
+	if (res.message) {
+		const message = `Directory "<span class="text-primary font-weight-bold">${res.dirName}</span>" got <span class="text-primary font-weight-bold">${res.dirs.length}</span> directori(es), <span class="text-success font-weight-bold">${res.files.length}</span> file(s), <span class="text-info font-weight-bold">${res.links.length}</span> link(s). Total: <span class="text-danger font-weight-bold">${res.content.length}</span>`;
+		log(message, "info", tab);
+	}
 	if (res.dirs.length) {
 		log(`<span class="text-primary font-weight-bold">Directories:</span> <span class="orange-text font-weight-bold">${res.dirs.length}</span>`, "log", tab);
 		for (const dir of res.dirs) {
@@ -341,10 +345,12 @@ function checkList(current) {
 		const list = button.value;
 		if (current === list) {
 			button.setAttribute("checked", true);
+			button.checked = true;
 			button.parentElement.className = "btn btn-light-blue form-check-label active";
 		}
 		else {
 			button.removeAttribute("checked");
+			button.checked = false;
 			button.parentElement.className = "btn btn-light-blue form-check-label";
 		}
 	}
