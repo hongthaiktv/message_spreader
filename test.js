@@ -1,2 +1,5 @@
-const v = "1";
-console.log(v.trim());
+const a = []
+a.forEach(function (item, index) {
+	console.log(index);
+});
+console.log("end script");

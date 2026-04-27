@@ -206,6 +206,7 @@ function runPuppet(act, res) {
 
 			logger.addLog(msg, "success", {
 				code: 7,
+				started: puppet.started,
 				current: puppet.current,
 				counter: puppet.counter
 			});
@@ -213,6 +214,7 @@ function runPuppet(act, res) {
 				code: 7,
 				message: msg,
 				type: "success",
+				started: puppet.started,
 				current: puppet.current,
 				counter: puppet.counter
 			});
@@ -221,7 +223,7 @@ function runPuppet(act, res) {
 		case "stop":
 			msg = `Puppet stopped with ${puppet.total} request, ${puppet.success} success, ${puppet.failed} failed`;
 			puppet.started = false;
-			logger.addLog(msg, "success", {code: 8, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, urlSuccess: listSites.urlSuccess, urlFailed: listSites.urlFailed});
+			logger.addLog(msg, "success", {code: 8, started: puppet.started, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, urlSuccess: listSites.urlSuccess, urlFailed: listSites.urlFailed});
 			const urlFailed = [];
 			for (const {url} of listSites.urlFailed) {
 				urlFailed.push(url);
@@ -231,6 +233,7 @@ function runPuppet(act, res) {
 				code: 8,
 				message: msg,
 				type: "success",
+				started: puppet.started,
 				counter: puppet.counter,
 				total: puppet.total,
 				success: puppet.success,

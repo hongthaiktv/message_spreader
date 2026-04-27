@@ -335,6 +335,31 @@ function convertCounter(point) {
 	}
 }
 
+function checkList(current) {
+	const listSiteButtons = document.querySelectorAll("#listSite input");
+	for (const button of listSiteButtons) {
+		const list = button.value;
+		if (current === list) {
+			button.setAttribute("checked", true);
+			button.parentElement.className = "btn btn-light-blue form-check-label active";
+		}
+		else {
+			button.removeAttribute("checked");
+			button.parentElement.className = "btn btn-light-blue form-check-label";
+		}
+	}
+}
+
+function checkStarted(started) {
+	if (started) {
+		$("#pupBtnStart").toggleClass("d-none", true);
+		$("#pupBtnStop").toggleClass("d-none", false);
+	} else {
+		$("#pupBtnStart").toggleClass("d-none", false);
+		$("#pupBtnStop").toggleClass("d-none", true);
+	}
+}
+
 function log(data, type, tab = "logger") {
 	let divCard = document.createElement("DIV");
 	let cardContent, cardType;
@@ -369,20 +394,7 @@ function log(data, type, tab = "logger") {
 						break;
 
 					case 5:
-						if (data.current) {
-							const listSiteButtons = document.querySelectorAll("#listSite input");
-							for (const button of listSiteButtons) {
-								const list = button.value;
-								if (data.current === list) {
-									button.setAttribute("checked", true);
-									button.parentElement.className = "btn btn-light-blue form-check-label active";
-								}
-								else {
-									button.removeAttribute("checked");
-									button.parentElement.className = "btn btn-light-blue form-check-label";
-								}
-							}
-						}
+						if (data.current) checkList(data.current);
 						if (data.started) {
 							$("#pupBtnStart").toggleClass("d-none", true);
 							$("#pupBtnStop").toggleClass("d-none", false);
@@ -410,14 +422,17 @@ function log(data, type, tab = "logger") {
 			case "success":
 				switch (data.code) {
 					case 7:
+						if (typeof data.started === "boolean") checkStarted(data.started);
 						cardContent = `Puppet starting with "<span class="orange-text font-weight-bold">${data.current}</span>"...`;
 						break;
 				
 					case 8:
+						if (typeof data.started === "boolean") checkStarted(data.started);
 						cardContent = `Puppet stopped with <span class="orange-text font-weight-bold">${data.total}</span> request, <span class="text-success font-weight-bold">${data.success}</span> success, <span class="text-danger font-weight-bold">${data.failed}</span> failed.`;
 						break;
 
 					case 9:
+						if (data.current) checkList(data.current);
 						if (Number.isFinite(data.sitesLength)) {
 							const max = convertSitesLength(data.sitesLength).point;
 							$("#sliderCounter").attr("max", max);
@@ -427,6 +442,8 @@ function log(data, type, tab = "logger") {
 
 					case 10:
 						cardContent = `Puppet rate changed to "<span class="orange-text font-weight-bold">${data.rate}s</span>".`;
+						repeatRate.innerText = data.rate;
+						sliderRate.value = data.rate;
 						break;
 
 					case 11:
