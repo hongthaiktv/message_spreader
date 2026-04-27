@@ -370,7 +370,7 @@ function log(data, type, tab = "logger") {
 	let divCard = document.createElement("DIV");
 	let cardContent, cardType;
 	if (data instanceof Object) {
-		cardContent = data.message.trim();
+		cardContent = typeof data.message === "string" ? data.message.trim() : data.message;
 		cardType = type || data.type || "log";
 		if (data.sitesLength) APPSETTING.sitesLength = data.sitesLength;
 
@@ -460,12 +460,16 @@ function log(data, type, tab = "logger") {
 						cardContent = `Puppet mode changed to "<span class="orange-text font-weight-bold">${data.mode}</span>".`;
 						switchQuiet.checked = data.quiet;
 						break;
-
-					case 20:
-						if (cardContent === "") return;
-						break;
 				}
 				break;
+
+// 			case "info":
+// 				switch (data.code) {
+// 					case 20:
+// 						if (cardContent === "") return;
+// 						break;
+// 				}
+// 				break;
 		}
 	} else {
 		cardContent = data;
