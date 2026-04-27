@@ -410,11 +410,26 @@ async function randRequest() {
 							const paras = document.querySelectorAll("p");
 							if (paras.length) {
 								const rand = Math.floor(Math.random() * paras.length);
-								const para = paras[rand].textContent.trim();
-								if (para) {
-									console.log(para);
+								const para = paras[rand];
+								const paraText = para.textContent.trim();
+								if (paraText) {
+									console.log(paraText);
 									const code = 20;
-									const paraHTML = paras[rand].innerHTML;
+									const elements = para.querySelectorAll("*");
+									const aLinks = para.querySelectorAll("a");
+									const images = para.querySelectorAll("img");
+									for (const element of elements) {
+										element.removeAttribute("class");
+										element.removeAttribute("style");
+									}
+									for (const aLink of aLinks) {
+										aLink.setAttribute("target", "_blank");
+										aLink.href = link.src(aLink.href);
+									}
+									for (const image of images) {
+										image.src = link.src(image.src);
+									}
+									const paraHTML = para.innerHTML;
 									logger.addLog(paraHTML, "info", {code, pageRank, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
 									urlData.code = code;
 									urlData.message = "paragraph";
