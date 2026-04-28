@@ -383,7 +383,7 @@ function log(data, type, tab = "logger") {
 			case "error":
 				switch (data.code) {
 					case 1:
-						if (switchQuiet.checked) return;
+						if (data.quiet) return;
 						cardContent = `Failed (<span class="text-danger font-weight-bold">${data.failed}</span>/<span class="text-default font-weight-bold">${data.total}</span>) : <span class="text-danger font-weight-bold">${data.errorCode}</span> : <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a>`;
 						break;
 				}
