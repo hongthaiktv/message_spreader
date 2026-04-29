@@ -384,7 +384,9 @@ function log(data, type, tab = "logger") {
 				switch (data.code) {
 					case 1:
 						if (data.quiet) return;
-						cardContent = `Failed (<span class="text-danger font-weight-bold">${data.failed}</span>/<span class="text-default font-weight-bold">${data.total}</span>) : <span class="text-danger font-weight-bold">${data.errorCode}</span> : <a class="app-text-link" target="_blank" href="${data.url}">${data.url}</a>`;
+						const patt = /^Error: /i;
+						const message = patt.test(data.errorMessage) ? data.errorMessage.replace(patt, "") : data.errorMessage;
+						cardContent = `Failed (<span class="text-danger font-weight-bold">${data.failed}</span>/<span class="text-default font-weight-bold">${data.total}</span>) : <span class="text-danger font-weight-bold">${data.errorCode}</span> : ${message}`;
 						break;
 				}
 				break;
@@ -508,6 +510,7 @@ function log(data, type, tab = "logger") {
 							`;
 						}
 						break;
+
 					case 21:
 						if (!data.quiet) {
 							divCard.innerHTML = `
@@ -526,6 +529,26 @@ function log(data, type, tab = "logger") {
 							`;
 						}
 						break;
+
+					case 1:
+						if (!data.quiet) {
+							divCard.innerHTML = `
+							<div class="card-body px-3 py-2 mask">
+								<p class="card-text text-white">${cardContent}</p>
+							</div>
+							<div class="card-footer rgba-white-light px-3 py-1">
+								<a class="app-text-link stretched-link" target="_blank" href="${data.url}">${data.url}</a>
+							</div>
+							`;
+						} else {
+							divCard.innerHTML = `
+							<div class="card-body px-3 py-2 mask">
+								<p class="card-text text-white">${cardContent}</p>
+							</div>
+							`;
+						}
+						break;
+
 					default:
 						divCard.innerHTML = `
 						<div class="card-body px-3 py-2 mask">

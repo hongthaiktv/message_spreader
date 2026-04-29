@@ -387,7 +387,7 @@ async function randRequest() {
 						listSites.urlFailed.push({code, message, url, errorCode: error.code});
 						++puppet.failed;
 						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${error.code} : ${url}`;
-						if (!puppet.quiet) logger.addLog(msg, "error", {code, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: error.code});
+						if (!puppet.quiet) logger.addLog(msg, "error", {code, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: error.code, errorMessage: error.syscall});
 						else logger.addLog("", "error", {code, quiet: puppet.quiet, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
 						return;
 					}
@@ -397,7 +397,7 @@ async function randRequest() {
 						listSites.urlFailed.push({code, message, url, errorCode: response.statusCode});
 						++puppet.failed;
 						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${response.statusCode} : ${url}`;
-						if (!puppet.quiet) logger.addLog(msg, "error", {code, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: response.statusCode});
+						if (!puppet.quiet) logger.addLog(msg, "error", {code, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: response.statusCode, errorMessage: message});
 						else logger.addLog("", "error", {code, quiet: puppet.quiet, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
 					} else {
 						const urlData = {url, pageRank};
@@ -411,7 +411,7 @@ async function randRequest() {
 							if (paras.length) {
 								const rand = Math.floor(Math.random() * paras.length);
 								const para = paras[rand];
-								const paraText = para.textContent.trim();
+								const paraText = para.innerText;
 								if (paraText) {
 									console.log(paraText);
 									const code = 20;
@@ -438,6 +438,10 @@ async function randRequest() {
 							}
 							else if (document.querySelectorAll("img").length) {
 								const images = document.querySelectorAll("img");
+								const imageJPGs = document.querySelectorAll('img[src*=".jpg" i]');
+								for (const image of imageJPGs) {
+									console.log("=====>", image.src);
+								}
 								const rand = Math.floor(Math.random() * images.length);
 								let image = images[rand];
 								image.src = link.src(image.src);
