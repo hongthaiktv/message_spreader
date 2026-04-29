@@ -411,7 +411,7 @@ async function randRequest() {
 							if (paras.length) {
 								const rand = Math.floor(Math.random() * paras.length);
 								const para = paras[rand];
-								const paraText = para.innerText;
+								const paraText = para.textContent.trim();
 								if (paraText) {
 									console.log(paraText);
 									const code = 20;
@@ -437,13 +437,29 @@ async function randRequest() {
 								}
 							}
 							else if (document.querySelectorAll("img").length) {
-								const images = document.querySelectorAll("img");
-								const imageJPGs = document.querySelectorAll('img[src*=".jpg" i]');
-								for (const image of imageJPGs) {
-									console.log("=====>", image.src);
+								let image;
+								if (document.querySelectorAll('img[src*=".jpg" i]').length) {
+									const imageJPGs = document.querySelectorAll('img[src*=".jpg" i]');
+									const rand = Math.floor(Math.random() * imageJPGs.length);
+									image = imageJPGs[rand];
 								}
-								const rand = Math.floor(Math.random() * images.length);
-								let image = images[rand];
+								else if (document.querySelectorAll('img[src*=".webp" i]').length) {
+									const imageWEBPs = document.querySelectorAll('img[src*=".webp" i]');
+									const rand = Math.floor(Math.random() * imageWEBPs.length);
+									image = imageWEBPs[rand];
+								}
+								else if (document.querySelectorAll('img[src*=".png" i]').length) {
+									const imagePNGs = document.querySelectorAll('img[src*=".png" i]');
+									const rand = Math.floor(Math.random() * imagePNGs.length);
+									image = imagePNGs[rand];
+								}
+								else {
+									const images = document.querySelectorAll("img");
+									const rand = Math.floor(Math.random() * images.length);
+									image = images[rand];
+								}
+								image.removeAttribute("class");
+								image.removeAttribute("style");
 								image.src = link.src(image.src);
 								image = image.outerHTML;
 								const code = 21;
