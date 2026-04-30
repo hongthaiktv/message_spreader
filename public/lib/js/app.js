@@ -503,8 +503,13 @@ function log(data, type, tab = "logger") {
 							<div class="card-body px-3 py-2 mask">
 								<p class="card-text text-white">${cardContent}</p>
 							</div>
-							<div class="card-footer rgba-white-light px-3 py-1">
-								<a class="app-text-link${$(`<div>${cardContent}</div>`).find("a").length ? "" : " stretched-link"}" target="_blank" href="${data.url}">${url}</a>
+							<div class="card-footer d-flex align-items-center rgba-white-light px-3 py-1">
+								<div class="d-flex align-items-center secondary-color-dark text-center app-numPageRank rounded mr-2">
+									<i class="fas fa-globe app-iconSM9 mr-1"></i>
+									${data.pageRank}
+								</div>
+								<i class="app-text-link fas fa-link mx-1"></i>
+								<a class="app-text-link flex-grow-1 text-truncate${$(`<div>${cardContent}</div>`).find("a").length ? "" : " stretched-link"}" target="_blank" href="${data.url}">${url}</a>
 							</div>
 							`;
 						} else {
@@ -522,8 +527,13 @@ function log(data, type, tab = "logger") {
 							<div class="card-body px-3 py-2 mask text-center">
 								${$(cardContent).removeAttr("style").attr("class", "img-fluid z-depth-1 rounded-lg")[0].outerHTML}
 							</div>
-							<div class="card-footer rgba-white-light px-3 py-1">
-								<a class="app-text-link stretched-link" target="_blank" href="${data.url}">${url}</a>
+							<div class="card-footer d-flex align-items-center rgba-white-light px-3 py-1">
+								<div class="d-flex align-items-center secondary-color-dark text-center app-numPageRank rounded mr-2">
+									<i class="fas fa-globe app-iconSM9 mr-1"></i>
+									${data.pageRank}
+								</div>
+								<i class="app-text-link fas fa-link mx-1"></i>
+								<a class="app-text-link flex-grow-1 text-truncate stretched-link" target="_blank" href="${data.url}">${url}</a>
 							</div>
 							`;
 						} else {
@@ -541,8 +551,13 @@ function log(data, type, tab = "logger") {
 							<div class="card-body px-3 py-2 mask">
 								<p class="card-text text-white">${cardContent}</p>
 							</div>
-							<div class="card-footer rgba-white-light px-3 py-1">
-								<a class="app-text-link stretched-link" target="_blank" href="${data.url}">${url}</a>
+							<div class="card-footer d-flex align-items-center rgba-white-light px-3 py-1">
+								<div class="d-flex align-items-center danger-color text-center app-numPageRank rounded mr-2">
+									<i class="fas fa-globe app-iconSM9 mr-1"></i>
+									${data.pageRank}
+								</div>
+								<i class="app-text-link fas fa-link mx-1"></i>
+								<a class="app-text-link flex-grow-1 text-truncate stretched-link" target="_blank" href="${data.url}">${url}</a>
 							</div>
 							`;
 						} else {

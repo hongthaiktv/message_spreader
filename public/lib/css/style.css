@@ -36,6 +36,15 @@ body {
 	color: #1c71ff;
 }
 
+.app-numPageRank {
+	padding: 0.1em 0.4em;
+	line-height: normal;
+}
+
+.app-iconSM9 {
+	font-size: 0.9em;
+}
+
 .minw-25 { min-width: 25%; }
 .minw-50 { min-width: 50%; }
 .minw-75 { min-width: 75%; }

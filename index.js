@@ -369,7 +369,7 @@ async function randRequest() {
 				const url = link.url;
 				const pageRank = rand + 1;
 				const msg = `Rank ${pageRank}: ${url}`;
-				if (!puppet.quiet) logger.addLog(msg, "log", { code: 4, pageRank, url });
+				if (!puppet.quiet) console.log(msg);
 				const options = {
 					url: url,
 					strictSSL: false,
@@ -388,7 +388,7 @@ async function randRequest() {
 						listSites.urlFailed.push({code, message, url, errorCode: error.code});
 						++puppet.failed;
 						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${error.code} : ${url}`;
-						if (!puppet.quiet) logger.addLog(msg, "error", {code, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: error.code, errorMessage: error.syscall});
+						if (!puppet.quiet) logger.addLog(msg, "error", {code, url, pageRank, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: error.code, errorMessage: error.syscall});
 						else logger.addLog("", "error", {code, quiet: puppet.quiet, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
 						return;
 					}
@@ -398,7 +398,7 @@ async function randRequest() {
 						listSites.urlFailed.push({code, message, url, errorCode: response.statusCode});
 						++puppet.failed;
 						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${response.statusCode} : ${url}`;
-						if (!puppet.quiet) logger.addLog(msg, "error", {code, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: response.statusCode, errorMessage: message});
+						if (!puppet.quiet) logger.addLog(msg, "error", {code, url, pageRank, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: response.statusCode, errorMessage: message});
 						else logger.addLog("", "error", {code, quiet: puppet.quiet, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
 					} else {
 						const urlData = {url, pageRank};
@@ -431,7 +431,7 @@ async function randRequest() {
 										image.src = link.src(image.src);
 									}
 									const paraHTML = para.innerHTML;
-									if (!puppet.quiet) logger.addLog(paraHTML, "info", {code, pageRank, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
+									if (!puppet.quiet) logger.addLog(paraHTML, "info", {code, url, pageRank, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
 									else logger.addLog(paraHTML, "info", {code, quiet: puppet.quiet, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
 									urlData.code = code;
 									urlData.message = "paragraph";
@@ -466,7 +466,7 @@ async function randRequest() {
 								const code = 21;
 								if (!puppet.quiet) {
 									console.log("Image found:", url);
-									logger.addLog(image, "info", {code, pageRank, url, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
+									logger.addLog(image, "info", {code, url, pageRank, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
 								} else logger.addLog(image, "info", {code, quiet: puppet.quiet, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
 								urlData.code = code;
 								urlData.message = "image";
