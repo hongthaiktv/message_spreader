@@ -116,10 +116,7 @@ tabCounterFailedHeader.onclick = function () {
 
 //puppet
 let source = new EventSource(`${SERVER}logger`);
-source.onopen = e => {
-	SSE = true;
-	query("getDir", "upload", "upload");
-}
+source.onopen = () => SSE = true;
 source.onmessage = e => {
 	const data = JSON.parse(e.data);
 	log(data);
@@ -417,6 +414,7 @@ function log(data, type, tab = "logger") {
 						}
 						if (typeof data.quiet === "boolean") {
 							$("#switchQuiet")[0].checked = data.quiet;
+							if (!data.quiet) query("getDir", "upload", "upload");
 						}
 						if (Number.isFinite(data.sitesLength)) {
 							const max = convertSitesLength(data.sitesLength).point;
