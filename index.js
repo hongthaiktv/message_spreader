@@ -309,9 +309,10 @@ function runPuppet(act, res) {
 function linkParse(origin) {
 	let protocol = "https://";
 	let host = origin;
-	if (/^http.*:\/\//i.test(host)) {
-		protocol = /^.*:\/\//i.exec(host)[0];
-		host = host.replace(protocol, "");
+	const patt = /^.*:\/\//i;
+	if (patt.test(host)) {
+		protocol = patt.exec(host)[0];
+		host = host.replace(patt, "");
 	}
 	const url = `${protocol}${host}`;
 	return {protocol, host, url, origin,
