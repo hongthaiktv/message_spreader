@@ -465,6 +465,8 @@ function log(data, type, tab = "logger") {
 					case 12:
 						cardContent = `Puppet mode changed to "<span class="orange-text font-weight-bold">${data.mode}</span>".`;
 						switchQuiet.checked = data.quiet;
+						if (data.quiet) $("#uploadContent").empty();
+						else query("getDir", "upload", "upload");
 						break;
 				}
 				break;
