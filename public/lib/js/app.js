@@ -120,7 +120,7 @@ source.onopen = () => SSE = true;
 source.onmessage = e => {
 	const data = JSON.parse(e.data);
 	log(data);
-	if (switchQuiet.checked) return;
+	if (data.quiet) return;
 	const url = data.url ? data.url.replace(/^.*:\/\//i, "") : data.url;
 	let logData;
 	switch (data.code) {

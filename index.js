@@ -97,7 +97,8 @@ app.get("/logger", (req, res) => {
 		"Content-Type": "text/event-stream",
 		"Cache-Control": "no-cache"
 	});
-	logger.addClient(res, "log", {code: 5, sitesLength: listSites[puppet.current].length, urlSuccess: listSites.urlSuccess, urlFailed: listSites.urlFailed, ...puppet});
+	if (!puppet.quiet) logger.addClient(res, "log", {code: 5, sitesLength: listSites[puppet.current].length, urlSuccess: listSites.urlSuccess, urlFailed: listSites.urlFailed, ...puppet});
+	else logger.addClient(res, "log", {code: 5, sitesLength: listSites[puppet.current].length, ...puppet});
 });
 
 app.post("/puppet", (req, res) => {
@@ -225,12 +226,15 @@ function runPuppet(act, res) {
 		case "stop":
 			msg = `Puppet stopped with ${puppet.total} request, ${puppet.success} success, ${puppet.failed} failed`;
 			puppet.started = false;
-			logger.addLog(msg, "success", {code: 8, started: puppet.started, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, urlSuccess: listSites.urlSuccess, urlFailed: listSites.urlFailed});
-			const urlFailed = [];
-			for (const {url} of listSites.urlFailed) {
-				urlFailed.push(url);
+			if (!puppet.quiet) {
+				logger.addLog(msg, "success", {code: 8, started: puppet.started, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, urlSuccess: listSites.urlSuccess, urlFailed: listSites.urlFailed});
+				const urlFailed = [];
+				for (const {url} of listSites.urlFailed) {
+					urlFailed.push(url);
+				}
+				console.log('URL failed:', urlFailed);
 			}
-			console.log('URL failed:', urlFailed);
+			else logger.addLog(msg, "success", {code: 8, started: puppet.started, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed});
 			if (res) res.json({
 				code: 8,
 				message: msg,
@@ -240,8 +244,8 @@ function runPuppet(act, res) {
 				total: puppet.total,
 				success: puppet.success,
 				failed: puppet.failed,
-				urlSuccess: listSites.urlSuccess,
-				urlFailed: listSites.urlFailed
+				urlSuccess: !puppet.quiet ? listSites.urlSuccess : undefined,
+				urlFailed: !puppet.quiet ? listSites.urlFailed : undefined
 			});
 			clear();
 			break;
@@ -385,7 +389,7 @@ async function randRequest() {
 					if (error) {
 						const code = 1;
 						const message = error.toString();
-						listSites.urlFailed.push({code, message, url, errorCode: error.code});
+						if (!puppet.quiet) listSites.urlFailed.push({code, message, url, errorCode: error.code, errorMessage: error.syscall});
 						++puppet.failed;
 						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${error.code} : ${url}`;
 						if (!puppet.quiet) logger.addLog(msg, "error", {code, url, pageRank, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: error.code, errorMessage: error.syscall});
@@ -395,14 +399,14 @@ async function randRequest() {
 					if (response.statusCode !== 200) {
 						const code = 1;
 						const message = response.statusMessage;
-						listSites.urlFailed.push({code, message, url, errorCode: response.statusCode});
+						if (!puppet.quiet) listSites.urlFailed.push({code, message, url, errorCode: response.statusCode, errorMessage: message});
 						++puppet.failed;
 						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${response.statusCode} : ${url}`;
 						if (!puppet.quiet) logger.addLog(msg, "error", {code, url, pageRank, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: response.statusCode, errorMessage: message});
 						else logger.addLog("", "error", {code, quiet: puppet.quiet, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
 					} else {
 						const urlData = {url, pageRank};
-						listSites.urlSuccess.push(urlData);
+						if (!puppet.quiet) listSites.urlSuccess.push(urlData);
 						++puppet.success;
 						const msg = `Success (${puppet.success}/${puppet.total})`;
 						if (!puppet.quiet) console.log(msg);
