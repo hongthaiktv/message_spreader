@@ -2,27 +2,32 @@ const PROTO = "http", HOST = "localhost", PORT = 3000;
 const SERVER = location.href || `${PROTO}://${HOST}:${PORT}/`;
 const APPSETTING = {};
 let SSE = false;
-let loggerScrollable = true;
-let loggerPrevPos = 0;
 
 const wHeight = window.innerHeight;
 document.body.style.height = `${wHeight}px`;
 
+function scroller(layout) {
+	const id = layout.id;
+	const curPos = layout.scrollTop;
+	if (scroller[id].scrollable && curPos < scroller[id].prevPos) {
+		scroller[id].scrollable = false;
+	}
+	else if (!scroller[id].scrollable && layout.scrollHeight - curPos <= layout.offsetHeight + 10) {
+		scroller[id].scrollable = true;
+	}
+	scroller[id].prevPos = curPos;
+}
+
+const scrollLayouts = ["loggerContent", "counterAllContent", "counterSuccessContent", "counterFailedContent", "urlContent", "motdContent", "uploadContent", "statisticContent"];
+for (const layout of scrollLayouts) {
+	scroller[layout] = {scrollable: true, prevPos: 0};
+	window[layout].onscroll = function () {scroller(this)};
+}
+
 listSite.onchange = function (e) {
 	const listName = e.target.value;
 	puppet("changeList", listName);
-}
-
-loggerContent.onscroll = function () {
-	let curPos = loggerContent.scrollTop;
-	if (loggerScrollable && curPos < loggerPrevPos) {
-		loggerScrollable = false;
-	}
-	else if (!loggerScrollable && loggerContent.scrollHeight - curPos <= loggerContent.offsetHeight + 10) {
-		loggerScrollable = true;
-	}
-	loggerPrevPos = curPos;
-}
+};
 
 tabButtons.onclick = function () {
 	$(this).attr("class", "nav nav-tabs nav-justified md-tabs color-light-blue-active");
@@ -94,25 +99,25 @@ sliderCounter.onchange = function () {
 switchQuiet.onchange = function () {
 	const enable = this.checked;
 	puppet("changeMode", enable);
-}
+};
 
 tabCounterAllHeader.onclick = function () {
 	$("#tabButtons").toggleClass("orange darken-4", false).toggleClass("success-color-dark", true);
 	$("#tabsContainer").toggleClass("orange darken-2", false).toggleClass("green lighten-1", true);
 	$("#tabCounterSuccess").tab("show");
-}
+};
 
 tabCounterSuccessHeader.onclick = function () {
 	$("#tabButtons").toggleClass("success-color-dark", false).toggleClass("danger-color-dark", true);
 	$("#tabsContainer").toggleClass("green lighten-1", false).toggleClass("red lighten-1", true);
 	$("#tabCounterFailed").tab("show");
-}
+};
 
 tabCounterFailedHeader.onclick = function () {
 	$("#tabButtons").toggleClass("danger-color-dark", false).toggleClass("orange darken-4", true);
 	$("#tabsContainer").toggleClass("red lighten-1", false).toggleClass("orange darken-2", true);
 	$("#tabCounterAll").tab("show");
-}
+};
 
 //puppet
 let source = new EventSource(`${SERVER}logger`);
@@ -593,44 +598,42 @@ function log(data, type, tab = "logger") {
 	switch (tab) {
 		case "logger":
 			loggerContent.appendChild(divCard);
-			if (loggerScrollable) {
-				loggerContent.scrollTop = loggerContent.scrollHeight;
-			}
+			if (scroller.loggerContent.scrollable) loggerContent.scrollTop = loggerContent.scrollHeight;
 			break;
 	
 		case "url":
 			urlContent.appendChild(divCard);
-			urlContent.scrollTop = urlContent.scrollHeight;
+			if (scroller.urlContent.scrollable) urlContent.scrollTop = urlContent.scrollHeight;
 			break;
 
 		case "motd":
 			motdContent.appendChild(divCard);
-			motdContent.scrollTop = motdContent.scrollHeight;
+			if (scroller.motdContent.scrollable) motdContent.scrollTop = motdContent.scrollHeight;
 			break;
 
 		case "upload":
 			uploadContent.appendChild(divCard);
-			uploadContent.scrollTop = uploadContent.scrollHeight;
+			if (scroller.uploadContent.scrollable) uploadContent.scrollTop = uploadContent.scrollHeight;
 			break;
 
 		case "counterAll":
 			counterAllContent.appendChild(divCard);
-			counterAllContent.scrollTop = counterAllContent.scrollHeight;
+			if (scroller.counterAllContent.scrollable) counterAllContent.scrollTop = counterAllContent.scrollHeight;
 			break;
 
 		case "counterSuccess":
 			counterSuccessContent.appendChild(divCard);
-			counterSuccessContent.scrollTop = counterSuccessContent.scrollHeight;
+			if (scroller.counterSuccessContent.scrollable) counterSuccessContent.scrollTop = counterSuccessContent.scrollHeight;
 			break;
 
 		case "counterFailed":
 			counterFailedContent.appendChild(divCard);
-			counterFailedContent.scrollTop = counterFailedContent.scrollHeight;
+			if (scroller.counterFailedContent.scrollable) counterFailedContent.scrollTop = counterFailedContent.scrollHeight;
 			break;
 
 		case "statistic":
 			statisticContent.appendChild(divCard);
-			statisticContent.scrollTop = statisticContent.scrollHeight;
+			if (scroller.statisticContent.scrollable) statisticContent.scrollTop = statisticContent.scrollHeight;
 			break;
 	}
 }
