@@ -387,7 +387,7 @@ function log(data, type, tab = "logger") {
 						if (data.quiet) return;
 						const patt = /^Error: /i;
 						const message = patt.test(data.errorMessage) ? data.errorMessage.replace(patt, "") : data.errorMessage;
-						cardContent = `Failed (<span class="text-danger font-weight-bold">${data.failed}</span>/<span class="text-default font-weight-bold">${data.total}</span>) : <span class="text-danger font-weight-bold">${data.errorCode}</span> : ${message}`;
+						cardContent = `<span class="text-danger font-weight-bold">${data.errorCode}</span> : ${message}`;
 						break;
 				}
 				break;

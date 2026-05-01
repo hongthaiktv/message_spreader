@@ -342,7 +342,7 @@ function parseHTML(html) {
 	try {
 		dom = new JSDOM(html, { virtualConsole, pretendToBeVisual: true });
 	} catch(err) {
-		console.error("Error parsing HTML:", err);
+		console.error("Error parsing HTML:", err.toString());
 	}
 	if (dom && dom.window && dom.window.document) document = dom.window.document;
 	return document;
