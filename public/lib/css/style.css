@@ -45,6 +45,10 @@ body {
 	font-size: 0.9em;
 }
 
+.app-textSize2 {
+	font-size: 1.2em;
+}
+
 .minw-25 { min-width: 25%; }
 .minw-50 { min-width: 50%; }
 .minw-75 { min-width: 75%; }
