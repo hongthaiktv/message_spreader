@@ -255,7 +255,10 @@ pupBtnUpload.addEventListener("change", async function (e) {
 });
 
 async function query(action, data, tab) {
-	if (data && tab === undefined) tab = data;
+	if (typeof data === "string" && tab === undefined) {
+		tab = data;
+		data = undefined;
+	}
 	let url = `${SERVER}query?action=${action}`;
 	switch (action) {
 		case "getDir":

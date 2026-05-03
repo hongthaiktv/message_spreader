@@ -1,3 +1,3 @@
-const o = {a: 11, b: [2, 3]};
-const s = JSON.stringify(o, null, 4);
-console.log(s);
+let s = undefined;
+if (s !== "") console.log("not empty");
+else console.log("empty");
