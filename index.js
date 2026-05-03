@@ -71,11 +71,10 @@ app.get("/query", (req, res) => {
 		return;
 	}
 	const action = req.query.action;
-	const dirName = req.query.dirName || "upload";
-	const dirPath = path.join(rootDir, dirName);
-	let message = "";
 	switch (action) {
 		case "getDir":
+			const dirName = req.query.dirName || "upload";
+			const dirPath = path.join(rootDir, dirName);
 			const dirInfo = getDir(dirPath);
 			if (dirInfo.isError) {
 				res.status(500).json(dirInfo);
@@ -84,7 +83,15 @@ app.get("/query", (req, res) => {
 			if (!puppet.quiet) {
 				console.log(dirInfo.message);
 				res.json(dirInfo);
-			} else res.json({quiet: puppet.quiet});
+			}
+			else res.json({quiet: puppet.quiet});
+			break;
+
+		case "getMotdMsg":
+			if (!puppet.quiet) {
+				res.json({message: motd.message});
+			}
+			else res.json({quiet: puppet.quiet});
 			break;
 	}
 });
@@ -123,6 +130,9 @@ app.post("/puppet", (req, res) => {
 	}
 	runPuppet(reqAct, res);
 });
+
+// app.post("/motd", (req, res) => {
+// });
 
 app.post("/upload", uploader.array("files"), (req, res) => {
 	const message = req.files && req.files.length ? `Total ${req.files.length} file(s) uploaded.` : "No file(s) uploaded.";

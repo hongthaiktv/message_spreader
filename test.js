@@ -1,5 +1,3 @@
-const a = []
-a.forEach(function (item, index) {
-	console.log(index);
-});
-console.log("end script");
+const o = {a: 11, b: [2, 3]};
+const s = JSON.stringify(o, null, 4);
+console.log(s);

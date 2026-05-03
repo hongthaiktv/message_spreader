@@ -120,19 +120,15 @@ tabCounterFailedHeader.onclick = function () {
 };
 
 motdMessage.onfocus = function () {
-	$("#motdGroupBtnEdit").toggleClass("d-none d-flex");
+	$("#motdBtnSend").toggleClass("d-none", false).toggleClass("d-flex", true);
 };
 
 motdMessage.onblur = function () {
-	$("#motdGroupBtnEdit").toggleClass("d-none d-flex");
+	$("#motdBtnSend").toggleClass("d-none", true).toggleClass("d-flex", false);
 };
 
-motdBtnAccept.onclick = function () {
-	alert("accept")
-};
-
-motdBtnCancel.onclick = function () {
-	alert("cancel")
+motdBtnSend.onmousedown = function (e) {
+	e.preventDefault();
 };
 
 //puppet
@@ -258,39 +254,57 @@ pupBtnUpload.addEventListener("change", async function (e) {
 	query("getDir", "upload", "upload");
 });
 
-async function query(action = "getDir", dirName = "upload", tab = "logger") {
-	const url = `${SERVER}query?action=${action}&dirName=${dirName}`;
+async function query(action, data, tab) {
+	if (data && tab === undefined) tab = data;
+	let url = `${SERVER}query?action=${action}`;
+	switch (action) {
+		case "getDir":
+			url += `&dirName=${data}`;
+			break;
+	}
 	const response = await fetch(url);
 	if (!response.ok) {
 		const res = await response.json();
 		if (res instanceof Object && res.message) {
 			log(res.message, "error", tab);
-		} else log(`Error ${response.status}: Getting directory failed.`, "error", tab);
+		} else log(`Error ${response.status}: Action "${action}" failed.`, "error", tab);
 		return;
 	}
 	const res = await response.json();
 	if (res.quiet) return;
-	if (res.message) {
-		const message = `Directory "<span class="text-primary font-weight-bold">${res.dirName}</span>" got <span class="text-primary font-weight-bold">${res.dirs.length}</span> directori(es), <span class="text-success font-weight-bold">${res.files.length}</span> file(s), <span class="text-info font-weight-bold">${res.links.length}</span> link(s). Total: <span class="text-danger font-weight-bold">${res.content.length}</span>`;
-		log(message, "info", tab);
-	}
-	if (res.dirs.length) {
-		log(`<span class="text-primary font-weight-bold">Directories:</span> <span class="orange-text font-weight-bold">${res.dirs.length}</span>`, "log", tab);
-		for (const dir of res.dirs) {
-			log(dir, "log", tab);
-		}
-	}
-	if (res.files.length) {
-		log(`<span class="text-secondary font-weight-bold">Files:</span> <span class="orange-text font-weight-bold">${res.files.length}</span>`, "log", tab);
-		for (const file of res.files) {
-			log(file, "log", tab);
-		}
-	}
-	if (res.links.length) {
-		log(`<span class="text-danger font-weight-bold">Links:</span> <span class="orange-text font-weight-bold">${res.links.length}</span>`, "log", tab);
-		for (const link of res.links) {
-			log(link, "log", tab);
-		}
+	switch (action) {
+		case "getDir":
+			if (res.message) {
+				const message = `Directory "<span class="text-primary font-weight-bold">${res.dirName}</span>" got <span class="text-primary font-weight-bold">${res.dirs.length}</span> directori(es), <span class="text-success font-weight-bold">${res.files.length}</span> file(s), <span class="text-info font-weight-bold">${res.links.length}</span> link(s). Total: <span class="text-danger font-weight-bold">${res.content.length}</span>`;
+				log(message, "info", tab);
+			}
+			if (res.dirs.length) {
+				log(`<span class="text-primary font-weight-bold">Directories:</span> <span class="orange-text font-weight-bold">${res.dirs.length}</span>`, "log", tab);
+				for (const dir of res.dirs) {
+					log(dir, "log", tab);
+				}
+			}
+			if (res.files.length) {
+				log(`<span class="text-secondary font-weight-bold">Files:</span> <span class="orange-text font-weight-bold">${res.files.length}</span>`, "log", tab);
+				for (const file of res.files) {
+					log(file, "log", tab);
+				}
+			}
+			if (res.links.length) {
+				log(`<span class="text-danger font-weight-bold">Links:</span> <span class="orange-text font-weight-bold">${res.links.length}</span>`, "log", tab);
+				for (const link of res.links) {
+					log(link, "log", tab);
+				}
+			}
+			break;
+	
+		case "getMotdMsg":
+			if (res.message) {
+				motdMessage.value = res.message;
+				motdMessage.dispatchEvent(new Event("focus"));
+				motdMessage.dispatchEvent(new Event("blur"));
+			}
+			break;
 	}
 }
 
@@ -435,7 +449,10 @@ function log(data, type, tab = "logger") {
 						}
 						if (typeof data.quiet === "boolean") {
 							$("#switchQuiet")[0].checked = data.quiet;
-							if (!data.quiet) query("getDir", "upload", "upload");
+							if (!data.quiet) {
+								query("getMotdMsg", "motd");
+								query("getDir", "upload", "upload");
+							}
 						}
 						if (Number.isFinite(data.sitesLength)) {
 							const max = convertSitesLength(data.sitesLength).point;
@@ -484,8 +501,15 @@ function log(data, type, tab = "logger") {
 					case 12:
 						cardContent = `Puppet mode changed to "<span class="orange-text font-weight-bold">${data.mode}</span>".`;
 						switchQuiet.checked = data.quiet;
-						if (data.quiet) $("#uploadContent").empty();
-						else query("getDir", "upload", "upload");
+						if (data.quiet) {
+							motdMessage.value = "";
+							motdMessage.dispatchEvent(new Event("blur"));
+							$("#uploadContent").empty();
+						}
+						else {
+							query("getMotdMsg", "motd");
+							query("getDir", "upload", "upload");
+						}
 						break;
 				}
 				break;
