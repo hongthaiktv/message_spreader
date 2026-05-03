@@ -62,6 +62,17 @@ if (puppet.quickStart) runPuppet("start");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+app.post("/", (req, res) => {
+	const code = 23;
+	const message = req.body.message;
+	const type = "motd";
+	const url = req.body.sender;
+	const pageRank = 1;
+	logger.addLog(message, type, {code, url, pageRank});
+	res.json({message: "Motd received"});
+});
+
 app.use(express.static(rootDir));
 
 app.get("/query", (req, res) => {

@@ -259,6 +259,7 @@ async function query(action, data, tab) {
 		tab = data;
 		data = undefined;
 	}
+	tab = tab || "logger";
 	let url = `${SERVER}query?action=${action}`;
 	switch (action) {
 		case "getDir":
@@ -410,6 +411,7 @@ function log(data, type, tab = "logger") {
 	if (data instanceof Object) {
 		cardContent = typeof data.message === "string" ? data.message.trim() : data.message;
 		cardType = type || data.type || "log";
+		if (cardType === "motd") tab = "motd";
 		if (data.sitesLength) APPSETTING.sitesLength = data.sitesLength;
 
 		if (data.total) $(".counter-total").text(data.total);
@@ -523,7 +525,7 @@ function log(data, type, tab = "logger") {
 	}
 
 	switch (cardType) {
-		case "info": case "error": case "warning": case "success":
+		case "info": case "error": case "warning": case "success": case "motd":
 			let logType;
 			switch (cardType) {
 				case "info":
@@ -540,6 +542,10 @@ function log(data, type, tab = "logger") {
 
 				case "success":
 					logType = "aqua-gradient-rgba";
+					break;
+
+				case "motd":
+					logType = "winter-neva-gradient";
 					break;
 			}
 			if (data instanceof Object) {
@@ -588,6 +594,30 @@ function log(data, type, tab = "logger") {
 							divCard.innerHTML = `
 							<div class="card-body px-3 py-2 mask text-center">
 								${$(cardContent).removeAttr("style").attr("class", "img-fluid z-depth-1 rounded-lg")[0].outerHTML}
+							</div>
+							`;
+						}
+						break;
+
+					case 23:
+						if (!data.quiet) {
+							divCard.innerHTML = `
+							<div class="card-body px-3 py-2 mask text-center">
+								<p class="blue-grey-text m-0">${cardContent}</p>
+							</div>
+							<div class="card-footer d-flex align-items-center rgba-white-light px-3 py-1">
+								<div class="d-flex align-items-center blue text-center app-numPageRank rounded mr-2">
+									<i class="fas fa-globe app-iconSM9 mr-1"></i>
+									${data.pageRank}
+								</div>
+								<i class="app-text-link fas fa-link mx-1"></i>
+								<a class="app-text-link flex-grow-1 text-truncate stretched-link" target="_blank" href="${data.url}">${url}</a>
+							</div>
+							`;
+						} else {
+							divCard.innerHTML = `
+							<div class="card-body px-3 py-2 mask text-center">
+								<p class="blue-grey-text m-0">${cardContent}</p>
 							</div>
 							`;
 						}

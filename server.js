@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const multer = require('multer');
+const request = require('request');
 
 const app = express();
 const port = 3001;
@@ -14,6 +15,11 @@ const storage = multer.diskStorage({
 	}
 });
 const uploader = multer({ storage });
+
+randPost({
+	message: "test post from trusted",
+	sender: "http://localhost:3001"
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -60,4 +66,44 @@ app.get("/query", (req, res) => {
 app.listen(port, () => {
 	console.log(`Testing web server running at http://localhost:${port}`);
 });
+
+async function randPost(data) {
+	let counter = 1;
+	let message = data.message;
+	function wait() {
+		return new Promise((resolve) => {
+			const time = 5000;
+			const randTime = Math.floor(Math.random() * time + 1);
+			const url = `http://localhost:3000`;
+			data.message = `${message} | counter: ${counter}`;
+
+			console.log("Sending to:", url, "| Wait:", randTime);
+
+			setTimeout(() => {
+				const options = {
+					method: "POST",
+					url: url,
+					strictSSL: false,
+					json: true,
+					headers: {
+						'User-Agent': 'Mozilla/5.0 (Android 15; Mobile; rv:78.0) Gecko/78.0 Firefox/78.0'
+					},
+					body: data
+				};
+
+				request(options, function (error, response, body) {
+					if (error) {
+						console.error("====> Post:", error.toString());
+						return;
+					}
+				});
+				resolve(data);
+			}, randTime);
+		});
+	}
+	while (counter <= 10) {
+		await wait();
+		++counter;
+	}
+}
 
