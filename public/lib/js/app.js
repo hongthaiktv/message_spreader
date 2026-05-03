@@ -119,6 +119,22 @@ tabCounterFailedHeader.onclick = function () {
 	$("#tabCounterAll").tab("show");
 };
 
+motdMessage.onfocus = function () {
+	$("#motdGroupBtnEdit").toggleClass("d-none d-flex");
+};
+
+motdMessage.onblur = function () {
+	$("#motdGroupBtnEdit").toggleClass("d-none d-flex");
+};
+
+motdBtnAccept.onclick = function () {
+	alert("accept")
+};
+
+motdBtnCancel.onclick = function () {
+	alert("cancel")
+};
+
 //puppet
 let source = new EventSource(`${SERVER}logger`);
 source.onopen = () => SSE = true;
