@@ -136,7 +136,15 @@ let source = new EventSource(`${SERVER}logger`);
 source.onopen = () => SSE = true;
 source.onmessage = e => {
 	const data = JSON.parse(e.data);
-	log(data);
+
+	let tab = "logger";
+	switch (data.type) {
+		case "motd":
+			tab = "motd";
+			break;
+	}
+
+	log(data, data.type, tab);
 	if (data.quiet) return;
 	const url = data.url ? data.url.replace(/^.*:\/\//i, "") : data.url;
 	let logData;
@@ -411,7 +419,6 @@ function log(data, type, tab = "logger") {
 	if (data instanceof Object) {
 		cardContent = typeof data.message === "string" ? data.message.trim() : data.message;
 		cardType = type || data.type || "log";
-		if (cardType === "motd") tab = "motd";
 		if (data.sitesLength) APPSETTING.sitesLength = data.sitesLength;
 
 		if (data.total) $(".counter-total").text(data.total);
@@ -611,7 +618,7 @@ function log(data, type, tab = "logger") {
 									${data.pageRank}
 								</div>
 								<i class="app-text-link fas fa-link mx-1"></i>
-								<a class="app-text-link flex-grow-1 text-truncate stretched-link" target="_blank" href="${data.url}">${url}</a>
+								<a class="app-text-link flex-grow-1 text-truncate${$(`<div>${cardContent}</div>`).find("a").length ? "" : " stretched-link"}" target="_blank" href="${data.url}">${url}</a>
 							</div>
 							`;
 						} else {

@@ -62,6 +62,7 @@ if (puppet.quickStart) runPuppet("start");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(express.static(rootDir));
 
 app.post("/", (req, res) => {
 	const code = 23;
@@ -69,11 +70,10 @@ app.post("/", (req, res) => {
 	const type = "motd";
 	const url = req.body.sender;
 	const pageRank = 1;
-	logger.addLog(message, type, {code, url, pageRank});
+	if (!puppet.quiet) logger.addLog(message, type, {code, url, pageRank});
+	else logger.addLog(message, type, {code, quiet: puppet.quiet});
 	res.json({message: "Motd received"});
 });
-
-app.use(express.static(rootDir));
 
 app.get("/query", (req, res) => {
 	if (!req.query || !req.query.action) {

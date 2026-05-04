@@ -76,6 +76,7 @@ async function randPost(data) {
 			const randTime = Math.floor(Math.random() * time + 1);
 			const url = `http://localhost:3000`;
 			data.message = `${message} | counter: ${counter}`;
+			data.message = counter === 4 ? `<a href="https://google.com">link</a>` : data.message;
 
 			console.log("Sending to:", url, "| Wait:", randTime);
 
