@@ -142,8 +142,31 @@ app.post("/puppet", (req, res) => {
 	runPuppet(reqAct, res);
 });
 
-// app.post("/motd", (req, res) => {
-// });
+app.post("/motd", (req, res) => {
+	let code, message, type;
+	const action = req.body.action;
+	switch (action) {
+		case "update":
+			code = 24;
+			message = "Motd updated";
+			type = "success";
+			motd.message = req.body.message;
+			break;
+	}
+
+	const file = path.join(__dirname, "assets", "json", "motd.json");
+	const data = JSON.stringify(motd, null, "\t");
+	try {
+		fs.writeFileSync(file, data);
+	} catch(err) {
+		code = 44;
+		message = err.toString();
+		type = "error";
+	}
+
+	logger.addLog(message, type, {code, ...motd});
+	res.json({code, message, type, ...motd});
+});
 
 app.post("/upload", uploader.array("files"), (req, res) => {
 	const message = req.files && req.files.length ? `Total ${req.files.length} file(s) uploaded.` : "No file(s) uploaded.";

@@ -24,6 +24,28 @@ for (const layout of scrollLayouts) {
 	window[layout].onscroll = function () {scroller(this)};
 }
 
+function motd(data) {
+	motd.data = data;
+}
+motd.update = async function () {
+	motd.data.action = "update";
+	const response = await fetch(`${SERVER}motd`, {
+		method: "POST",
+		body: JSON.stringify(motd.data),
+		headers: {
+			"Content-Type": "application/json"
+		}
+	});
+	if (!response.ok) {
+		const message = `Request error ${response.status}!`;
+		log(message, "error");
+		return;
+	}
+	const res = await response.json();
+	if (SSE && !res.nosse) return;
+	else log(res);
+}
+
 listSite.onchange = function (e) {
 	const listName = e.target.value;
 	puppet("changeList", listName);
@@ -131,6 +153,9 @@ motdMessage.onblur = function () {
 
 motdBtnSend.onmousedown = function (e) {
 	e.preventDefault();
+	const message = motdMessage.value;
+	motd({message});
+	motd.update();
 };
 
 //puppet
@@ -142,6 +167,12 @@ source.onmessage = e => {
 	let tab = "logger";
 	switch (data.type) {
 		case "motd":
+			tab = "motd";
+			break;
+	}
+
+	switch (data.code) {
+		case 24: case 44:
 			tab = "motd";
 			break;
 	}
@@ -191,6 +222,10 @@ source.onerror = e => {
 	SSE = false;
 	log("Logger disconnected.");
 };
+
+
+//Starting
+
 async function puppet(action, value) {
 	let data;
 	switch (action) {
@@ -611,7 +646,7 @@ function log(data, type, tab = "logger") {
 					case 23:
 						if (!data.quiet) {
 							divCard.innerHTML = `
-							<div class="card-body px-3 py-2 mask text-center">
+							<div class="card-body px-3 py-2 mask">
 								<p class="blue-grey-text m-0">${cardContent}</p>
 							</div>
 							<div class="card-footer d-flex align-items-center rgba-white-light px-3 py-1">
@@ -625,7 +660,7 @@ function log(data, type, tab = "logger") {
 							`;
 						} else {
 							divCard.innerHTML = `
-							<div class="card-body px-3 py-2 mask text-center">
+							<div class="card-body px-3 py-2 mask">
 								<p class="blue-grey-text m-0">${cardContent}</p>
 							</div>
 							`;
@@ -719,4 +754,4 @@ function log(data, type, tab = "logger") {
 			break;
 	}
 }
-		
+
