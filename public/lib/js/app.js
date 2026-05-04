@@ -121,10 +121,12 @@ tabCounterFailedHeader.onclick = function () {
 
 motdMessage.onfocus = function () {
 	$("#motdBtnSend").toggleClass("d-none", false).toggleClass("d-flex", true);
+	this.nextElementSibling.innerText = "Message";
 };
 
 motdMessage.onblur = function () {
 	$("#motdBtnSend").toggleClass("d-none", true).toggleClass("d-flex", false);
+	if (!this.value) this.nextElementSibling.innerText = "What's on your mind?";
 };
 
 motdBtnSend.onmousedown = function (e) {
