@@ -361,6 +361,23 @@ async function query(action, data, tab) {
 					url = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${url}">${url}</a></div>`;
 					$("#urlMainSitesContent").append(url);
 				});
+				$("#urlMainSitesCounter").text(res.mainSitesLength);
+			}
+
+			if (res.trustSites && res.trustSites.length) {
+				res.trustSites.forEach(function (url, index) {
+					url = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${url}">${url}</a></div>`;
+					$("#urlTrustSitesContent").append(url);
+				});
+				$("#urlTrustSitesCounter").text(res.trustSitesLength);
+			}
+
+			if (res.blackSites && res.blackSites.length) {
+				res.blackSites.forEach(function (url, index) {
+					url = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${url}">${url}</a></div>`;
+					$("#urlBlackSitesContent").append(url);
+				});
+				$("#urlBlackSitesCounter").text(res.blackSitesLength);
 			}
 			break;
 	}
