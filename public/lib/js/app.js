@@ -27,7 +27,8 @@ for (const layout of scrollLayouts) {
 function motd(data) {
 	motd.data = data;
 }
-motd.update = async function () {
+motd.update = async function (data) {
+	if (data instanceof Object) motd.data = data;
 	motd.data.action = "update";
 	const response = await fetch(`${SERVER}motd`, {
 		method: "POST",
@@ -154,8 +155,7 @@ motdMessage.onblur = function () {
 motdBtnSend.onmousedown = function (e) {
 	e.preventDefault();
 	const message = motdMessage.value;
-	motd({message});
-	motd.update();
+	motd.update({message});
 };
 
 //puppet
@@ -324,7 +324,7 @@ async function query(action, data, tab) {
 	switch (action) {
 		case "getDir":
 			if (res.message) {
-				const message = `Directory "<span class="text-primary font-weight-bold">${res.dirName}</span>" got <span class="text-primary font-weight-bold">${res.dirs.length}</span> directori(es), <span class="text-success font-weight-bold">${res.files.length}</span> file(s), <span class="text-info font-weight-bold">${res.links.length}</span> link(s). Total: <span class="text-danger font-weight-bold">${res.content.length}</span>`;
+				const message = `Directory <span class="text-primary font-weight-bold">${res.dirName}</span> got <span class="text-primary font-weight-bold">${res.dirs.length}</span> directori(es), <span class="text-success font-weight-bold">${res.files.length}</span> file(s), <span class="text-info font-weight-bold">${res.links.length}</span> link(s). Total: <span class="text-danger font-weight-bold">${res.content.length}</span>`;
 				log(message, "info", tab);
 			}
 			if (res.dirs.length) {
@@ -352,6 +352,13 @@ async function query(action, data, tab) {
 				motdMessage.value = res.message;
 				motdMessage.dispatchEvent(new Event("focus"));
 				motdMessage.dispatchEvent(new Event("blur"));
+			}
+			break;
+
+		case "getListSites":
+			if (res.message) {
+				const message = `<span class="text-primary font-weight-bold">mainSites</span> got <span class="text-primary font-weight-bold">${res.mainSitesLength}</span>, <span class="text-success font-weight-bold">trustSites</span> got <span class="text-success font-weight-bold">${res.trustSitesLength}</span>, <span class="text-info font-weight-bold">blackSites</span> got <span class="text-info font-weight-bold">${res.blackSitesLength}</span> url(s).`;
+				log(message, "info", tab);
 			}
 			break;
 	}
@@ -499,6 +506,7 @@ function log(data, type, tab = "logger") {
 						if (typeof data.quiet === "boolean") {
 							$("#switchQuiet")[0].checked = data.quiet;
 							if (!data.quiet) {
+								query("getListSites", "url");
 								query("getMotdMsg", "motd");
 								query("getDir", "upload", "upload");
 							}
@@ -551,11 +559,13 @@ function log(data, type, tab = "logger") {
 						cardContent = `Puppet mode changed to "<span class="orange-text font-weight-bold">${data.mode}</span>".`;
 						switchQuiet.checked = data.quiet;
 						if (data.quiet) {
+							$("#urlContent").empty();
 							motdMessage.value = "";
 							motdMessage.dispatchEvent(new Event("blur"));
 							$("#uploadContent").empty();
 						}
 						else {
+							query("getListSites", "url");
 							query("getMotdMsg", "motd");
 							query("getDir", "upload", "upload");
 						}

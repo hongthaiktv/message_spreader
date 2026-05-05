@@ -100,7 +100,30 @@ app.get("/query", (req, res) => {
 
 		case "getMotdMsg":
 			if (!puppet.quiet) {
-				res.json({message: motd.message});
+				const message = motd.message;
+				console.log("Motd:", message);
+				res.json({message});
+			}
+			else res.json({quiet: puppet.quiet});
+			break;
+
+		case "getListSites":
+			const mainSitesLength = listSites.mainSites.length;
+			const trustSitesLength = listSites.trustSites.length;
+			const blackSitesLength = listSites.blackSites.length;
+			const message = `"mainSites" got ${mainSitesLength}, "trustSites" got ${trustSitesLength}, "blackSites" got ${blackSitesLength} url(s)`;
+			const listSitesInfo = {
+				message,
+				mainSitesLength,
+				trustSitesLength,
+				blackSitesLength,
+				mainSites: listSites.mainSites.slice(0, 100),
+				trustSites: listSites.trustSites.slice(0, 100),
+				blackSites: listSites.blackSites.slice(0, 100)
+			};
+			if (!puppet.quiet) {
+				console.log(message);
+				res.json(listSitesInfo);
 			}
 			else res.json({quiet: puppet.quiet});
 			break;
