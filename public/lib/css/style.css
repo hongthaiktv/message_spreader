@@ -57,6 +57,30 @@ body {
 	font-size: 1.4em;
 }
 
+.iconBtnUrl {
+	width: 2.5em;
+	height: 3em;
+	position: absolute;
+	top: 0;
+	left: -0.25em;
+	padding-top: 0.5em;
+	padding-left: 0.2em;
+	font-size: 1.5em;
+}
+
+.btnCollapseUrl {
+	padding-left: 4em;
+	min-height: 3em;
+}
+
+.text-mdb {
+	color: #59698D;
+}
+
+.badge-lg {
+	font-size: 0.9em;
+}
+
 .minw-25 { min-width: 25%; }
 .minw-50 { min-width: 50%; }
 .minw-75 { min-width: 75%; }

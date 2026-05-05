@@ -356,9 +356,11 @@ async function query(action, data, tab) {
 			break;
 
 		case "getListSites":
-			if (res.message) {
-				const message = `<span class="text-primary font-weight-bold">mainSites</span> got <span class="text-primary font-weight-bold">${res.mainSitesLength}</span>, <span class="text-success font-weight-bold">trustSites</span> got <span class="text-success font-weight-bold">${res.trustSitesLength}</span>, <span class="text-info font-weight-bold">blackSites</span> got <span class="text-info font-weight-bold">${res.blackSitesLength}</span> url(s).`;
-				log(message, "info", tab);
+			if (res.mainSites && res.mainSites.length) {
+				res.mainSites.forEach(function (url, index) {
+					url = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${url}">${url}</a></div>`;
+					$("#urlMainSitesContent").append(url);
+				});
 			}
 			break;
 	}
@@ -612,7 +614,7 @@ function log(data, type, tab = "logger") {
 								<p class="card-text text-white">${cardContent}</p>
 							</div>
 							<div class="card-footer d-flex align-items-center rgba-white-light px-3 py-1">
-								<div class="d-flex align-items-center secondary-color-dark text-center app-numPageRank rounded mr-2">
+								<div class="d-flex align-items-center secondary-color-dark text-center z-depth-1 app-numPageRank rounded mr-2">
 									<i class="fas fa-globe app-iconSM9 mr-1"></i>
 									${data.pageRank}
 								</div>
@@ -636,7 +638,7 @@ function log(data, type, tab = "logger") {
 								${$(cardContent).removeAttr("style").attr("class", "img-fluid z-depth-1 rounded-lg")[0].outerHTML}
 							</div>
 							<div class="card-footer d-flex align-items-center rgba-white-light px-3 py-1">
-								<div class="d-flex align-items-center secondary-color-dark text-center app-numPageRank rounded mr-2">
+								<div class="d-flex align-items-center secondary-color-dark text-center z-depth-1 app-numPageRank rounded mr-2">
 									<i class="fas fa-globe app-iconSM9 mr-1"></i>
 									${data.pageRank}
 								</div>
@@ -660,7 +662,7 @@ function log(data, type, tab = "logger") {
 								<p class="blue-grey-text m-0">${cardContent}</p>
 							</div>
 							<div class="card-footer d-flex align-items-center rgba-white-light px-3 py-1">
-								<div class="d-flex align-items-center blue text-center app-numPageRank rounded mr-2">
+								<div class="d-flex align-items-center blue text-center z-depth-1 app-numPageRank rounded mr-2">
 									<i class="fas fa-globe app-iconSM9 mr-1"></i>
 									${data.pageRank}
 								</div>
@@ -684,7 +686,7 @@ function log(data, type, tab = "logger") {
 								<p class="card-text text-white">${cardContent}</p>
 							</div>
 							<div class="card-footer d-flex align-items-center rgba-white-light px-3 py-1">
-								<div class="d-flex align-items-center danger-color text-center app-numPageRank rounded mr-2">
+								<div class="d-flex align-items-center danger-color text-center z-depth-1 app-numPageRank rounded mr-2">
 									<i class="fas fa-globe app-iconSM9 mr-1"></i>
 									${data.pageRank}
 								</div>
