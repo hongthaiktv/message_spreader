@@ -533,9 +533,7 @@ function log(data, type, tab = "logger") {
 							$("#switchQuiet")[0].checked = data.quiet;
 							if (!data.quiet) {
 								query("getListSites", "url");
-								$("#urlBtnMainSites").toggleClass("d-none", false);
-								$("#urlBtnTrustSites").toggleClass("d-none", false);
-								$("#urlBtnBlackSites").toggleClass("d-none", false);
+								$("#urlAccordion").toggleClass("d-none", false).toggleClass("d-flex", true);
 								query("getMotdMsg", "motd");
 								query("getDir", "upload", "upload");
 							}
@@ -588,19 +586,17 @@ function log(data, type, tab = "logger") {
 						cardContent = `Puppet mode changed to "<span class="orange-text font-weight-bold">${data.mode}</span>".`;
 						switchQuiet.checked = data.quiet;
 						if (data.quiet) {
+							$("#urlAccordion").toggleClass("d-none", true).toggleClass("d-flex", false);
+							$("#urlAccordion .badge-lg").text("0");
 							$("#urlContent").empty();
-							$("#urlBtnMainSites").toggleClass("d-none", true);
-							$("#urlBtnTrustSites").toggleClass("d-none", true);
-							$("#urlBtnBlackSites").toggleClass("d-none", true);
 							motdMessage.value = "";
 							motdMessage.dispatchEvent(new Event("blur"));
+							$("#motdContent").empty();
 							$("#uploadContent").empty();
 						}
 						else {
 							query("getListSites", "url");
-							$("#urlBtnMainSites").toggleClass("d-none", false);
-							$("#urlBtnTrustSites").toggleClass("d-none", false);
-							$("#urlBtnBlackSites").toggleClass("d-none", false);
+							$("#urlAccordion").toggleClass("d-none", false).toggleClass("d-flex", true);
 							query("getMotdMsg", "motd");
 							query("getDir", "upload", "upload");
 						}
