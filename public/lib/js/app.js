@@ -358,24 +358,27 @@ async function query(action, data, tab) {
 		case "getListSites":
 			if (res.mainSites && res.mainSites.length) {
 				res.mainSites.forEach(function (url, index) {
-					url = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${url}">${url}</a></div>`;
-					$("#urlMainSitesContent").append(url);
+					const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
+					const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
+					$("#urlMainSitesContent").append(link);
 				});
 				$("#urlMainSitesCounter").text(res.mainSitesLength);
 			}
 
 			if (res.trustSites && res.trustSites.length) {
 				res.trustSites.forEach(function (url, index) {
-					url = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${url}">${url}</a></div>`;
-					$("#urlTrustSitesContent").append(url);
+					const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
+					const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
+					$("#urlTrustSitesContent").append(link);
 				});
 				$("#urlTrustSitesCounter").text(res.trustSitesLength);
 			}
 
 			if (res.blackSites && res.blackSites.length) {
 				res.blackSites.forEach(function (url, index) {
-					url = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${url}">${url}</a></div>`;
-					$("#urlBlackSitesContent").append(url);
+					const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
+					const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
+					$("#urlBlackSitesContent").append(link);
 				});
 				$("#urlBlackSitesCounter").text(res.blackSitesLength);
 			}
