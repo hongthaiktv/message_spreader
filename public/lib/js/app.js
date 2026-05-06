@@ -588,6 +588,7 @@ function log(data, type, tab = "logger") {
 						if (data.quiet) {
 							$("#urlAccordion").toggleClass("d-none", true).toggleClass("d-flex", false);
 							$("#urlAccordion .badge-lg").text("0");
+							$("#urlAccordion .urlCollapse > div").empty();
 							$("#urlContent").empty();
 							motdMessage.value = "";
 							motdMessage.dispatchEvent(new Event("blur"));
