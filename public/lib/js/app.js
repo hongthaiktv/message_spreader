@@ -526,6 +526,9 @@ function log(data, type, tab = "logger") {
 							$("#switchQuiet")[0].checked = data.quiet;
 							if (!data.quiet) {
 								query("getListSites", "url");
+								$("#urlBtnMainSites").toggleClass("d-none", false);
+								$("#urlBtnTrustSites").toggleClass("d-none", false);
+								$("#urlBtnBlackSites").toggleClass("d-none", false);
 								query("getMotdMsg", "motd");
 								query("getDir", "upload", "upload");
 							}
@@ -579,12 +582,18 @@ function log(data, type, tab = "logger") {
 						switchQuiet.checked = data.quiet;
 						if (data.quiet) {
 							$("#urlContent").empty();
+							$("#urlBtnMainSites").toggleClass("d-none", true);
+							$("#urlBtnTrustSites").toggleClass("d-none", true);
+							$("#urlBtnBlackSites").toggleClass("d-none", true);
 							motdMessage.value = "";
 							motdMessage.dispatchEvent(new Event("blur"));
 							$("#uploadContent").empty();
 						}
 						else {
 							query("getListSites", "url");
+							$("#urlBtnMainSites").toggleClass("d-none", false);
+							$("#urlBtnTrustSites").toggleClass("d-none", false);
+							$("#urlBtnBlackSites").toggleClass("d-none", false);
 							query("getMotdMsg", "motd");
 							query("getDir", "upload", "upload");
 						}
