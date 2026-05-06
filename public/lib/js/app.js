@@ -142,6 +142,10 @@ tabCounterFailedHeader.onclick = function () {
 	$("#tabCounterAll").tab("show");
 };
 
+$(".urlCollapse").on("hidden.bs.collapse", function () {
+	$("#urlCollapseContent").collapse("show");
+});
+
 motdMessage.onfocus = function () {
 	$("#motdBtnSend").toggleClass("d-none", false).toggleClass("d-flex", true);
 	this.nextElementSibling.innerText = "Message";
