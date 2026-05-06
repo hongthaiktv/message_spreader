@@ -57,7 +57,7 @@ body {
 	font-size: 1.4em;
 }
 
-.iconBtnUrl {
+.iconBtnCollapse {
 	width: 2.5em;
 	height: 3em;
 	position: absolute;
@@ -68,7 +68,7 @@ body {
 	font-size: 1.5em;
 }
 
-.btnUrlCollapse {
+.btnCollapse {
 	padding-left: 4em;
 	min-height: 3em;
 }

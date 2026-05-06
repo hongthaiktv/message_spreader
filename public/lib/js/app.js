@@ -142,8 +142,20 @@ tabCounterFailedHeader.onclick = function () {
 	$("#tabCounterAll").tab("show");
 };
 
-$(".urlCollapse").on("hidden.bs.collapse", function () {
+$("#urlAccordion .contentCollapse").on("hidden.bs.collapse", function () {
 	$("#urlCollapseContent").collapse("show");
+});
+
+$("#uploadAccordion .contentCollapse").on("hidden.bs.collapse", function () {
+	$("#uploadCollapseContent").collapse("show");
+});
+
+$(".contentCollapse").on("hide.bs.collapse", function () {
+	$(this).prev().children("i").last().toggleClass("fa-angle-double-down", true).toggleClass("fa-angle-double-up", false);
+});
+
+$(".contentCollapse").on("show.bs.collapse", function () {
+	$(this).prev().children("i").last().toggleClass("fa-angle-double-down", false).toggleClass("fa-angle-double-up", true);
 });
 
 motdMessage.onfocus = function () {
@@ -300,7 +312,7 @@ pupBtnUpload.addEventListener("change", async function (e) {
 	}
 	const res = await response.json();
 	log(res.message, "success", "upload");
-	query("getDir", "upload", "upload");
+	if (!$("#switchQuiet")[0].checked) query("getDir", "upload", "upload");
 });
 
 async function query(action, data, tab) {
@@ -324,31 +336,31 @@ async function query(action, data, tab) {
 		return;
 	}
 	const res = await response.json();
-	if (res.quiet) return;
+	if (res.quiet) return res;
 	switch (action) {
 		case "getDir":
-			if (res.message) {
-				const message = `Directory <span class="text-primary font-weight-bold">${res.dirName}</span> got <span class="text-primary font-weight-bold">${res.dirs.length}</span> directori(es), <span class="text-success font-weight-bold">${res.files.length}</span> file(s), <span class="text-info font-weight-bold">${res.links.length}</span> link(s). Total: <span class="text-danger font-weight-bold">${res.content.length}</span>`;
-				log(message, "info", tab);
-			}
-			if (res.dirs.length) {
-				log(`<span class="text-primary font-weight-bold">Directories:</span> <span class="orange-text font-weight-bold">${res.dirs.length}</span>`, "log", tab);
+			$("#uploadAccordion .contentCollapse > div").empty();
+			if (res.dirs && res.dirs.length) {
+				$("#uploadDirectoriesCounter").text(res.dirs.length);
 				for (const dir of res.dirs) {
-					log(dir, "log", tab);
+					$("#uploadDirectoriesContent").append(`<div>${dir}</div>`);
 				}
-			}
-			if (res.files.length) {
-				log(`<span class="text-secondary font-weight-bold">Files:</span> <span class="orange-text font-weight-bold">${res.files.length}</span>`, "log", tab);
+				$("#uploadBtnDirectories").toggleClass("d-none", false);
+			} else $("#uploadBtnDirectories").toggleClass("d-none", true);
+			if (res.files && res.files.length) {
+				$("#uploadFilesCounter").text(res.files.length);
 				for (const file of res.files) {
-					log(file, "log", tab);
+					$("#uploadFilesContent").append(`<div>${file}</div>`);
 				}
-			}
-			if (res.links.length) {
-				log(`<span class="text-danger font-weight-bold">Links:</span> <span class="orange-text font-weight-bold">${res.links.length}</span>`, "log", tab);
+				$("#uploadBtnFiles").toggleClass("d-none", false);
+			} else $("#uploadBtnFiles").toggleClass("d-none", true);
+			if (res.links && res.links.length) {
+				$("#uploadLinksCounter").text(res.links.length);
 				for (const link of res.links) {
-					log(link, "log", tab);
+					$("#uploadLinksContent").append(`<div>${link}</div>`);
 				}
-			}
+				$("#uploadBtnLinks").toggleClass("d-none", false);
+			} else $("#uploadBtnLinks").toggleClass("d-none", true);
 			break;
 	
 		case "getMotdMsg":
@@ -360,6 +372,7 @@ async function query(action, data, tab) {
 			break;
 
 		case "getListSites":
+			$("#urlAccordion .contentCollapse > div").empty();
 			if (res.mainSites && res.mainSites.length) {
 				res.mainSites.forEach(function (url, index) {
 					const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
@@ -588,11 +601,16 @@ function log(data, type, tab = "logger") {
 						if (data.quiet) {
 							$("#urlAccordion").toggleClass("d-none", true).toggleClass("d-flex", false);
 							$("#urlAccordion .badge-lg").text("0");
-							$("#urlAccordion .urlCollapse > div").empty();
+							$("#urlAccordion .contentCollapse > div").empty();
 							$("#urlContent").empty();
 							motdMessage.value = "";
 							motdMessage.dispatchEvent(new Event("blur"));
 							$("#motdContent").empty();
+							$("#uploadBtnDirectories").toggleClass("d-none", true);
+							$("#uploadBtnFiles").toggleClass("d-none", true);
+							$("#uploadBtnLinks").toggleClass("d-none", true);
+							$("#uploadAccordion .badge-lg").text("0");
+							$("#uploadAccordion .contentCollapse > div").empty();
 							$("#uploadContent").empty();
 						}
 						else {
