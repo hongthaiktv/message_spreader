@@ -1,12 +1,13 @@
 {
-	"id": 2026,
-	"message": "What's on your mind?",
-	"spreader": "http://localhost:3000",
-	"slogan": "In God We Trust",
-	"location": {
-		"name": "Vatican City",
-		"coordinate": "41.902187,12.453938",
-		"plusCode": "8FHJWF23+VH"
+	"integrity": "573bad7749fc0fd3ba46cd64cadd8e686ef0ff75",
+	"data": {
+		"message": "What's on your mind?",
+		"slogan": "In God We Trust",
+		"location": {
+			"name": "Vatican City",
+			"coordinate": "41.902187,12.453938",
+			"plusCode": "8FHJWF23+VH"
+		}
 	},
-	"integrity": "b601451ecb4e648a84078071b8df724dd4348050"
+	"spreader": "http://localhost:3000"
 }
