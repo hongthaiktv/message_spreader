@@ -15,6 +15,7 @@ getDir(uploadDir, true);
 const app = express();
 const port = 3000;
 const logger = new Logger("");
+const motdLogger = new Logger({prefix: "", record: true});
 const storage = multer.diskStorage({
 	destination: uploadDir,
 	filename: function (req, file, cb) {
@@ -31,6 +32,7 @@ const listSites = {
 	urlFailed: [],
 	urlSuccess: []
 };
+
 const puppet = {
 	started: false,
 	quiet: true,
@@ -66,12 +68,28 @@ app.use(express.static(rootDir));
 
 app.post("/", (req, res) => {
 	const code = 23;
-	const message = req.body.message;
+	const message = req.body;
 	const type = "motd";
-	const url = req.body.sender;
-	const pageRank = 1;
-	if (!puppet.quiet) logger.addLog(message, type, {code, url, pageRank});
+	const pageRank = 0;
+	const { spreader, integrity } = message;
+	const motdLogs = motdLogger.getLogs();
+	const motdSpreaders = [];
+	for (const {spreader} of motdLogs) {
+		motdSpreaders.push(spreader);
+	}
+	let motdSpreaderIndex;
+	for (let i = 0; i < motdSpreaders.length; i++) {
+		const motdSpreader = motdSpreaders[i];
+		if (motdSpreader === spreader) {
+			motdSpreaderIndex = i;
+			break;
+		}
+	}
+	if (motdSpreaderIndex === undefined) motdLogger.addLog({messages: [message], spreader}, type);
+	else motdLogs[motdSpreaderIndex].messages.push(message);
+	if (!puppet.quiet) logger.addLog(message, type, {code, spreader, pageRank});
 	else logger.addLog(message, type, {code, quiet: puppet.quiet});
+	console.log(motdLogs);
 	res.json({message: "Motd received"});
 });
 

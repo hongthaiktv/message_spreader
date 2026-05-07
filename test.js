@@ -1,3 +1,3 @@
-let s = undefined;
-if (s !== "") console.log("not empty");
-else console.log("empty");
+let s = "abc";
+if (!(s instanceof Object)) console.log("object");
+else console.log("not an object");

@@ -3,6 +3,7 @@ const path = require('path');
 const express = require('express');
 const multer = require('multer');
 const request = require('request');
+const motd = require('./assets/json/motd.json');
 
 const app = express();
 const port = 3001;
@@ -16,10 +17,13 @@ const storage = multer.diskStorage({
 });
 const uploader = multer({ storage });
 
-randPost({
-	message: "test post from trusted",
-	sender: "http://localhost:3001"
-});
+// randPost({
+// 	message: "test post from trusted",
+// 	spreader: "http://localhost:3001"
+// });
+
+motd.spreader = "http://localhost:3001";
+randPost(motd);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -69,14 +73,15 @@ app.listen(port, () => {
 
 async function randPost(data) {
 	let counter = 1;
-	let message = data.message;
+	const msgData = data.data;
+	let message = msgData.message;
 	function wait() {
 		return new Promise((resolve) => {
 			const time = 5000;
 			const randTime = Math.floor(Math.random() * time + 1);
 			const url = `http://localhost:3000`;
-			data.message = `${message} | counter: ${counter}`;
-			data.message = counter === 4 ? `<a href="https://google.com">link</a>` : data.message;
+			msgData.message = counter === 3 ? `<a href="https://google.com">link</a>` : `${message} | counter: ${counter}`;
+			data.spreader = counter === 4 ? "http://localhost:3002" : "http://localhost:3001";
 
 			console.log("Sending to:", url, "| Wait:", randTime);
 

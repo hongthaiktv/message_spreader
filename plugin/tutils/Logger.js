@@ -1,12 +1,16 @@
 class Logger extends EventTarget {
 	#clients = [];
 	#logs = [];
-	#prefix = "Logger: ";
+	#options = {
+		prefix: "Logger: ",
+		output: true,
+		record: false
+	};
 
 	constructor(name) {
 		super();
-		if (name === "") this.#prefix = "";
-		else if (name !== undefined) this.#prefix = `${name}: `;
+		if (typeof name === "string") this.#options.prefix = name;
+		else if (name instanceof Object) this.#options = {...this.#options, ...name};
 	}
 
 	#update(act, log, client) {
@@ -24,7 +28,7 @@ class Logger extends EventTarget {
 	addClient(client, type = "log", logData = {}, output = true) {
 		this.#clients.push(client);
 		const total = this.#clients.length;
-		const msg = `${this.#prefix}Client added. Total: ${total}`;
+		const msg = `${this.#options.prefix}Client added. Total: ${total}`;
 		if (output) console.log(msg);
 		if (!logData instanceof Object) {
 			console.error("Wrong log data!");
@@ -41,22 +45,20 @@ class Logger extends EventTarget {
 	}
 
 	addLog(log, type = "log", logData = {}, output) {
-		let options = {
-			output: true,
-			record: false
-		};
+		let options = {...this.#options};
 		if (typeof output === "boolean") options.output = output;
 		else if (output instanceof Object) options = {...options, ...output};
-		log = log.trim();
 		if (options.record) this.#logs.push(log);
-		const msg = `${this.#prefix}${log}`;
+		if (!(log instanceof Object)) {
+			log = `${this.#options.prefix}${log}`;
+			if (log && options.output) console.log(log);
+		}
 		if (!logData instanceof Object) {
 			console.error("Wrong log data!");
 			return;
 		}
-		logData.message = msg;
+		logData.message = log;
 		logData.type = type;
-		if (log && options.output) console.log(msg);
 		this.#update("update", logData);
 	}
 
@@ -71,7 +73,7 @@ class Logger extends EventTarget {
 			const index = clients.indexOf(client);
 			clients.splice(index, 1);
 			total = clients.length;
-			msg = `${this.#prefix}Client disconnected. Left: ${total}`;
+			msg = `${this.#options.prefix}Client disconnected. Left: ${total}`;
 			if (output) console.log(msg);
 		}
 		if (!logData instanceof Object) {
@@ -85,7 +87,15 @@ class Logger extends EventTarget {
 	}
 
 	setPrefix(name) {
-		this.#prefix = name;
+		this.#options.prefix = name;
+	}
+
+	getOptions() {
+		return this.#options;
+	}
+
+	setOptions(options) {
+		this.#options = {...this.#options, ...options};
 	}
 
 	clear() {
