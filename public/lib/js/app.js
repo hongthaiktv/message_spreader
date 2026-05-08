@@ -32,10 +32,10 @@ motd.update = async function (data) {
 	motd.data.action = "update";
 	const response = await fetch(`${SERVER}motd`, {
 		method: "POST",
-		body: JSON.stringify(motd.data),
 		headers: {
 			"Content-Type": "application/json"
-		}
+		},
+		body: JSON.stringify(motd.data)
 	});
 	if (!response.ok) {
 		const message = `Request error ${response.status}!`;

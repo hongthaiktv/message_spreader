@@ -135,7 +135,7 @@ app.get("/query", (req, res) => {
 
 		case "getMotdMsg":
 			if (!puppet.quiet) {
-				const message = motd.message;
+				const message = motd.data.message;
 				console.log("Motd:", message);
 				res.json({message});
 			}
@@ -208,7 +208,7 @@ app.post("/motd", (req, res) => {
 			code = 24;
 			message = "Motd updated";
 			type = "success";
-			motd.message = req.body.message;
+			motd.data.message = req.body.message;
 			break;
 	}
 
