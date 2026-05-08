@@ -48,17 +48,18 @@ class Logger extends EventTarget {
 		let options = {...this.#options};
 		if (typeof output === "boolean") options.output = output;
 		else if (output instanceof Object) options = {...options, ...output};
-		if (options.record) this.#logs.push(log);
-		if (!(log instanceof Object)) {
-			log = `${this.#options.prefix}${log}`;
-			if (log && options.output) console.log(log);
-		}
-		if (!logData instanceof Object) {
+		if (!(logData instanceof Object)) {
 			console.error("Wrong log data!");
 			return;
 		}
-		logData.message = log;
-		logData.type = type;
+		if (!(log instanceof Object)) {
+			log = `${this.#options.prefix}${log}`;
+			if (log && options.output) console.log(log);
+			logData.message = log;
+			logData.type = type;
+		}
+		else logData = {...log, ...logData, type};
+		if (options.record) this.#logs.push(logData);
 		this.#update("update", logData);
 	}
 

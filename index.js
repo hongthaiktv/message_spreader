@@ -68,29 +68,46 @@ app.use(express.static(rootDir));
 
 app.post("/", (req, res) => {
 	const code = 23;
-	const message = req.body;
 	const type = "motd";
-	const pageRank = 0;
-	const { spreader, integrity } = message;
+	const motdMessage = req.body;
+	const { spreader, integrity } = motdMessage;
 	const motdLogs = motdLogger.getLogs();
-	const motdSpreaders = [];
-	for (const {spreader} of motdLogs) {
-		motdSpreaders.push(spreader);
-	}
-	let motdSpreaderIndex;
-	for (let i = 0; i < motdSpreaders.length; i++) {
-		const motdSpreader = motdSpreaders[i];
-		if (motdSpreader === spreader) {
-			motdSpreaderIndex = i;
+	let existMessage = false;
+
+	for (let i = 0; i < motdLogs.length; i++) {
+		const motdIntegrity = motdLogs[i].integrity;
+		if (motdIntegrity === integrity) {
+			existMessage = true;
 			break;
 		}
 	}
-	if (motdSpreaderIndex === undefined) motdLogger.addLog({messages: [message], spreader}, type);
-	else motdLogs[motdSpreaderIndex].messages.push(message);
-	if (!puppet.quiet) logger.addLog(message, type, {code, spreader, pageRank});
-	else logger.addLog(message, type, {code, quiet: puppet.quiet});
-	console.log(motdLogs);
-	res.json({message: "Motd received"});
+
+	if (!existMessage) {
+		motdLogger.addLog(motdMessage, type);
+		let pageRank = 0;
+		const trustSites = listSites.trustSites;
+		for (let i = 0; i < trustSites.length; i++) {
+			let trustSpreader = trustSites[i];
+			if (trustSpreader instanceof Object) trustSpreader = trustSpreader.url;
+			if (trustSpreader === spreader) {
+				pageRank = i + 1;
+				break;
+			}
+		}
+
+		if (!puppet.quiet) logger.addLog(motdMessage, type, {code, pageRank});
+		else {
+			delete motdMessage.spreader;
+			logger.addLog(motdMessage, type, {code});
+		}
+		const message = "Motd forwarding...";
+		console.log(message);
+		res.json({message});
+	} else {
+		const message = "Motd has already forwarded";
+		console.log(message);
+		res.json({message});
+	}
 });
 
 app.get("/query", (req, res) => {

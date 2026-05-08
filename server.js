@@ -74,7 +74,8 @@ app.listen(port, () => {
 async function randPost(data) {
 	let counter = 1;
 	const msgData = data.data;
-	let message = msgData.message;
+	const message = msgData.message;
+	const integrity = data.integrity;
 	function wait() {
 		return new Promise((resolve) => {
 			const time = 5000;
@@ -82,6 +83,7 @@ async function randPost(data) {
 			const url = `http://localhost:3000`;
 			msgData.message = counter === 3 ? `<a href="https://google.com">link</a>` : `${message} | counter: ${counter}`;
 			data.spreader = counter === 4 ? "http://localhost:3002" : "http://localhost:3001";
+			data.integrity = counter === 5 ? `new integ: ${integrity}` : integrity;
 
 			console.log("Sending to:", url, "| Wait:", randTime);
 
