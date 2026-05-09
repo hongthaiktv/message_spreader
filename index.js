@@ -103,6 +103,7 @@ app.post("/", (req, res) => {
 		}
 		const message = "Motd forwarding...";
 		console.log(message);
+		motdMessage.spreader = domain;
 		postTrustSites(motdMessage, spreader);
 		res.json({message});
 	} else {
