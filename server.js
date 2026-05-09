@@ -73,17 +73,19 @@ app.listen(port, () => {
 
 async function randPost(data) {
 	let counter = 1;
-	const msgData = data.data;
-	const message = msgData.message;
-	const integrity = data.integrity;
+	const postData = {...data};
 	function wait() {
 		return new Promise((resolve) => {
 			const time = 5000;
 			const randTime = Math.floor(Math.random() * time + 1);
 			const url = `http://localhost:3000`;
-			msgData.message = counter === 3 ? `<a href="https://google.com">link</a>` : `${message} | counter: ${counter}`;
-			data.spreader = counter === 4 ? "http://localhost:3002" : "http://localhost:3001";
-			data.integrity = counter === 5 ? `new integ: ${integrity}` : integrity;
+			if (counter === 2) {
+				postData.spreader = "https://onepage.web.app";
+				postData.integrity = `counter 2: ${postData.integrity}`;
+			}
+			if (counter === 3) postData.message = `<a href="https://google.com">link</a>`;
+			if (counter === 4) postData.spreader = `http://localhost:3002`;
+			if (counter === 5) postData.integrity = `new integ: ${postData.integrity}`;
 
 			console.log("Sending to:", url, "| Wait:", randTime);
 
@@ -96,7 +98,7 @@ async function randPost(data) {
 					headers: {
 						'User-Agent': 'Mozilla/5.0 (Android 15; Mobile; rv:78.0) Gecko/78.0 Firefox/78.0'
 					},
-					body: data
+					body: postData
 				};
 
 				request(options, function (error, response, body) {

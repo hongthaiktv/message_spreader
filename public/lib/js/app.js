@@ -27,15 +27,13 @@ for (const layout of scrollLayouts) {
 function motd(data) {
 	motd.data = data;
 }
-motd.update = async function (data) {
-	if (data instanceof Object) motd.data = data;
-	motd.data.action = "update";
-	const response = await fetch(`${SERVER}motd`, {
+motd.update = async function (data = motd.data) {
+	const response = await fetch(`${SERVER}motd?action=update`, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json"
 		},
-		body: JSON.stringify(motd.data)
+		body: JSON.stringify(data)
 	});
 	if (!response.ok) {
 		const message = `Request error ${response.status}!`;
@@ -368,6 +366,16 @@ async function query(action, data, tab) {
 				motdMessage.value = res.message;
 				motdMessage.dispatchEvent(new Event("focus"));
 				motdMessage.dispatchEvent(new Event("blur"));
+			}
+			if (res.motdMessages && res.motdMessages.length) {
+				for (const {code, type, pageRank, data, spreader} of res.motdMessages) {
+					const logData = {
+						code, type, pageRank,
+						message: data.message,
+						url: spreader
+					};
+					log(logData);
+				}
 			}
 			break;
 

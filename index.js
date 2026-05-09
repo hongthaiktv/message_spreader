@@ -70,7 +70,7 @@ app.post("/", (req, res) => {
 	const code = 23;
 	const type = "motd";
 	const motdMessage = req.body;
-	const { spreader, integrity } = motdMessage;
+	const { integrity, spreader } = motdMessage;
 	const motdLogs = motdLogger.getLogs();
 	let existMessage = false;
 
@@ -83,7 +83,6 @@ app.post("/", (req, res) => {
 	}
 
 	if (!existMessage) {
-		motdLogger.addLog(motdMessage, type);
 		let pageRank = 0;
 		const trustSites = listSites.trustSites;
 		for (let i = 0; i < trustSites.length; i++) {
@@ -95,6 +94,7 @@ app.post("/", (req, res) => {
 			}
 		}
 
+		motdLogger.addLog(motdMessage, type, {code, pageRank});
 		if (!puppet.quiet) logger.addLog(motdMessage, type, {code, pageRank});
 		else {
 			delete motdMessage.spreader;
@@ -136,8 +136,9 @@ app.get("/query", (req, res) => {
 		case "getMotdMsg":
 			if (!puppet.quiet) {
 				const message = motd.data.message;
+				const motdMessages = motdLogger.getLogs();
 				console.log("Motd:", message);
-				res.json({message});
+				res.json({message, motdMessages});
 			}
 			else res.json({quiet: puppet.quiet});
 			break;
@@ -202,11 +203,11 @@ app.post("/puppet", (req, res) => {
 
 app.post("/motd", (req, res) => {
 	let code, message, type;
-	const action = req.body.action;
+	const action = req.query.action;
 	switch (action) {
 		case "update":
 			code = 24;
-			message = "Motd updated";
+			message = `Motd updated: "${req.body.message}"`;
 			type = "success";
 			motd.data.message = req.body.message;
 			break;
