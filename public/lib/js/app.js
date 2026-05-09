@@ -176,16 +176,22 @@ motdBtnSend.onmousedown = function (e) {
 let source = new EventSource(`${SERVER}logger`);
 source.onopen = () => SSE = true;
 source.onmessage = e => {
-	const data = JSON.parse(e.data);
+	let data = JSON.parse(e.data);
 
 	let tab = "logger";
-	switch (data.type) {
-		case "motd":
-			tab = "motd";
-			break;
-	}
-
 	switch (data.code) {
+		case 23:
+			tab = "motd";
+			data = {
+				code: data.code, 
+				type: data.type,
+				pageRank: data.pageRank,
+				message: data.data.message,
+				url: data.spreader,
+				quiet: data.quiet
+			};
+			break;
+
 		case 24: case 44:
 			tab = "motd";
 			break;
@@ -384,6 +390,7 @@ async function query(action, data, tab) {
 			$("#urlAccordion .contentCollapse > div").empty();
 			if (res.mainSites && res.mainSites.length) {
 				res.mainSites.forEach(function (url, index) {
+					if (url instanceof Object) url = url.url;
 					const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
 					const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
 					$("#urlMainSitesContent").append(link);
@@ -393,6 +400,7 @@ async function query(action, data, tab) {
 
 			if (res.trustSites && res.trustSites.length) {
 				res.trustSites.forEach(function (url, index) {
+					if (url instanceof Object) url = url.url;
 					const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
 					const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
 					$("#urlTrustSitesContent").append(link);
@@ -402,6 +410,7 @@ async function query(action, data, tab) {
 
 			if (res.blackSites && res.blackSites.length) {
 				res.blackSites.forEach(function (url, index) {
+					if (url instanceof Object) url = url.url;
 					const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
 					const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
 					$("#urlBlackSitesContent").append(link);

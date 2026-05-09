@@ -7,13 +7,14 @@ const multer = require('multer');
 const { JSDOM, VirtualConsole } = require("jsdom");
 const { Logger, FormUpload } = require('./plugin/tutils/index.js');
 const motd = require('./assets/json/motd.json');
+const port = 3000;
+const domain = process.env.DOMAIN || `http://localhost:${port}`;
 
 const rootDir = path.join(__dirname, "public");
 const uploadDir = path.join(rootDir, "upload");
 getDir(uploadDir, true);
 
 const app = express();
-const port = 3000;
 const logger = new Logger("");
 const motdLogger = new Logger({prefix: "", record: true});
 const storage = multer.diskStorage({
@@ -98,10 +99,11 @@ app.post("/", (req, res) => {
 		if (!puppet.quiet) logger.addLog(motdMessage, type, {code, pageRank});
 		else {
 			delete motdMessage.spreader;
-			logger.addLog(motdMessage, type, {code});
+			logger.addLog(motdMessage, type, {code, quiet: puppet.quiet});
 		}
 		const message = "Motd forwarding...";
 		console.log(message);
+		postTrustSites(motdMessage, spreader);
 		res.json({message});
 	} else {
 		const message = "Motd has already forwarded";
@@ -587,6 +589,32 @@ async function randRequest() {
 	}
 	while (puppet.started) {
 		await wait();
+	}
+}
+
+function postTrustSites(data, spreader) {
+	const trustSites = listSites.trustSites;
+	for (let url of trustSites) {
+		if (url instanceof Object) url = url.url;
+		if (url === domain || url === spreader) continue;
+		if (!/^http/i.test(url)) url = `https://${url}`;
+		const options = {
+			method: "POST",
+			url,
+			strictSSL: false,
+			json: true,
+			headers: {
+				'User-Agent': 'Mozilla/5.0 (Android 15; Mobile; rv:78.0) Gecko/78.0 Firefox/78.0'
+			},
+			body: data
+		};
+
+		request(options, function (error, response, body) {
+			if (error) {
+				if (!puppet.quiet) console.error("Motd forward error:", error.toString());
+				return;
+			}
+		});
 	}
 }
 

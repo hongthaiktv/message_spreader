@@ -17,11 +17,6 @@ const storage = multer.diskStorage({
 });
 const uploader = multer({ storage });
 
-// randPost({
-// 	message: "test post from trusted",
-// 	spreader: "http://localhost:3001"
-// });
-
 motd.spreader = "http://localhost:3001";
 randPost(motd);
 
@@ -82,8 +77,9 @@ async function randPost(data) {
 			if (counter === 2) {
 				postData.spreader = "https://onepage.web.app";
 				postData.integrity = `counter 2: ${postData.integrity}`;
+				postData.data.message = `new message with <a href="https://google.com" target="_blank">link</a>`;
 			}
-			if (counter === 3) postData.message = `<a href="https://google.com">link</a>`;
+			if (counter === 3) postData.data.message = `<a href="https://google.com" target="_blank">link</a>`;
 			if (counter === 4) postData.spreader = `http://localhost:3002`;
 			if (counter === 5) postData.integrity = `new integ: ${postData.integrity}`;
 
