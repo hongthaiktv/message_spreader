@@ -368,13 +368,14 @@ async function query(action, data, tab) {
 				motdMessage.dispatchEvent(new Event("blur"));
 			}
 			if (res.motdMessages && res.motdMessages.length) {
+				$("#motdContent").empty();
 				for (const {code, type, pageRank, data, spreader} of res.motdMessages) {
 					const logData = {
 						code, type, pageRank,
 						message: data.message,
 						url: spreader
 					};
-					log(logData);
+					log(logData, type, tab);
 				}
 			}
 			break;
@@ -720,9 +721,9 @@ function log(data, type, tab = "logger") {
 							<div class="card-footer d-flex align-items-center rgba-white-light px-3 py-1">
 								<div class="d-flex align-items-center blue text-center z-depth-1 app-numPageRank rounded mr-2">
 									<i class="fas fa-globe app-iconSM9 mr-1"></i>
-									${data.pageRank}
+									${data.pageRank ? data.pageRank : `<i class="fas fa-question app-iconSM9" style="margin: 0.15em;"></i>`}
 								</div>
-								<i class="app-text-link fas fa-link mx-1"></i>
+								<i class="app-text-link fas fa-bullhorn mx-1"></i>
 								<a class="app-text-link flex-grow-1 text-truncate${$(`<div>${cardContent}</div>`).find("a").length ? "" : " stretched-link"}" target="_blank" href="${data.url}">${url}</a>
 							</div>
 							`;
