@@ -58,7 +58,10 @@ class Logger extends EventTarget {
 			logData.message = log;
 			logData.type = type;
 		}
-		else logData = {...log, ...logData, type};
+		else {
+			log = JSON.parse(JSON.stringify(log));
+			logData = {...log, ...logData, type};
+		}
 		if (options.record) this.#logs.push(logData);
 		this.#update("update", logData);
 	}

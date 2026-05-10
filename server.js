@@ -75,13 +75,17 @@ async function randPost(data) {
 			const url = `http://localhost:3000`;
 			const postData = JSON.parse(JSON.stringify(data));
 			if (counter === 2) {
-				postData.spreader = "https://onepage.web.app";
 				postData.integrity = `counter 2: ${postData.integrity}`;
+				postData.spreader = "https://onepage.web.app";
 				postData.data.message = `new message with <a href="https://google.com" target="_blank">link</a>`;
 			}
 			if (counter === 3) postData.data.message = `<a href="https://google.com" target="_blank">link</a>`;
 			if (counter === 4) postData.spreader = `http://localhost:3002`;
-			if (counter === 5) postData.integrity = `new integ: ${postData.integrity}`;
+			if (counter === 5) {
+				postData.integrity = `new integ: ${postData.integrity}`;
+				postData.spreader = "http://localhost:3002";
+				postData.data.message = "message from 3002";
+			}
 
 			console.log("Sending to:", url, "| Wait:", randTime);
 
