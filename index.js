@@ -104,7 +104,7 @@ app.post("/", (req, res) => {
 		const message = "Motd forwarding...";
 		console.log(message);
 		motdMessage.spreader = domain;
-		postTrustSites(motdMessage, spreader);
+		deliverMotd(motdMessage, spreader);
 		res.json({message});
 	} else {
 		const message = "Motd has already forwarded";
@@ -593,7 +593,33 @@ async function randRequest() {
 	}
 }
 
-function postTrustSites(data, spreader) {
+function deliverMotd(data, spreader) {
+	const trustSites = listSites.trustSites;
+	for (let url of trustSites) {
+		if (url instanceof Object) url = url.url;
+		if (url === domain || url === spreader) continue;
+		if (!/^http/i.test(url)) url = `https://${url}`;
+		const options = {
+			method: "POST",
+			url,
+			strictSSL: false,
+			json: true,
+			headers: {
+				'User-Agent': 'Mozilla/5.0 (Android 15; Mobile; rv:78.0) Gecko/78.0 Firefox/78.0'
+			},
+			body: data
+		};
+
+		request(options, function (error, response, body) {
+			if (error) {
+				if (!puppet.quiet) console.error("Motd forward error:", error.toString());
+				return;
+			}
+		});
+	}
+}
+
+function deliverUpload(data, spreader) {
 	const trustSites = listSites.trustSites;
 	for (let url of trustSites) {
 		if (url instanceof Object) url = url.url;
@@ -661,6 +687,7 @@ async function randUpload(formData) {
 		if (dirInfo.isError) return;
 		formData = new FormUpload(dirInfo.pathFiles);
 		formData.append("message", `File(s) upload by "Message Spreader"`);
+		formData.append("spreader", domain);
 	}
 
 	function wait() {
