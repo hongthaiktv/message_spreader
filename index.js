@@ -67,7 +67,24 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(rootDir));
 
-app.post("/", (req, res) => {
+app.post("/", (req, res, next) => {
+	const contentType = req.get("Content-Type");
+	switch (true) {
+		case /application\/json/i.test(contentType):
+			console.log("jsonData...");
+			next();
+			break;
+
+		case /multipart\/form-data/i.test(contentType):
+			console.log("UploadData...");
+			uploader.array("files")(req, res, callback);
+			break;
+	}
+	function callback() {
+		console.log(req.files);
+		res.json({message: "handle data uploaded"});
+	}
+}, (req, res) => {
 	const code = 23;
 	const type = "motd";
 	const motdMessage = req.body;
