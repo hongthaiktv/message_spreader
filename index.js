@@ -84,7 +84,6 @@ app.post("/", (req, res, next) => {
 			const message = `${req.files.length} file(s) forwarding...`;
 			formData.append("message", uploadMessage);
 			formData.append("spreader", domain);
-			console.log(integrity, spreader, uploadMessage);
 			console.log(message);
 			deliverUpload(formData, spreader);
 			res.json({message});

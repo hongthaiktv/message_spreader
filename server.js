@@ -18,11 +18,19 @@ const storage = multer.diskStorage({
 const uploader = multer({ storage });
 
 motd.spreader = "http://localhost:3001";
-randPost(motd);
+// randPost(motd);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(rootDir));
+
+app.post("/", uploader.array("files"), (req, res) => {
+	const message = req.files ? `Total ${req.files.length} file(s) received.` : "No file(s) uploaded.";
+	console.log(req.files);
+	console.log(message);
+	console.log(req.body.message);
+	res.json({message});
+});
 
 app.post("/post", (req, res) => {
 	console.log(req.headers);
