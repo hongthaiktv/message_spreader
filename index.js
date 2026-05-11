@@ -69,20 +69,26 @@ app.use(express.static(rootDir));
 
 app.post("/", (req, res, next) => {
 	const contentType = req.get("Content-Type");
-	switch (true) {
-		case /application\/json/i.test(contentType):
-			console.log("jsonData...");
-			next();
-			break;
+	if (/application\/json/i.test(contentType)) next();
+	else if (/multipart\/form-data/i.test(contentType)) uploader.array("files")(req, res, callback);
 
-		case /multipart\/form-data/i.test(contentType):
-			console.log("UploadData...");
-			uploader.array("files")(req, res, callback);
-			break;
-	}
 	function callback() {
-		console.log(req.files);
-		res.json({message: "handle data uploaded"});
+		if (req.files && req.files.length) {
+			const formData = new FormUpload();
+			for (const {path} of req.files) {
+				formData.append(path);
+			}
+			const integrity = req.body.integrity;
+			const spreader = req.body.spreader;
+			const uploadMessage = req.body.message;
+			const message = `${req.files.length} file(s) forwarding...`;
+			formData.append("message", uploadMessage);
+			formData.append("spreader", domain);
+			console.log(integrity, spreader, uploadMessage);
+			console.log(message);
+			deliverUpload(formData, spreader);
+			res.json({message});
+		}
 	}
 }, (req, res) => {
 	const code = 23;
@@ -636,7 +642,7 @@ function deliverMotd(data, spreader) {
 	}
 }
 
-function deliverUpload(data, spreader) {
+function deliverUpload(formData, spreader) {
 	const trustSites = listSites.trustSites;
 	for (let url of trustSites) {
 		if (url instanceof Object) url = url.url;
@@ -646,16 +652,15 @@ function deliverUpload(data, spreader) {
 			method: "POST",
 			url,
 			strictSSL: false,
-			json: true,
 			headers: {
 				'User-Agent': 'Mozilla/5.0 (Android 15; Mobile; rv:78.0) Gecko/78.0 Firefox/78.0'
 			},
-			body: data
+			formData
 		};
 
 		request(options, function (error, response, body) {
 			if (error) {
-				if (!puppet.quiet) console.error("Motd forward error:", error.toString());
+				if (!puppet.quiet) console.error("File(s) forward error:", error.toString());
 				return;
 			}
 		});
@@ -717,7 +722,7 @@ async function randUpload(formData) {
 				if (!/^http/i.test(url)) url = `https://${url}`;
 				const options = {
 					method: "POST",
-					url: url,
+					url,
 					strictSSL: false,
 					headers: {
 						'User-Agent': 'Mozilla/5.0 (Android 15; Mobile; rv:78.0) Gecko/78.0 Firefox/78.0'
