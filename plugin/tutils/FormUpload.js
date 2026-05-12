@@ -10,15 +10,11 @@ class FormUpload extends Object {
 		super();
 		if (key && !value) {
 			if (key && typeof key === 'string') {
-				const file = this.#createFile(key);
-				this.files.push(file);
-				++this.length;
+				this.#createFile(key);
 			}
 			else if (key && key instanceof Array) {
 				for (const path of key) {
-					const file = this.#createFile(path);
-					this.files.push(file);
-					++this.length;
+					this.#createFile(path);
 				}
 			}
 		}
@@ -29,13 +25,12 @@ class FormUpload extends Object {
 	}
 
 	append(key, value) {
-		if (key && !value) {
-			const file = this.#createFile(key);
-			this.files.push(file);
+		if (key && !value) this.#createFile(key);
+		else if (key && value) {
+			this[key] = value;
+			++this.length;
 		}
-		else if (key && value) this[key] = value;
 		else throw new Error('Wrong argument(s).');
-		++this.length;
 	}
 
 	delete(key) {
@@ -51,12 +46,23 @@ class FormUpload extends Object {
 
 	deleteFiles() {
 		const filesLength = this.files.length;
-		this.length = this.length - filesLength;
+		this.length -= filesLength;
 		delete this.files;
 	}
 
 	#createFile(path) {
-		return fs.createReadStream(path);
+		try {
+			const value = fs.readFileSync(path);
+			const filename = path.replace(/^.*\//g.exec(path)[0], "");
+			const file = {
+				value,
+				options: {filename}
+			};
+			this.files.push(file);
+			++this.length;
+		} catch(err) {
+			console.error(err.toString());
+		}
 	}
 }
 
