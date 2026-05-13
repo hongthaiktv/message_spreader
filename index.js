@@ -17,6 +17,7 @@ getDir(uploadDir, true);
 const app = express();
 const logger = new Logger("");
 const motdLogger = new Logger({prefix: "", record: true});
+const uploadLogger = new Logger({prefix: "", record: true});
 const storage = multer.diskStorage({
 	destination: uploadDir,
 	filename: function (req, file, cb) {
@@ -31,7 +32,20 @@ const listSites = {
 	trustSites: require('./assets/json/trustSites.json'),
 	blackSites: require('./assets/json/blackSites.json'),
 	urlFailed: [],
-	urlSuccess: []
+	urlSuccess: [],
+	getRank: function (url, list) {
+		let rank = 0;
+		list = listSites[list];
+		for (let i = 0; i < list.length; i++) {
+			let listUrl = list[i];
+			if (listUrl instanceof Object) listUrl = listUrl.url;
+			if (listUrl === url) {
+				rank = i + 1;
+				break;
+			}
+		}
+		return rank;
+	}
 };
 
 const puppet = {
@@ -74,20 +88,48 @@ app.post("/", (req, res, next) => {
 
 	function callback() {
 		if (req.files && req.files.length) {
-			const formData = new FormUpload();
-			for (const {path} of req.files) {
-				formData.append(path);
-			}
-			const integrity = req.body.integrity;
-			const spreader = req.body.spreader;
+			const code = 25;
+			const type = "info";
+			const { integrity, spreader } = req.body;
 			const uploadMessage = req.body.message;
-			const message = `${req.files.length} file(s) forwarding...`;
-			formData.append("integrity", integrity);
-			formData.append("spreader", domain);
-			formData.append("message", uploadMessage);
-			console.log(message);
-			deliverUpload(formData, spreader);
-			res.json({message});
+			const uploadLogs = uploadLogger.getLogs();
+			let existUpload = false;
+
+			for (let i = 0; i < uploadLogs.length; i++) {
+				const uploadIntegrity = uploadLogs[i].integrity;
+				if (uploadIntegrity === integrity) {
+					existUpload = true;
+					break;
+				}
+			}
+
+			if (!existUpload) {
+				const pageRank = listSites.getRank(spreader, "trustSites");
+				const upload = {code, integrity, spreader, message: uploadMessage, pageRank};
+				uploadLogger.addLog(upload, type);
+				console.log(uploadLogs);
+// 				if (!puppet.quiet) logger.addLog(motdMessage, type, {code, pageRank});
+// 				else {
+// 					delete motdMessage.spreader;
+// 					logger.addLog(motdMessage, type, {code, quiet: puppet.quiet});
+// 				}
+				const formData = new FormUpload();
+				for (const {path} of req.files) {
+					formData.append(path);
+				}
+				const message = `${req.files.length} file(s) forwarding...`;
+				formData.append("integrity", integrity);
+				formData.append("spreader", domain);
+				formData.append("message", uploadMessage);
+				console.log(message);
+				deliverUpload(formData, spreader);
+				res.json({message});
+			}
+			else {
+				const message = "Upload has already forwarded";
+				console.log(message);
+				res.json({message});
+			}
 		}
 	}
 }, (req, res) => {
@@ -107,17 +149,7 @@ app.post("/", (req, res, next) => {
 	}
 
 	if (!existMessage) {
-		let pageRank = 0;
-		const trustSites = listSites.trustSites;
-		for (let i = 0; i < trustSites.length; i++) {
-			let trustSpreader = trustSites[i];
-			if (trustSpreader instanceof Object) trustSpreader = trustSpreader.url;
-			if (trustSpreader === spreader) {
-				pageRank = i + 1;
-				break;
-			}
-		}
-
+		const pageRank = listSites.getRank(spreader, "trustSites");
 		motdLogger.addLog(motdMessage, type, {code, pageRank});
 		if (!puppet.quiet) logger.addLog(motdMessage, type, {code, pageRank});
 		else {
@@ -129,7 +161,8 @@ app.post("/", (req, res, next) => {
 		motdMessage.spreader = domain;
 		deliverMotd(motdMessage, spreader);
 		res.json({message});
-	} else {
+	}
+	else {
 		const message = "Motd has already forwarded";
 		console.log(message);
 		res.json({message});
