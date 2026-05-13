@@ -105,22 +105,21 @@ app.post("/", (req, res, next) => {
 
 			if (!existUpload) {
 				const pageRank = listSites.getRank(spreader, "trustSites");
-				const upload = {code, integrity, spreader, message: uploadMessage, pageRank};
-				uploadLogger.addLog(upload, type);
-				console.log(uploadLogs);
-// 				if (!puppet.quiet) logger.addLog(motdMessage, type, {code, pageRank});
-// 				else {
-// 					delete motdMessage.spreader;
-// 					logger.addLog(motdMessage, type, {code, quiet: puppet.quiet});
-// 				}
+				const upload = {code, integrity, message: uploadMessage};
+				uploadLogger.addLog(upload, type, {spreader, pageRank});
+
+				if (!puppet.quiet) logger.addLog(upload, type, {spreader, pageRank});
+				else logger.addLog(upload, type, {quiet: puppet.quiet});
+
 				const formData = new FormUpload();
 				for (const {path} of req.files) {
 					formData.append(path);
 				}
-				const message = `${req.files.length} file(s) forwarding...`;
 				formData.append("integrity", integrity);
 				formData.append("spreader", domain);
 				formData.append("message", uploadMessage);
+
+				const message = `${req.files.length} file(s) forwarding...`;
 				console.log(message);
 				deliverUpload(formData, spreader);
 				res.json({message});

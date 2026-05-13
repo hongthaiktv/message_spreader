@@ -28,6 +28,7 @@ app.post("/", uploader.array("files"), (req, res) => {
 	const message = req.files ? `Total ${req.files.length} file(s) received.` : "No file(s) uploaded.";
 	console.log(req.files);
 	console.log(message);
+	console.log(req.body.spreader);
 	console.log(req.body.message);
 	res.json({message});
 });
