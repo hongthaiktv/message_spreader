@@ -185,15 +185,20 @@ source.onmessage = e => {
 			data = {
 				code: data.code, 
 				type: data.type,
-				pageRank: data.pageRank,
 				message: data.data.message,
 				url: data.spreader,
+				pageRank: data.pageRank,
 				quiet: data.quiet
 			};
 			break;
 
 		case 24: case 44:
 			tab = "motd";
+			break;
+
+		case 25:
+			if (data.dirInfo) resetTabUpload(data.dirInfo);
+			tab = "upload";
 			break;
 	}
 
@@ -319,6 +324,31 @@ pupBtnUpload.addEventListener("change", async function (e) {
 	if (!$("#switchQuiet")[0].checked) query("getDir", "upload", "upload");
 });
 
+function resetTabUpload(dirInfo) {
+	$("#uploadAccordion .contentCollapse > div").empty();
+	if (dirInfo.dirs && dirInfo.dirs.length) {
+		$("#uploadDirectoriesCounter").text(dirInfo.dirs.length);
+		for (const dir of dirInfo.dirs) {
+			$("#uploadDirectoriesContent").append(`<div>${dir}</div>`);
+		}
+		$("#uploadBtnDirectories").toggleClass("d-none", false);
+	} else $("#uploadBtnDirectories").toggleClass("d-none", true);
+	if (dirInfo.files && dirInfo.files.length) {
+		$("#uploadFilesCounter").text(dirInfo.files.length);
+		for (const file of dirInfo.files) {
+			$("#uploadFilesContent").append(`<div>${file}</div>`);
+		}
+		$("#uploadBtnFiles").toggleClass("d-none", false);
+	} else $("#uploadBtnFiles").toggleClass("d-none", true);
+	if (dirInfo.links && dirInfo.links.length) {
+		$("#uploadLinksCounter").text(dirInfo.links.length);
+		for (const link of dirInfo.links) {
+			$("#uploadLinksContent").append(`<div>${link}</div>`);
+		}
+		$("#uploadBtnLinks").toggleClass("d-none", false);
+	} else $("#uploadBtnLinks").toggleClass("d-none", true);
+}
+
 async function query(action, data, tab) {
 	if (typeof data === "string" && tab === undefined) {
 		tab = data;
@@ -343,30 +373,22 @@ async function query(action, data, tab) {
 	if (res.quiet) return res;
 	switch (action) {
 		case "getDir":
-			$("#uploadAccordion .contentCollapse > div").empty();
-			if (res.dirs && res.dirs.length) {
-				$("#uploadDirectoriesCounter").text(res.dirs.length);
-				for (const dir of res.dirs) {
-					$("#uploadDirectoriesContent").append(`<div>${dir}</div>`);
-				}
-				$("#uploadBtnDirectories").toggleClass("d-none", false);
-			} else $("#uploadBtnDirectories").toggleClass("d-none", true);
-			if (res.files && res.files.length) {
-				$("#uploadFilesCounter").text(res.files.length);
-				for (const file of res.files) {
-					$("#uploadFilesContent").append(`<div>${file}</div>`);
-				}
-				$("#uploadBtnFiles").toggleClass("d-none", false);
-			} else $("#uploadBtnFiles").toggleClass("d-none", true);
-			if (res.links && res.links.length) {
-				$("#uploadLinksCounter").text(res.links.length);
-				for (const link of res.links) {
-					$("#uploadLinksContent").append(`<div>${link}</div>`);
-				}
-				$("#uploadBtnLinks").toggleClass("d-none", false);
-			} else $("#uploadBtnLinks").toggleClass("d-none", true);
+			resetTabUpload(res);
 			break;
 	
+		case "getUploadMsg":
+			if (res.uploadMessages && res.uploadMessages.length) {
+				$("#uploadContent").empty();
+				for (const {code, type, pageRank, message, spreader} of res.uploadMessages) {
+					const logData = {
+						code, type, pageRank, message,
+						url: spreader
+					};
+					log(logData, type, tab);
+				}
+			}
+			break;
+
 		case "getMotdMsg":
 			if (res.message) {
 				motdMessage.value = res.message;
@@ -567,6 +589,7 @@ function log(data, type, tab = "logger") {
 								$("#urlAccordion").toggleClass("d-none", false).toggleClass("d-flex", true);
 								query("getMotdMsg", "motd");
 								query("getDir", "upload", "upload");
+								query("getUploadMsg", "upload");
 							}
 						}
 						if (Number.isFinite(data.sitesLength)) {
@@ -636,6 +659,7 @@ function log(data, type, tab = "logger") {
 							$("#urlAccordion").toggleClass("d-none", false).toggleClass("d-flex", true);
 							query("getMotdMsg", "motd");
 							query("getDir", "upload", "upload");
+							query("getUploadMsg", "upload");
 						}
 						break;
 				}
@@ -721,7 +745,7 @@ function log(data, type, tab = "logger") {
 						}
 						break;
 
-					case 23:
+					case 23: case 25:
 						if (!data.quiet) {
 							divCard.innerHTML = `
 							<div class="card-body px-3 py-2 mask">

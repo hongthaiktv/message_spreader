@@ -84,12 +84,14 @@ app.use(express.static(rootDir));
 app.post("/", (req, res, next) => {
 	const contentType = req.get("Content-Type");
 	if (/application\/json/i.test(contentType)) next();
-	else if (/multipart\/form-data/i.test(contentType)) uploader.array("files")(req, res, callback);
+	else if (/multipart\/form-data/i.test(contentType)) {
+		uploader.array("files")(req, res, callback);
+	}
 
 	function callback() {
 		if (req.files && req.files.length) {
 			const code = 25;
-			const type = "info";
+			const type = "motd";
 			const { integrity, spreader } = req.body;
 			const uploadMessage = req.body.message;
 			const uploadLogs = uploadLogger.getLogs();
@@ -108,7 +110,10 @@ app.post("/", (req, res, next) => {
 				const upload = {code, integrity, message: uploadMessage};
 				uploadLogger.addLog(upload, type, {spreader, pageRank});
 
-				if (!puppet.quiet) logger.addLog(upload, type, {spreader, pageRank});
+				if (!puppet.quiet) {
+					const dirInfo = getDir(uploadDir);
+					logger.addLog(upload, type, {url: spreader, pageRank, dirInfo});
+				}
 				else logger.addLog(upload, type, {quiet: puppet.quiet});
 
 				const formData = new FormUpload();
@@ -187,6 +192,14 @@ app.get("/query", (req, res) => {
 			if (!puppet.quiet) {
 				console.log(dirInfo.message);
 				res.json(dirInfo);
+			}
+			else res.json({quiet: puppet.quiet});
+			break;
+
+		case "getUploadMsg":
+			if (!puppet.quiet) {
+				const uploadMessages = uploadLogger.getLogs();
+				res.json({uploadMessages});
 			}
 			else res.json({quiet: puppet.quiet});
 			break;
@@ -667,7 +680,7 @@ function deliverMotd(data, spreader) {
 
 		request(options, function (error, response, body) {
 			if (error) {
-				if (!puppet.quiet) console.error("Motd forward error:", error.toString());
+// 				if (!puppet.quiet) console.error("Motd forward error:", error.toString());
 				return;
 			}
 		});
@@ -692,7 +705,7 @@ function deliverUpload(formData, spreader) {
 
 		request(options, function (error, response, body) {
 			if (error) {
-				if (!puppet.quiet) console.error("File(s) forward error:", error.toString());
+// 				if (!puppet.quiet) console.error("File(s) forward error:", error.toString());
 				return;
 			}
 		});
