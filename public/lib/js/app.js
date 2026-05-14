@@ -197,7 +197,7 @@ source.onmessage = e => {
 			break;
 
 		case 25:
-			if (data.dirInfo) resetTabUpload(data.dirInfo);
+			if (data.dirInfo) updateTabUpload(data.dirInfo);
 			tab = "upload";
 			break;
 	}
@@ -324,7 +324,7 @@ pupBtnUpload.addEventListener("change", async function (e) {
 	if (!$("#switchQuiet")[0].checked) query("getDir", "upload", "upload");
 });
 
-function resetTabUpload(dirInfo) {
+function updateTabUpload(dirInfo) {
 	$("#uploadAccordion .contentCollapse > div").empty();
 	if (dirInfo.dirs && dirInfo.dirs.length) {
 		$("#uploadDirectoriesCounter").text(dirInfo.dirs.length);
@@ -373,7 +373,7 @@ async function query(action, data, tab) {
 	if (res.quiet) return res;
 	switch (action) {
 		case "getDir":
-			resetTabUpload(res);
+			updateTabUpload(res);
 			break;
 	
 		case "getUploadMsg":

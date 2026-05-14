@@ -25,11 +25,20 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(rootDir));
 
 app.post("/", uploader.array("files"), (req, res) => {
-	const message = req.files ? `Total ${req.files.length} file(s) received.` : "No file(s) uploaded.";
-	console.log(req.files);
-	console.log(message);
-	console.log(req.body.spreader);
-	console.log(req.body.message);
+	let message;
+	console.log(req.query);
+	const contentType = req.get("Content-Type");
+	if (/application\/json/i.test(contentType)) {
+		message = "Motd received.";
+		console.log("Motd:", req.body.data.message);
+	}
+	else {
+		message = req.files ? `Total ${req.files.length} file(s) received.` : "No file(s) uploaded.";
+		console.log(req.files);
+		console.log(message);
+		console.log(req.body.spreader);
+		console.log(req.body.message);
+	}
 	res.json({message});
 });
 

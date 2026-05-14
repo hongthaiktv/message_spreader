@@ -77,37 +77,45 @@ logger.addEventListener("change", function (e) {
 
 if (puppet.quickStart) runPuppet("start");
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(express.static(rootDir));
-
 app.post("/", (req, res, next) => {
 	const contentType = req.get("Content-Type");
 	if (/application\/json/i.test(contentType)) next();
 	else if (/multipart\/form-data/i.test(contentType)) {
-		uploader.array("files")(req, res, callback);
-	}
+		if (!req.query || !req.query.integrity) {
+			const message = "Missing integrity of url query";
+			console.error("Upload:", message);
+			res.status(500).json({message});
+			return;
+		}
 
-	function callback() {
-		if (req.files && req.files.length) {
-			const code = 25;
-			const type = "motd";
-			const { integrity, spreader } = req.body;
-			const uploadMessage = req.body.message;
-			const uploadLogs = uploadLogger.getLogs();
-			let existUpload = false;
+		const integrity = req.query.integrity;
+		const uploadLogs = uploadLogger.getLogs();
+		let existUpload = false;
 
-			for (let i = 0; i < uploadLogs.length; i++) {
-				const uploadIntegrity = uploadLogs[i].integrity;
-				if (uploadIntegrity === integrity) {
-					existUpload = true;
-					break;
-				}
+		for (let i = 0; i < uploadLogs.length; i++) {
+			const uploadIntegrity = uploadLogs[i].integrity;
+			if (uploadIntegrity === integrity) {
+				existUpload = true;
+				break;
 			}
+		}
 
-			if (!existUpload) {
+		if (!existUpload) uploader.array("files")(req, res, callback);
+		else {
+			const message = "Upload has already forwarded";
+			console.log(message);
+			res.json({message});
+		}
+
+		function callback() {
+			if (req.files && req.files.length) {
+				const code = 25;
+				const type = "motd";
+				const uploadMessage = req.body.message;
+				const { spreader } = req.body;
 				const pageRank = listSites.getRank(spreader, "trustSites");
 				const upload = {code, integrity, message: uploadMessage};
+
 				uploadLogger.addLog(upload, type, {spreader, pageRank});
 
 				if (!puppet.quiet) {
@@ -125,22 +133,26 @@ app.post("/", (req, res, next) => {
 				formData.append("message", uploadMessage);
 
 				const message = `${req.files.length} file(s) forwarding...`;
-				console.log(message);
-				deliverUpload(formData, spreader);
+				console.log("Upload:", message);
+				deliverUpload(formData, spreader, integrity);
 				res.json({message});
 			}
 			else {
-				const message = "Upload has already forwarded";
-				console.log(message);
+				const message = "No file(s) uploaded.";
+				console.log("Upload:", message);
 				res.json({message});
 			}
 		}
 	}
 }, (req, res) => {
-	const code = 23;
-	const type = "motd";
-	const motdMessage = req.body;
-	const { integrity, spreader } = motdMessage;
+	if (!req.query || !req.query.integrity) {
+		const message = "Missing integrity of url query";
+		console.error("Motd:", message);
+		res.status(500).json({message});
+		return;
+	}
+
+	const integrity = req.query.integrity;
 	const motdLogs = motdLogger.getLogs();
 	let existMessage = false;
 
@@ -152,8 +164,21 @@ app.post("/", (req, res, next) => {
 		}
 	}
 
-	if (!existMessage) {
+	if (!existMessage) express.json()(req, res, callback);
+	else {
+		const message = "Motd has already forwarded";
+		console.log(message);
+		res.json({message});
+	}
+
+	function callback() {
+		const code = 23;
+		const type = "motd";
+		const motdMessage = req.body;
+		const { spreader } = motdMessage;
 		const pageRank = listSites.getRank(spreader, "trustSites");
+
+		motdMessage.integrity = integrity;
 		motdLogger.addLog(motdMessage, type, {code, pageRank});
 		if (!puppet.quiet) logger.addLog(motdMessage, type, {code, pageRank});
 		else {
@@ -163,15 +188,14 @@ app.post("/", (req, res, next) => {
 		const message = "Motd forwarding...";
 		console.log(message);
 		motdMessage.spreader = domain;
-		deliverMotd(motdMessage, spreader);
-		res.json({message});
-	}
-	else {
-		const message = "Motd has already forwarded";
-		console.log(message);
+		deliverMotd(motdMessage, spreader, integrity);
 		res.json({message});
 	}
 });
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(express.static(rootDir));
 
 app.get("/query", (req, res) => {
 	if (!req.query || !req.query.action) {
@@ -661,12 +685,13 @@ async function randRequest() {
 	}
 }
 
-function deliverMotd(data, spreader) {
+function deliverMotd(data, spreader, integrity) {
 	const trustSites = listSites.trustSites;
 	for (let url of trustSites) {
 		if (url instanceof Object) url = url.url;
 		if (url === domain || url === spreader) continue;
 		if (!/^http/i.test(url)) url = `https://${url}`;
+		url += `?integrity=${integrity}`;
 		const options = {
 			method: "POST",
 			url,
@@ -687,12 +712,13 @@ function deliverMotd(data, spreader) {
 	}
 }
 
-function deliverUpload(formData, spreader) {
+function deliverUpload(formData, spreader, integrity) {
 	const trustSites = listSites.trustSites;
 	for (let url of trustSites) {
 		if (url instanceof Object) url = url.url;
 		if (url === domain || url === spreader) continue;
 		if (!/^http/i.test(url)) url = `https://${url}`;
+		url += `?integrity=${integrity}`;
 		const options = {
 			method: "POST",
 			url,
