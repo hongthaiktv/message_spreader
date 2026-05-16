@@ -1,6 +1,7 @@
 //for file with extra option (see https://www.npmjs.com/package/form-data)
 
 const fs = require('fs');
+const path = require('path');
 
 class FormUpload extends Object {
 	files = [];
@@ -30,7 +31,11 @@ class FormUpload extends Object {
 			this[key] = value;
 			++this.length;
 		}
-		else throw new Error('Wrong argument(s).');
+		else throw new Error('FormUpload: Wrong argument(s) for append().');
+	}
+
+	get(key) {
+		return this[key];
 	}
 
 	delete(key) {
@@ -50,10 +55,10 @@ class FormUpload extends Object {
 		delete this.files;
 	}
 
-	#createFile(path) {
+	#createFile(filePath) {
 		try {
-			const value = fs.readFileSync(path);
-			const filename = path.replace(/^.*\//g.exec(path)[0], "");
+			const value = fs.readFileSync(filePath);
+			const filename = path.basename(filePath);
 			const file = {
 				value,
 				options: {filename}

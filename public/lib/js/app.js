@@ -204,7 +204,7 @@ source.onmessage = e => {
 
 	log(data, data.type, tab);
 	if (data.quiet) return;
-	const url = data.url ? data.url.replace(/^.*:\/\//i, "") : data.url;
+	const url = data.url ? data.url.replace(/^.*:\/\//i, "") : undefined;
 	let logData;
 	switch (data.code) {
 		case 20: case 21:
@@ -224,7 +224,7 @@ source.onmessage = e => {
 		case 5:
 			if (data.urlSuccess && data.urlSuccess.length) {
 				for (const {url, pageRank} of data.urlSuccess) {
-					const urlText = url ? url.replace(/^.*:\/\//i, "") : url;
+					const urlText = url ? url.replace(/^.*:\/\//i, "") : undefined;
 					logData = `<div class="white-text my-2"><span class="secondary-color-dark rounded p-1">Rank ${pageRank}</span> : <a class="app-text-link" target="_blank" href="${url}">${urlText}</a></div>`;
 					log(logData, "log", "counterSuccess");
 					logData = `<div class="white-text my-2"><span class="success-color-dark rounded p-1">Rank ${pageRank}</span> : <a class="app-text-link" target="_blank" href="${url}">${urlText}</a></div>`;
@@ -233,7 +233,7 @@ source.onmessage = e => {
 			}
 			if (data.urlFailed && data.urlFailed.length) {
 				for (const {url, errorCode} of data.urlFailed) {
-					const urlText = url ? url.replace(/^.*:\/\//i, "") : url;
+					const urlText = url ? url.replace(/^.*:\/\//i, "") : undefined;
 					logData = `<div class="white-text my-2"><span class="warning-color-dark rounded p-1">${errorCode}</span> : <a class="app-text-link" target="_blank" href="${url}">${urlText}</a></div>`;
 					log(logData, "log", "counterFailed");
 					logData = `<div class="white-text my-2"><span class="danger-color-dark rounded p-1">${errorCode}</span> : <a class="app-text-link" target="_blank" href="${url}">${urlText}</a></div>`;
@@ -548,7 +548,7 @@ function log(data, type, tab = "logger") {
 		if (data.success) $(".counter-success").text(data.success);
 		if (data.failed) $(".counter-failed").text(data.failed);
 		if (Number.isFinite(data.counter)) checkCounter(data.counter, APPSETTING.sitesLength, true);
-		const url = data.url ? data.url.replace(/^.*:\/\//i, "") : data.url;
+		const url = data.url ? data.url.replace(/^.*:\/\//i, "") : undefined;
 
 		switch (cardType) {
 			case "error":
@@ -695,7 +695,7 @@ function log(data, type, tab = "logger") {
 					break;
 			}
 			if (data instanceof Object) {
-				const url = data.url ? data.url.replace(/^.*:\/\//i, "") : data.url;
+				const url = data.url ? data.url.replace(/^.*:\/\//i, "") : undefined;
 				switch (data.code) {
 					case 20:
 						if (!data.quiet) {

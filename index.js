@@ -341,7 +341,7 @@ server = app.listen(port, () => {
 });
 
 function getDir(dirPath, created = false) {
-	const dirName = dirPath.replace(/^.*\//g, '');
+	const dirName = path.basename(dirPath);
 	const content = [], dirs = [], files = [], links = [];
 	const pathContent = [], pathDirs = [], pathFiles = [], pathLinks = [];
 	try {
@@ -567,8 +567,10 @@ async function randRequest() {
 					return;
 				}
 				const rand = getRandomInList(listSites[puppet.current]);
-				const link = linkParse(listSites[puppet.current][rand]);
-				const url = link.url;
+				let url = listSites[puppet.current][rand];
+				if (url instanceof Object) url = url.url;
+				const link = linkParse(url);
+				url = link.url;
 				const pageRank = rand + 1;
 				const msg = `Rank ${pageRank}: ${url}`;
 				if (!puppet.quiet) console.log(msg);
@@ -746,10 +748,12 @@ async function randPost(data) {
 			setTimeout(() => {
 				const rand = getRandomInList(listSites[puppet.current]);
 				let url = listSites[puppet.current][rand];
+				if (url instanceof Object) url = url.url;
 				if (!/^http/i.test(url)) url = `https://${url}`;
+				if (data.integrity) url += `?integrity=${data.integrity}`;
 				const options = {
 					method: "POST",
-					url: url,
+					url,
 					strictSSL: false,
 					json: true,
 					headers: {
@@ -781,6 +785,7 @@ async function randUpload(formData) {
 		formData = new FormUpload(dirInfo.pathFiles);
 		formData.append("message", `File(s) upload by "Message Spreader"`);
 		formData.append("spreader", domain);
+		// append file integrity here
 	}
 
 	function wait() {
@@ -790,7 +795,9 @@ async function randUpload(formData) {
 			setTimeout(() => {
 				const rand = getRandomInList(listSites[puppet.current]);
 				let url = listSites[puppet.current][rand];
+				if (url instanceof Object) url = url.url;
 				if (!/^http/i.test(url)) url = `https://${url}`;
+				// append query integrity here
 				const options = {
 					method: "POST",
 					url,
