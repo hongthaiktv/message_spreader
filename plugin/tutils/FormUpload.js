@@ -6,6 +6,7 @@ const path = require('path');
 class FormUpload extends Object {
 	files = [];
 	length = 0;
+	static #openFiles = [];
 
 	constructor(key, value) {
 		super();
@@ -57,16 +58,46 @@ class FormUpload extends Object {
 
 	#createFile(filePath) {
 		try {
-			const value = fs.readFileSync(filePath);
-			const filename = path.basename(filePath);
-			const file = {
-				value,
-				options: {filename}
-			};
+			const name = path.basename(filePath);
+			const fd = fs.openSync(filePath, "r");
+			const state = fs.fstatSync(fd);
+			const file = fs.createReadStream(null, {fd, start: 0, end: state.size});
 			this.files.push(file);
 			++this.length;
+			const fileData = {
+				path: filePath,
+				name, fd, state
+			};
+			FormUpload.#openFiles.push(fileData);
 		} catch(err) {
 			console.error(err.toString());
+		}
+
+// 		try {
+// 			const value = fs.readFileSync(filePath);
+// 			const filename = path.basename(filePath);
+// 			const file = {
+// 				value,
+// 				options: {filename}
+// 			};
+// 			this.files.push(file);
+// 			++this.length;
+// 		} catch(err) {
+// 			console.error(err.toString());
+// 		}
+	}
+
+	static getOpenFiles() {
+		return this.#openFiles;
+	}
+
+	static closeOpenFiles() {
+		for (const file of this.#openFiles) {
+			try {
+				fs.closeSync(file.fd);
+			} catch(err) {
+				console.error(err.toString());
+			}
 		}
 	}
 }
