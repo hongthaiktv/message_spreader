@@ -24,22 +24,27 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(rootDir));
 
-app.post("/", uploader.array("files"), (req, res) => {
+app.post("/", (req, res) => {
+	console.log(req.headers);
 	let message;
 	console.log(req.query);
 	const contentType = req.get("Content-Type");
 	if (/application\/json/i.test(contentType)) {
 		message = "Motd received.";
 		console.log("Motd:", req.body.data.message);
+		res.json({message});
 	}
 	else {
-		message = req.files ? `Total ${req.files.length} file(s) received.` : "No file(s) uploaded.";
-		console.log(req.files);
-		console.log(message);
-		console.log(req.body.spreader);
-		console.log(req.body.message);
+		uploader.array("files")(req, res, callback);
+		function callback() {
+			message = req.files ? `Total ${req.files.length} file(s) received.` : "No file(s) uploaded.";
+			console.log(req.files);
+			console.log(message);
+			console.log(req.body.spreader);
+			console.log(req.body.message);
+			res.json({message});
+		}
 	}
-	res.json({message});
 });
 
 app.post("/post", (req, res) => {

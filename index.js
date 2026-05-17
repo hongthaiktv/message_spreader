@@ -787,8 +787,6 @@ async function randUpload(formData) {
 		formData.append("spreader", domain);
 		// append file integrity here
 	}
-// 	console.log(formData);
-// 	console.log(FormUpload.getOpenFiles());
 
 	function wait() {
 		return new Promise((resolve) => {

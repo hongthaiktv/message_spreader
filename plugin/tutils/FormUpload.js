@@ -57,34 +57,32 @@ class FormUpload extends Object {
 	}
 
 	#createFile(filePath) {
+		const openFiles = FormUpload.getOpenFiles();
+		for (const {path, fd, stat} of openFiles) {
+			if (path === filePath) {
+				const file = fs.createReadStream(null, {fd, start: 0, end: stat.size});
+				this.files.push(file);
+				++this.length;
+				return;
+			}
+		}
+
 		try {
 			const name = path.basename(filePath);
 			const fd = fs.openSync(filePath, "r");
-			const state = fs.fstatSync(fd);
-			const file = fs.createReadStream(null, {fd, start: 0, end: state.size});
+			const stat = fs.fstatSync(fd);
+			const file = fs.createReadStream(null, {fd, start: 0, end: stat.size});
 			this.files.push(file);
 			++this.length;
+
 			const fileData = {
 				path: filePath,
-				name, fd, state
+				name, fd, stat
 			};
 			FormUpload.#openFiles.push(fileData);
 		} catch(err) {
 			console.error(err.toString());
 		}
-
-// 		try {
-// 			const value = fs.readFileSync(filePath);
-// 			const filename = path.basename(filePath);
-// 			const file = {
-// 				value,
-// 				options: {filename}
-// 			};
-// 			this.files.push(file);
-// 			++this.length;
-// 		} catch(err) {
-// 			console.error(err.toString());
-// 		}
 	}
 
 	static getOpenFiles() {
