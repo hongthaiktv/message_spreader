@@ -20,19 +20,18 @@ const uploader = multer({ storage });
 motd.spreader = "http://localhost:3001";
 // randPost(motd);
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(express.static(rootDir));
-
 app.post("/", (req, res) => {
 	console.log(req.headers);
-	let message;
 	console.log(req.query);
+	let message;
 	const contentType = req.get("Content-Type");
 	if (/application\/json/i.test(contentType)) {
-		message = "Motd received.";
-		console.log("Motd:", req.body.data.message);
-		res.json({message});
+		express.json()(req, res, callback);
+		function callback() {
+			message = "Motd received.";
+			console.log("Motd:", req.body.data.message);
+			res.json({message});
+		}
 	}
 	else {
 		uploader.array("files")(req, res, callback);
@@ -46,6 +45,10 @@ app.post("/", (req, res) => {
 		}
 	}
 });
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(express.static(rootDir));
 
 app.post("/post", (req, res) => {
 	console.log(req.headers);

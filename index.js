@@ -124,17 +124,14 @@ app.post("/", (req, res, next) => {
 				}
 				else logger.addLog(upload, type, {quiet: puppet.quiet});
 
-				const formData = new FormUpload();
+				const files = [];
 				for (const {path} of req.files) {
-					formData.append(path);
+					files.push(path);
 				}
-				formData.append("integrity", integrity);
-				formData.append("spreader", domain);
-				formData.append("message", uploadMessage);
 
 				const message = `${req.files.length} file(s) forwarding...`;
 				console.log("Upload:", message);
-				deliverUpload(formData, spreader, integrity);
+				deliverUpload(files, spreader, integrity, uploadMessage);
 				res.json({message});
 			}
 			else {
@@ -554,6 +551,7 @@ function clear() {
 	listSites.urlFailed.length = 0;
 	listSites.urlSuccess.length = 0;
 	logger.clear();
+	FormUpload.closeAll();
 }
 
 async function randRequest() {
@@ -714,13 +712,19 @@ function deliverMotd(data, spreader, integrity) {
 	}
 }
 
-function deliverUpload(formData, spreader, integrity) {
+function deliverUpload(files, spreader, integrity, message) {
 	const trustSites = listSites.trustSites;
 	for (let url of trustSites) {
 		if (url instanceof Object) url = url.url;
 		if (url === domain || url === spreader) continue;
 		if (!/^http/i.test(url)) url = `https://${url}`;
 		url += `?integrity=${integrity}`;
+
+		const formData = new FormUpload(files);
+		formData.append("integrity", integrity);
+		formData.append("spreader", domain);
+		formData.append("message", message);
+
 		const options = {
 			method: "POST",
 			url,
@@ -777,16 +781,10 @@ async function randPost(data) {
 	}
 }
 
-async function randUpload(formData) {
-	if (typeof formData === "string") {
-		const dirPath = formData;
-		const dirInfo = getDir(dirPath);
-		if (dirInfo.isError) return;
-		formData = new FormUpload(dirInfo.pathFiles);
-		formData.append("message", `File(s) upload by "Message Spreader"`);
-		formData.append("spreader", domain);
-		// append file integrity here
-	}
+async function randUpload(dirPath) {
+	const dirInfo = getDir(dirPath);
+	if (dirInfo.isError) return;
+	const files = dirInfo.pathFiles;
 
 	function wait() {
 		return new Promise((resolve) => {
@@ -798,6 +796,12 @@ async function randUpload(formData) {
 				if (url instanceof Object) url = url.url;
 				if (!/^http/i.test(url)) url = `https://${url}`;
 				// append query integrity here
+
+				const formData = new FormUpload(files);
+				formData.append("message", `File(s) upload by "Message Spreader"`);
+				formData.append("spreader", domain);
+				// append file integrity here
+
 				const options = {
 					method: "POST",
 					url,
