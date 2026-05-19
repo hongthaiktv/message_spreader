@@ -591,6 +591,10 @@ function log(data, type, tab = "logger") {
 								query("getDir", "upload", "upload");
 								query("getUploadMsg", "upload");
 							}
+							else {
+								motdMessage.value = "";
+								motdMessage.dispatchEvent(new Event("blur"));
+							}
 						}
 						if (Number.isFinite(data.sitesLength)) {
 							const max = convertSitesLength(data.sitesLength).point;
