@@ -6,10 +6,16 @@ const path = require('path');
 const multer = require('multer');
 const { JSDOM, VirtualConsole } = require("jsdom");
 const { Logger, FormUpload } = require('./plugin/tutils/index.js');
-const motd = require('./assets/json/motd.json');
 const port = 3000;
 const domain = process.env.DOMAIN || `http://localhost:${port}`;
 
+const setting = require('./assets/json/setting.json');
+setting.mainSites = require('./assets/json/mainSites.json');
+setting.trustSites = require('./assets/json/trustSites.json');
+setting.blackSites = require('./assets/json/blackSites.json');
+setting.motd = require('./assets/json/motd.json');
+
+const motd = setting.motd;
 const rootDir = path.join(__dirname, "public");
 const uploadDir = path.join(rootDir, "upload");
 getDir(uploadDir, true);
@@ -28,9 +34,9 @@ const uploader = multer({ storage });
 
 let server;
 const listSites = {
-	mainSites: require('./assets/json/mainSites.json'),
-	trustSites: require('./assets/json/trustSites.json'),
-	blackSites: require('./assets/json/blackSites.json'),
+	mainSites: setting.mainSites,
+	trustSites: setting.trustSites,
+	blackSites: setting.blackSites,
 	urlFailed: [],
 	urlSuccess: [],
 	getRank: function (url, list) {
@@ -50,14 +56,14 @@ const listSites = {
 
 const puppet = {
 	started: false,
-	quiet: true,
-	rate: 10,
+	quiet: setting.quiet,
+	rate: setting.rate,
 	total: 0,
 	counter: 0,
 	success: 0,
 	failed: 0,
-	current: "mainSites",
-	mode: "normal",
+	current: setting.current,
+	mode: setting.mode,
 	quickStart: process.env.PUPPET == 1 ? true : false
 };
 
@@ -275,10 +281,14 @@ app.post("/puppet", (req, res) => {
 	switch (reqAct) {
 		case "changeList":
 			puppet.current = req.body.list || "mainSites";
+			setting.current = puppet.current;
+			updateJSON("setting");
 			break;
 
 		case "changeRate":
 			puppet.rate = req.body.rate;
+			setting.rate = puppet.rate;
+			updateJSON("setting");
 			break;
 
 		case "changeCounter":
@@ -288,6 +298,9 @@ app.post("/puppet", (req, res) => {
 		case "changeMode":
 			puppet.quiet = req.body.quiet;
 			puppet.mode = puppet.quiet ? "quiet" : "normal";
+			setting.quiet = puppet.quiet;
+			setting.mode = puppet.mode;
+			updateJSON("setting");
 			break;
 	}
 	runPuppet(reqAct, res);
@@ -305,10 +318,8 @@ app.post("/motd", (req, res) => {
 			break;
 	}
 
-	const file = path.join(__dirname, "assets", "json", "motd.json");
-	const data = JSON.stringify(motd, null, "\t");
 	try {
-		fs.writeFileSync(file, data);
+		updateJSON("motd");
 	} catch(err) {
 		code = 44;
 		message = err.toString();
@@ -825,5 +836,21 @@ async function randUpload(dirPath) {
 	while (puppet.started) {
 		await wait();
 	}
+}
+
+function updateJSON(file) {
+	const filePath = path.join(__dirname, "assets", "json", `${file}.json`);
+	let settingObj = {};
+	if (file === "setting") {
+		let originSetting = fs.readFileSync(filePath, "utf8");
+		originSetting = JSON.parse(originSetting);
+		for (const key in originSetting) {
+			settingObj[key] = setting[key];
+		}
+	}
+	else settingObj = setting[file];
+
+	const data = JSON.stringify(settingObj, null, "\t");
+	fs.writeFileSync(filePath, data);
 }
 
