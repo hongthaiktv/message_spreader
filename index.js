@@ -1,8 +1,9 @@
+const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const express = require('express');
 const serveIndex = require('serve-index');
 const request = require('request');
-const path = require('path');
 const multer = require('multer');
 const { JSDOM, VirtualConsole } = require("jsdom");
 const { Logger, FormUpload } = require('./plugin/tutils/index.js');
@@ -178,8 +179,16 @@ app.post("/", (req, res, next) => {
 		const code = 23;
 		const type = "motd";
 		const motdMessage = req.body;
-		const { spreader } = motdMessage;
+		const { spreader, data } = motdMessage;
 		const pageRank = listSites.getRank(spreader, "trustSites");
+
+		const hash = hashGenerate(JSON.stringify(data, null, "\t"), "sha1");
+		if (hash !== integrity) {
+			const message = "Motd integrity verify failed";
+			console.error(message);
+			res.json({message});
+			return;
+		}
 
 		motdMessage.integrity = integrity;
 		motdLogger.addLog(motdMessage, type, {code, pageRank});
@@ -850,7 +859,19 @@ function updateJSON(file) {
 	}
 	else settingObj = setting[file];
 
+	if (file === "motd") {
+		const motd = JSON.stringify(settingObj.data, null, "\t");
+		const hash = hashGenerate(motd, "sha1");
+		settingObj.integrity = hash;
+	}
+
 	const data = JSON.stringify(settingObj, null, "\t");
 	fs.writeFileSync(filePath, data);
+}
+
+function hashGenerate(data, algorithm = "sha256") {
+	return crypto.createHash(algorithm)
+		.update(data)
+		.digest("hex");
 }
 
