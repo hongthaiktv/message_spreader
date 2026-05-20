@@ -98,9 +98,10 @@ async function randPost(data) {
 		return new Promise((resolve) => {
 			const time = 5000;
 			const randTime = Math.floor(Math.random() * time + 1);
-			const url = `http://localhost:3000`;
 			const postData = JSON.parse(JSON.stringify(data));
+			let url = `http://localhost:3000?integrity=${postData.integrity}`;
 			if (counter === 2) {
+				url = `http://localhost:3000?integrity=${postData.integrity}-counter2`;
 				postData.integrity = `counter 2: ${postData.integrity}`;
 				postData.spreader = "https://onepage.web.app";
 				postData.data.message = `new message with <a href="https://google.com" target="_blank">link</a>`;

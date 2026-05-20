@@ -863,6 +863,7 @@ function updateJSON(file) {
 		const motd = JSON.stringify(settingObj.data, null, "\t");
 		const hash = hashGenerate(motd, "sha1");
 		settingObj.integrity = hash;
+		settingObj.spreader = domain;
 	}
 
 	const data = JSON.stringify(settingObj, null, "\t");
