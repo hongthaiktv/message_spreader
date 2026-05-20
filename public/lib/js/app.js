@@ -861,3 +861,21 @@ function log(data, type, tab = "logger") {
 	}
 }
 
+async function hashGenerate(data, algorithm = "SHA-256") {
+	if (typeof data === "string" && data) data = new TextEncoder().encode(data);
+	else if (data instanceof Blob) data = await data.bytes();
+	else if (!(data instanceof ArrayBuffer) && !(data instanceof Uint8Array)) {
+		const message = "hashGenerate: Wrong data input!";
+		log(message, "error");
+		console.error(message);
+		return;
+	}
+
+	const hashBuffer = await window.crypto.subtle.digest(algorithm, data);
+	const hashArray = Array.from(new Uint8Array(hashBuffer));
+	const hashHex = hashArray
+	.map(b => b.toString(16).padStart(2, "0"))
+	.join("");
+	return hashHex;
+}
+
