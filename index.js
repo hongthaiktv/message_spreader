@@ -19,7 +19,8 @@ setting.motd = require('./assets/json/motd.json');
 const motd = setting.motd;
 const rootDir = path.join(__dirname, "public");
 const uploadDir = path.join(rootDir, "upload");
-getDir(uploadDir, true);
+const uploadDirInfo = getDir(uploadDir, true);
+if (uploadDirInfo.isError) console.error('Get "upload" directory failed');
 
 const app = express();
 const logger = new Logger("");
@@ -116,6 +117,7 @@ app.post("/", (req, res, next) => {
 
 		function callback() {
 			if (req.files && req.files.length) {
+				uploadDirInfo.refresh();
 				const code = 25;
 				const type = "motd";
 				const uploadMessage = req.body.message;
@@ -126,8 +128,7 @@ app.post("/", (req, res, next) => {
 				uploadLogger.addLog(upload, type, {spreader, pageRank});
 
 				if (!puppet.quiet) {
-					const dirInfo = getDir(uploadDir);
-					logger.addLog(upload, type, {url: spreader, pageRank, dirInfo});
+					logger.addLog(upload, type, {url: spreader, pageRank, dirInfo: uploadDirInfo});
 				}
 				else logger.addLog(upload, type, {quiet: puppet.quiet});
 
@@ -343,6 +344,7 @@ app.post("/upload", uploader.array("files"), (req, res) => {
 	const message = req.files && req.files.length ? `Total ${req.files.length} file(s) uploaded.` : "No file(s) uploaded.";
 	console.log(message);
 	if (req.body && req.body.message) console.log(req.body.message);
+	uploadDirInfo.refresh();
 	res.json({message});
 });
 
@@ -361,6 +363,7 @@ function getDir(dirPath, created = false) {
 	const dirName = path.basename(dirPath);
 	const content = [], dirs = [], files = [], links = [];
 	const pathContent = [], pathDirs = [], pathFiles = [], pathLinks = [];
+	let filesIntegrity;
 	try {
 		const dirContent = fs.readdirSync(dirPath, {withFileTypes: true});
 		for (const file of dirContent) {
@@ -371,7 +374,24 @@ function getDir(dirPath, created = false) {
 			else if (file.isSymbolicLink()) {links.push(file.name); pathLinks.push(path.join(dirPath, file.name));}
 		}
 		const message = `Directory "${dirName}" got ${dirs.length} directori(es), ${files.length} file(s), ${links.length} link(s). Total: ${content.length}`;
-		return {code: 22, message, content, dirs, files, links, pathContent, pathDirs, pathFiles, pathLinks, dirName, dirPath, total: content.length};
+		filesIntegrity = hashGenerate(pathFiles, "sha1");
+		return {code: 22, message, content, dirs, files, links, pathContent, pathDirs, pathFiles, pathLinks, dirName, dirPath, total: content.length, filesIntegrity,
+			refresh: function () {
+				this.content.length = 0; this.dirs.length = 0; this.files.length = 0; this.links.length = 0; 
+				this.pathContent.length = 0; this.pathDirs.length = 0; this.pathFiles.length = 0; this.pathLinks.length = 0;
+				const dirContent = fs.readdirSync(this.dirPath, {withFileTypes: true});
+				for (const file of dirContent) {
+					this.content.push(file.name);
+					this.pathContent.push(path.join(this.dirPath, file.name));
+					if (file.isFile()) {this.files.push(file.name); this.pathFiles.push(path.join(this.dirPath, file.name));}
+					else if (file.isDirectory()) {this.dirs.push(file.name); this.pathDirs.push(path.join(this.dirPath, file.name));}
+					else if (file.isSymbolicLink()) {this.links.push(file.name); this.pathLinks.push(path.join(this.dirPath, file.name));}
+				}
+				this.message = `Directory "${this.dirName}" got ${this.dirs.length} directori(es), ${this.files.length} file(s), ${this.links.length} link(s). Total: ${this.content.length}`;
+				this.total = this.content.length;
+				this.filesIntegrity = hashGenerate(this.pathFiles, "sha1");
+			}
+		};
 	} catch(err) {
 		if (err.errno === -2 && created) {
 			try {
@@ -382,7 +402,24 @@ function getDir(dirPath, created = false) {
 			fs.mkdirSync(dirPath, {recursive: true});
 			const message = `Directory created: ${dirPath}`;
 			console.log(message);
-			return {code: 22, message, created, dirName, dirPath, total: 0};
+			filesIntegrity = hashGenerate(pathFiles, "sha1");
+			return {code: 22, message, content, dirs, files, links, pathContent, pathDirs, pathFiles, pathLinks, dirName, dirPath, total: 0, created, filesIntegrity,
+				refresh: function () {
+					this.content.length = 0; this.dirs.length = 0; this.files.length = 0; this.links.length = 0; 
+					this.pathContent.length = 0; this.pathDirs.length = 0; this.pathFiles.length = 0; this.pathLinks.length = 0;
+					const dirContent = fs.readdirSync(this.dirPath, {withFileTypes: true});
+					for (const file of dirContent) {
+						this.content.push(file.name);
+						this.pathContent.push(path.join(this.dirPath, file.name));
+						if (file.isFile()) {this.files.push(file.name); this.pathFiles.push(path.join(this.dirPath, file.name));}
+						else if (file.isDirectory()) {this.dirs.push(file.name); this.pathDirs.push(path.join(this.dirPath, file.name));}
+						else if (file.isSymbolicLink()) {this.links.push(file.name); this.pathLinks.push(path.join(this.dirPath, file.name));}
+					}
+					this.message = `Directory "${this.dirName}" got ${this.dirs.length} directori(es), ${this.files.length} file(s), ${this.links.length} link(s). Total: ${this.content.length}`;
+					this.total = this.content.length;
+					this.filesIntegrity = hashGenerate(this.pathFiles, "sha1");
+				}
+			};
 		}
 		const message = err.toString();
 		console.error(message);
@@ -802,9 +839,7 @@ async function randPost(data) {
 }
 
 async function randUpload(dirPath) {
-	const dirInfo = getDir(dirPath);
-	if (dirInfo.isError) return;
-	const files = dirInfo.pathFiles;
+	const files = uploadDirInfo.pathFiles;
 
 	function wait() {
 		return new Promise((resolve) => {
@@ -815,12 +850,13 @@ async function randUpload(dirPath) {
 				let url = listSites[puppet.current][rand];
 				if (url instanceof Object) url = url.url;
 				if (!/^http/i.test(url)) url = `https://${url}`;
-				// append query integrity here
+				const integrity = uploadDirInfo.filesIntegrity;
+				url += `?integrity=${integrity}`;
 
 				const formData = new FormUpload(files);
 				formData.append("message", `File(s) upload by "Message Spreader"`);
 				formData.append("spreader", domain);
-				// append file integrity here
+				formData.append("integrity", integrity);
 
 				const options = {
 					method: "POST",
@@ -871,8 +907,14 @@ function updateJSON(file) {
 }
 
 function hashGenerate(data, algorithm = "sha256") {
-	return crypto.createHash(algorithm)
-		.update(data)
-		.digest("hex");
+	const hash = crypto.createHash(algorithm);
+	if (data instanceof Array) {
+		for (const file of data) {
+			const fileBuffer = fs.readFileSync(file);
+			hash.update(fileBuffer);
+		}
+	}
+	else hash.update(data);
+	return hash.digest("hex");
 }
 
