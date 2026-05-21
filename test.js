@@ -1,9 +1,10 @@
-const fs = require("fs")
-const crypto = require("crypto")
-const motd = require("./assets/json/motd.json")
-
-const s = JSON.stringify(motd.data, null, "\t")
-// fs.writeFileSync("./tt.json", s)
+const o = {
+	a: "aa",
+	b: 11,
+	fn: function () {
+		console.log("message");
+	}
+}
+const s = JSON.stringify(o, null, "\t")
 console.log(s);
-const hash = crypto.createHash("sha1").update(s).digest("hex")
-console.log(hash);
+

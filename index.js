@@ -91,7 +91,7 @@ app.post("/", (req, res, next) => {
 	else if (/multipart\/form-data/i.test(contentType)) {
 		if (!req.query || !req.query.integrity) {
 			const message = "Missing integrity of url query";
-			console.error("Upload:", message);
+			console.error("Deliver:", message);
 			res.status(500).json({message});
 			return;
 		}
@@ -111,13 +111,25 @@ app.post("/", (req, res, next) => {
 		if (!existUpload) uploader.array("files")(req, res, callback);
 		else {
 			const message = "Upload has already forwarded";
-			console.log(message);
+			console.log("Deliver:", message);
 			res.json({message});
 		}
 
 		function callback() {
 			if (req.files && req.files.length) {
+				const files = [];
+				for (const {path} of req.files) {
+					files.push(path);
+				}
+				const hash = hashGenerate(files, "sha1");
+				if (hash !== integrity) {
+					const message = "File(s) integrity verify failed";
+					console.error("Deliver:", message);
+					res.json({message});
+					return;
+				}
 				uploadDirInfo.refresh();
+
 				const code = 25;
 				const type = "motd";
 				const uploadMessage = req.body.message;
@@ -132,19 +144,14 @@ app.post("/", (req, res, next) => {
 				}
 				else logger.addLog(upload, type, {quiet: puppet.quiet});
 
-				const files = [];
-				for (const {path} of req.files) {
-					files.push(path);
-				}
-
 				const message = `${req.files.length} file(s) forwarding...`;
-				console.log("Upload:", message);
+				console.log("Deliver:", message);
 				deliverUpload(files, spreader, integrity, uploadMessage);
 				res.json({message});
 			}
 			else {
 				const message = "No file(s) uploaded.";
-				console.log("Upload:", message);
+				console.log("Deliver:", message);
 				res.json({message});
 			}
 		}
@@ -152,7 +159,7 @@ app.post("/", (req, res, next) => {
 }, (req, res) => {
 	if (!req.query || !req.query.integrity) {
 		const message = "Missing integrity of url query";
-		console.error("Motd:", message);
+		console.error("Deliver:", message);
 		res.status(500).json({message});
 		return;
 	}
@@ -172,7 +179,7 @@ app.post("/", (req, res, next) => {
 	if (!existMessage) express.json()(req, res, callback);
 	else {
 		const message = "Motd has already forwarded";
-		console.log(message);
+		console.log("Deliver:", message);
 		res.json({message});
 	}
 
@@ -186,7 +193,7 @@ app.post("/", (req, res, next) => {
 		const hash = hashGenerate(JSON.stringify(data, null, "\t"), "sha1");
 		if (hash !== integrity) {
 			const message = "Motd integrity verify failed";
-			console.error(message);
+			console.error("Deliver:", message);
 			res.json({message});
 			return;
 		}
@@ -199,7 +206,7 @@ app.post("/", (req, res, next) => {
 			logger.addLog(motdMessage, type, {code, quiet: puppet.quiet});
 		}
 		const message = "Motd forwarding...";
-		console.log(message);
+		console.log("Deliver:", message);
 		motdMessage.spreader = domain;
 		deliverMotd(motdMessage, spreader, integrity);
 		res.json({message});
@@ -342,9 +349,9 @@ app.post("/motd", (req, res) => {
 
 app.post("/upload", uploader.array("files"), (req, res) => {
 	const message = req.files && req.files.length ? `Total ${req.files.length} file(s) uploaded.` : "No file(s) uploaded.";
-	console.log(message);
+	console.log("Upload:", message);
 	if (req.body && req.body.message) console.log(req.body.message);
-	uploadDirInfo.refresh();
+	if (req.files && req.files.length) uploadDirInfo.refresh();
 	res.json({message});
 });
 
@@ -417,7 +424,7 @@ function getDir(dirPath, created = false) {
 		}
 		const message = err.toString();
 		console.error(message);
-		return {code: 42, message, dirPath, dirName, isError: true, ...err};
+		return {code: 42, message, dirName, isError: true, ...err};
 	}
 }
 
@@ -772,7 +779,6 @@ function deliverUpload(files, spreader, integrity, message) {
 		url += `?integrity=${integrity}`;
 
 		const formData = new FormUpload(files);
-		formData.append("integrity", integrity);
 		formData.append("spreader", domain);
 		formData.append("message", message);
 
