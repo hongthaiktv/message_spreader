@@ -41,7 +41,6 @@ app.post("/", (req, res) => {
 			console.log(message);
 			console.log(req.body.spreader);
 			console.log(req.body.message);
-			console.log(req.body.integrity);
 			res.json({message});
 		}
 	}

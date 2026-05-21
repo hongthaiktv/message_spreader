@@ -20,7 +20,7 @@ const motd = setting.motd;
 const rootDir = path.join(__dirname, "public");
 const uploadDir = path.join(rootDir, "upload");
 const uploadDirInfo = getDir(uploadDir, true);
-if (uploadDirInfo.isError) console.error('Get "upload" directory failed');
+if (uploadDirInfo.isError) console.error(`Get "${uploadDirInfo.dirName}" directory failed`);
 
 const app = express();
 const logger = new Logger("");
@@ -361,37 +361,46 @@ server = app.listen(port, () => {
 
 function getDir(dirPath, created = false) {
 	const dirName = path.basename(dirPath);
-	const content = [], dirs = [], files = [], links = [];
-	const pathContent = [], pathDirs = [], pathFiles = [], pathLinks = [];
-	let filesIntegrity;
+	const result = {
+		code: 22,
+		message: "",
+		dirPath, dirName,
+		content: [], dirs: [], files: [], links: [],
+		pathContent: [], pathDirs: [], pathFiles: [], pathLinks: [],
+		total: 0,
+		filesIntegrity: "",
+		refresh: function () {
+			this.content.length = 0; this.dirs.length = 0; this.files.length = 0; this.links.length = 0; 
+			this.pathContent.length = 0; this.pathDirs.length = 0; this.pathFiles.length = 0; this.pathLinks.length = 0;
+			const dirContent = fs.readdirSync(this.dirPath, {withFileTypes: true});
+			for (const file of dirContent) {
+				const filePath = path.join(this.dirPath, file.name);
+				this.content.push(file.name);
+				this.pathContent.push(filePath);
+				if (file.isFile()) {this.files.push(file.name); this.pathFiles.push(filePath);}
+				else if (file.isDirectory()) {this.dirs.push(file.name); this.pathDirs.push(filePath);}
+				else if (file.isSymbolicLink()) {this.links.push(file.name); this.pathLinks.push(filePath);}
+			}
+			this.total = this.content.length;
+			this.message = `Directory "${this.dirName}" got ${this.dirs.length} directori(es), ${this.files.length} file(s), ${this.links.length} link(s). Total: ${this.total}`;
+			this.filesIntegrity = hashGenerate(this.pathFiles, "sha1");
+		}
+	};
+
 	try {
 		const dirContent = fs.readdirSync(dirPath, {withFileTypes: true});
 		for (const file of dirContent) {
-			content.push(file.name);
-			pathContent.push(path.join(dirPath, file.name));
-			if (file.isFile()) {files.push(file.name); pathFiles.push(path.join(dirPath, file.name));}
-			else if (file.isDirectory()) {dirs.push(file.name); pathDirs.push(path.join(dirPath, file.name));}
-			else if (file.isSymbolicLink()) {links.push(file.name); pathLinks.push(path.join(dirPath, file.name));}
+			const filePath = path.join(dirPath, file.name);
+			result.content.push(file.name);
+			result.pathContent.push(filePath);
+			if (file.isFile()) {result.files.push(file.name); result.pathFiles.push(filePath);}
+			else if (file.isDirectory()) {result.dirs.push(file.name); result.pathDirs.push(filePath);}
+			else if (file.isSymbolicLink()) {result.links.push(file.name); result.pathLinks.push(filePath);}
 		}
-		const message = `Directory "${dirName}" got ${dirs.length} directori(es), ${files.length} file(s), ${links.length} link(s). Total: ${content.length}`;
-		filesIntegrity = hashGenerate(pathFiles, "sha1");
-		return {code: 22, message, content, dirs, files, links, pathContent, pathDirs, pathFiles, pathLinks, dirName, dirPath, total: content.length, filesIntegrity,
-			refresh: function () {
-				this.content.length = 0; this.dirs.length = 0; this.files.length = 0; this.links.length = 0; 
-				this.pathContent.length = 0; this.pathDirs.length = 0; this.pathFiles.length = 0; this.pathLinks.length = 0;
-				const dirContent = fs.readdirSync(this.dirPath, {withFileTypes: true});
-				for (const file of dirContent) {
-					this.content.push(file.name);
-					this.pathContent.push(path.join(this.dirPath, file.name));
-					if (file.isFile()) {this.files.push(file.name); this.pathFiles.push(path.join(this.dirPath, file.name));}
-					else if (file.isDirectory()) {this.dirs.push(file.name); this.pathDirs.push(path.join(this.dirPath, file.name));}
-					else if (file.isSymbolicLink()) {this.links.push(file.name); this.pathLinks.push(path.join(this.dirPath, file.name));}
-				}
-				this.message = `Directory "${this.dirName}" got ${this.dirs.length} directori(es), ${this.files.length} file(s), ${this.links.length} link(s). Total: ${this.content.length}`;
-				this.total = this.content.length;
-				this.filesIntegrity = hashGenerate(this.pathFiles, "sha1");
-			}
-		};
+		result.total = result.content.length;
+		result.message = `Directory "${dirName}" got ${result.dirs.length} directori(es), ${result.files.length} file(s), ${result.links.length} link(s). Total: ${result.total}`;
+		result.filesIntegrity = hashGenerate(result.pathFiles, "sha1");
+		return result;
 	} catch(err) {
 		if (err.errno === -2 && created) {
 			try {
@@ -400,30 +409,15 @@ function getDir(dirPath, created = false) {
 				console.error(err.toString());
 			}
 			fs.mkdirSync(dirPath, {recursive: true});
+			result.created = true;
 			const message = `Directory created: ${dirPath}`;
+			result.message = message;
 			console.log(message);
-			filesIntegrity = hashGenerate(pathFiles, "sha1");
-			return {code: 22, message, content, dirs, files, links, pathContent, pathDirs, pathFiles, pathLinks, dirName, dirPath, total: 0, created, filesIntegrity,
-				refresh: function () {
-					this.content.length = 0; this.dirs.length = 0; this.files.length = 0; this.links.length = 0; 
-					this.pathContent.length = 0; this.pathDirs.length = 0; this.pathFiles.length = 0; this.pathLinks.length = 0;
-					const dirContent = fs.readdirSync(this.dirPath, {withFileTypes: true});
-					for (const file of dirContent) {
-						this.content.push(file.name);
-						this.pathContent.push(path.join(this.dirPath, file.name));
-						if (file.isFile()) {this.files.push(file.name); this.pathFiles.push(path.join(this.dirPath, file.name));}
-						else if (file.isDirectory()) {this.dirs.push(file.name); this.pathDirs.push(path.join(this.dirPath, file.name));}
-						else if (file.isSymbolicLink()) {this.links.push(file.name); this.pathLinks.push(path.join(this.dirPath, file.name));}
-					}
-					this.message = `Directory "${this.dirName}" got ${this.dirs.length} directori(es), ${this.files.length} file(s), ${this.links.length} link(s). Total: ${this.content.length}`;
-					this.total = this.content.length;
-					this.filesIntegrity = hashGenerate(this.pathFiles, "sha1");
-				}
-			};
+			return result;
 		}
 		const message = err.toString();
 		console.error(message);
-		return {code: 42, message, isError: true, ...err};
+		return {code: 42, message, dirPath, dirName, isError: true, ...err};
 	}
 }
 
@@ -856,7 +850,6 @@ async function randUpload(dirPath) {
 				const formData = new FormUpload(files);
 				formData.append("message", `File(s) upload by "Message Spreader"`);
 				formData.append("spreader", domain);
-				formData.append("integrity", integrity);
 
 				const options = {
 					method: "POST",
