@@ -10,13 +10,16 @@ const { Logger, FormUpload } = require('./plugin/tutils/index.js');
 const port = 3000;
 const domain = process.env.DOMAIN || `http://localhost:${port}`;
 
-const setting = require('./assets/json/setting.json');
-setting.mainSites = require('./assets/json/mainSites.json');
-setting.trustSites = require('./assets/json/trustSites.json');
-setting.blackSites = require('./assets/json/blackSites.json');
-setting.motd = require('./assets/json/motd.json');
+const APPJSON = {
+	setting: require('./assets/json/setting.json'),
+	motd: require('./assets/json/motd.json'),
+	mainSites: require('./assets/json/mainSites.json'),
+	trustSites: require('./assets/json/trustSites.json'),
+	blackSites: require('./assets/json/blackSites.json')
+};
 
-const motd = setting.motd;
+const setting = APPJSON.setting;
+const motd = APPJSON.motd;
 const rootDir = path.join(__dirname, "public");
 const uploadDir = path.join(rootDir, "upload");
 const uploadDirInfo = getDir(uploadDir, true);
@@ -36,9 +39,9 @@ const uploader = multer({ storage });
 
 let server;
 const listSites = {
-	mainSites: setting.mainSites,
-	trustSites: setting.trustSites,
-	blackSites: setting.blackSites,
+	mainSites: APPJSON.mainSites,
+	trustSites: APPJSON.trustSites,
+	blackSites: APPJSON.blackSites,
 	urlFailed: [],
 	urlSuccess: [],
 	getRank: function (url, list) {
@@ -884,24 +887,16 @@ async function randUpload(dirPath) {
 
 function updateJSON(file) {
 	const filePath = path.join(__dirname, "assets", "json", `${file}.json`);
-	let settingObj = {};
-	if (file === "setting") {
-		let originSetting = fs.readFileSync(filePath, "utf8");
-		originSetting = JSON.parse(originSetting);
-		for (const key in originSetting) {
-			settingObj[key] = setting[key];
-		}
-	}
-	else settingObj = setting[file];
+	const jsonObj = APPJSON[file];
 
 	if (file === "motd") {
-		const motd = JSON.stringify(settingObj.data, null, "\t");
+		const motd = JSON.stringify(jsonObj.data, null, "\t");
 		const hash = hashGenerate(motd, "sha1");
-		settingObj.integrity = hash;
-		settingObj.spreader = domain;
+		jsonObj.integrity = hash;
+		jsonObj.spreader = domain;
 	}
 
-	const data = JSON.stringify(settingObj, null, "\t");
+	const data = JSON.stringify(jsonObj, null, "\t");
 	fs.writeFileSync(filePath, data);
 }
 

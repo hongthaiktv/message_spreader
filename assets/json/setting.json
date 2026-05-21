@@ -1,6 +1,6 @@
 {
-	"rate": 7,
+	"rate": 5,
 	"quiet": false,
-	"current": "blackSites",
+	"current": "mainSites",
 	"mode": "normal"
 }
