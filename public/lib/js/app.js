@@ -409,36 +409,7 @@ async function query(action, data, tab) {
 			break;
 
 		case "getListSites":
-			$("#urlAccordion .contentCollapse > div").empty();
-			if (res.mainSites && res.mainSites.length) {
-				res.mainSites.forEach(function (url, index) {
-					if (url instanceof Object) url = url.url;
-					const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
-					const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
-					$("#urlMainSitesContent").append(link);
-				});
-				$("#urlMainSitesCounter").text(res.mainSitesLength);
-			}
-
-			if (res.trustSites && res.trustSites.length) {
-				res.trustSites.forEach(function (url, index) {
-					if (url instanceof Object) url = url.url;
-					const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
-					const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
-					$("#urlTrustSitesContent").append(link);
-				});
-				$("#urlTrustSitesCounter").text(res.trustSitesLength);
-			}
-
-			if (res.blackSites && res.blackSites.length) {
-				res.blackSites.forEach(function (url, index) {
-					if (url instanceof Object) url = url.url;
-					const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
-					const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
-					$("#urlBlackSitesContent").append(link);
-				});
-				$("#urlBlackSitesCounter").text(res.blackSitesLength);
-			}
+			setListSites(res);
 			break;
 	}
 }
@@ -585,7 +556,7 @@ function log(data, type, tab = "logger") {
 						if (typeof data.quiet === "boolean") {
 							$("#switchQuiet")[0].checked = data.quiet;
 							if (!data.quiet) {
-								query("getListSites", "url");
+								setListSites(data.listSitesInfo);
 								$("#urlAccordion").toggleClass("d-none", false).toggleClass("d-flex", true);
 								query("getMotdMsg", "motd");
 								query("getDir", "upload", "upload");
@@ -872,5 +843,38 @@ async function hashGenerate(data, algorithm = "SHA-256") {
 	.map(b => b.toString(16).padStart(2, "0"))
 	.join("");
 	return hashHex;
+}
+
+function setListSites(listSitesInfo) {
+	$("#urlAccordion .contentCollapse > div").empty();
+	if (listSitesInfo.mainSites && listSitesInfo.mainSites.length) {
+		listSitesInfo.mainSites.forEach(function (url, index) {
+			if (url instanceof Object) url = url.url;
+			const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
+			const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
+			$("#urlMainSitesContent").append(link);
+		});
+		$("#urlMainSitesCounter").text(listSitesInfo.mainSitesLength);
+	}
+
+	if (listSitesInfo.trustSites && listSitesInfo.trustSites.length) {
+		listSitesInfo.trustSites.forEach(function (url, index) {
+			if (url instanceof Object) url = url.url;
+			const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
+			const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
+			$("#urlTrustSitesContent").append(link);
+		});
+		$("#urlTrustSitesCounter").text(listSitesInfo.trustSitesLength);
+	}
+
+	if (listSitesInfo.blackSites && listSitesInfo.blackSites.length) {
+		listSitesInfo.blackSites.forEach(function (url, index) {
+			if (url instanceof Object) url = url.url;
+			const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
+			const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
+			$("#urlBlackSitesContent").append(link);
+		});
+		$("#urlBlackSitesCounter").text(listSitesInfo.blackSitesLength);
+	}
 }
 

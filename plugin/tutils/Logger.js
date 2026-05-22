@@ -30,7 +30,7 @@ class Logger extends EventTarget {
 		const total = this.#clients.length;
 		const msg = `${this.#options.prefix}Client added. Total: ${total}`;
 		if (output) console.log(msg);
-		if (!logData instanceof Object) {
+		if (!(logData instanceof Object)) {
 			console.error("Wrong log data!");
 			return;
 		}
@@ -80,7 +80,7 @@ class Logger extends EventTarget {
 			msg = `${this.#options.prefix}Client disconnected. Left: ${total}`;
 			if (output) console.log(msg);
 		}
-		if (!logData instanceof Object) {
+		if (!(logData instanceof Object)) {
 			console.error("Wrong log data!");
 			return;
 		}

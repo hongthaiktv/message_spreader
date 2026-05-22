@@ -262,21 +262,9 @@ app.get("/query", (req, res) => {
 			break;
 
 		case "getListSites":
-			const mainSitesLength = listSites.mainSites.length;
-			const trustSitesLength = listSites.trustSites.length;
-			const blackSitesLength = listSites.blackSites.length;
-			const message = `"mainSites" got ${mainSitesLength}, "trustSites" got ${trustSitesLength}, "blackSites" got ${blackSitesLength} url(s)`;
-			const listSitesInfo = {
-				message,
-				mainSitesLength,
-				trustSitesLength,
-				blackSitesLength,
-				mainSites: listSites.mainSites.slice(0, 100),
-				trustSites: listSites.trustSites.slice(0, 100),
-				blackSites: listSites.blackSites.slice(0, 100)
-			};
+			const listSitesInfo = getListSites();
 			if (!puppet.quiet) {
-				console.log(message);
+				console.log(listSitesInfo.message);
 				res.json(listSitesInfo);
 			}
 			else res.json({quiet: puppet.quiet});
@@ -292,7 +280,10 @@ app.get("/logger", (req, res) => {
 		"Content-Type": "text/event-stream",
 		"Cache-Control": "no-cache"
 	});
-	if (!puppet.quiet) logger.addClient(res, "log", {code: 5, sitesLength: listSites[puppet.current].length, urlSuccess: listSites.urlSuccess, urlFailed: listSites.urlFailed, ...puppet});
+	if (!puppet.quiet) {
+		const listSitesInfo = getListSites();
+		logger.addClient(res, "log", {code: 5, sitesLength: listSites[puppet.current].length, urlSuccess: listSites.urlSuccess, urlFailed: listSites.urlFailed, listSitesInfo, ...puppet});
+	}
 	else logger.addClient(res, "log", {code: 5, sitesLength: listSites[puppet.current].length, ...puppet});
 });
 
@@ -910,5 +901,21 @@ function hashGenerate(data, algorithm = "sha256") {
 	}
 	else hash.update(data);
 	return hash.digest("hex");
+}
+
+function getListSites() {
+	const mainSitesLength = listSites.mainSites.length;
+	const trustSitesLength = listSites.trustSites.length;
+	const blackSitesLength = listSites.blackSites.length;
+	const message = `"mainSites" got ${mainSitesLength}, "trustSites" got ${trustSitesLength}, "blackSites" got ${blackSitesLength} url(s)`;
+	return {
+		message,
+		mainSitesLength,
+		trustSitesLength,
+		blackSitesLength,
+		mainSites: listSites.mainSites.slice(0, 100),
+		trustSites: listSites.trustSites.slice(0, 100),
+		blackSites: listSites.blackSites.slice(0, 100)
+	};
 }
 
