@@ -4,7 +4,7 @@
 
 **Using node.js for backend.**
 
-***Note: Individuals may use for any purpose and non-commercial use.***
+***Note: Individuals may use for any purpose and non-commercial use.***<br>
 ***Commercial use please contact for commercial license.***
 
 Using to obtain info on Internet base on the list sites .json (mainSites, trustSites, blackSites).
