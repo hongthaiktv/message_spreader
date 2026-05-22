@@ -4,8 +4,8 @@
 
 **Using node.js for backend.**
 
-***Note: Individuals may use for any purpose and non-commercial use.***<br>
-***Commercial use please contact for commercial license.***
+> **Note:** *Individuals may use for any purpose and non-commercial use.*
+> *Commercial use please contact for commercial license.*
 
 Using to obtain info on Internet base on the list sites .json (mainSites, trustSites, blackSites).
 Can send message to Internet and hope someone will catched it (motd.json => message of the day).
