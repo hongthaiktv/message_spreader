@@ -1,12 +1,12 @@
 {
-  "name": "Message Spreader",
+  "name": "Message_Spreader",
   "version": "1.0.0",
   "description": "Web application to deliver message and files across the world",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/hongthaiktv/localhost.git"
+    "url": "git+ssh://git@github.com/hongthaiktv/message_spreader.git"
   },
-  "license": "ISC",
+  "license": "BUSL-1.1",
   "author": "Thai Nguyen",
   "type": "commonjs",
   "main": "index.js",
