@@ -1,13 +1,17 @@
 {
-  "name": "localhost",
+  "name": "Message Spreader",
   "version": "1.0.0",
-  "description": "test running local service",
+  "description": "Web application to deliver message and files across the world",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/hongthaiktv/localhost.git"
+  },
   "license": "ISC",
   "author": "Thai Nguyen",
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+	"start": "PUPPET=1 node index.js"
   },
   "dependencies": {
     "express": "^4.22.1",
