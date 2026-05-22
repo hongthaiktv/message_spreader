@@ -4,7 +4,7 @@
 
 **Using node.js for backend.**
 
-> [!CAUTION]
+> [!WARNING]
 > **Note:**
 > - *Individuals may use for any purpose and non-commercial use.*
 > - *Commercial use please contact for commercial license.*
