@@ -324,31 +324,6 @@ pupBtnUpload.addEventListener("change", async function (e) {
 	if (!$("#switchQuiet")[0].checked) query("getDir", "upload", "upload");
 });
 
-function updateTabUpload(dirInfo) {
-	$("#uploadAccordion .contentCollapse > div").empty();
-	if (dirInfo.dirs && dirInfo.dirs.length) {
-		$("#uploadDirectoriesCounter").text(dirInfo.dirs.length);
-		for (const dir of dirInfo.dirs) {
-			$("#uploadDirectoriesContent").append(`<div>${dir}</div>`);
-		}
-		$("#uploadBtnDirectories").toggleClass("d-none", false);
-	} else $("#uploadBtnDirectories").toggleClass("d-none", true);
-	if (dirInfo.files && dirInfo.files.length) {
-		$("#uploadFilesCounter").text(dirInfo.files.length);
-		for (const file of dirInfo.files) {
-			$("#uploadFilesContent").append(`<div>${file}</div>`);
-		}
-		$("#uploadBtnFiles").toggleClass("d-none", false);
-	} else $("#uploadBtnFiles").toggleClass("d-none", true);
-	if (dirInfo.links && dirInfo.links.length) {
-		$("#uploadLinksCounter").text(dirInfo.links.length);
-		for (const link of dirInfo.links) {
-			$("#uploadLinksContent").append(`<div>${link}</div>`);
-		}
-		$("#uploadBtnLinks").toggleClass("d-none", false);
-	} else $("#uploadBtnLinks").toggleClass("d-none", true);
-}
-
 async function query(action, data, tab) {
 	if (typeof data === "string" && tab === undefined) {
 		tab = data;
@@ -390,26 +365,11 @@ async function query(action, data, tab) {
 			break;
 
 		case "getMotdMsg":
-			if (res.message) {
-				motdMessage.value = res.message;
-				motdMessage.dispatchEvent(new Event("focus"));
-				motdMessage.dispatchEvent(new Event("blur"));
-			}
-			if (res.motdMessages && res.motdMessages.length) {
-				$("#motdContent").empty();
-				for (const {code, type, pageRank, data, spreader} of res.motdMessages) {
-					const logData = {
-						code, type, pageRank,
-						message: data.message,
-						url: spreader
-					};
-					log(logData, type, tab);
-				}
-			}
+			updateTabMotd(res, tab);
 			break;
 
 		case "getListSites":
-			setListSites(res);
+			updateTabUrl(res);
 			break;
 	}
 }
@@ -556,11 +516,10 @@ function log(data, type, tab = "logger") {
 						if (typeof data.quiet === "boolean") {
 							$("#switchQuiet")[0].checked = data.quiet;
 							if (!data.quiet) {
-								setListSites(data.listSitesInfo);
+								updateTabUrl(data.listSitesInfo);
 								$("#urlAccordion").toggleClass("d-none", false).toggleClass("d-flex", true);
-								query("getMotdMsg", "motd");
-								query("getDir", "upload", "upload");
-								query("getUploadMsg", "upload");
+								updateTabMotd(data.motdInfo, "motd");
+								updateTabUpload(data.dirInfo);
 							}
 							else {
 								motdMessage.value = "";
@@ -845,7 +804,7 @@ async function hashGenerate(data, algorithm = "SHA-256") {
 	return hashHex;
 }
 
-function setListSites(listSitesInfo) {
+function updateTabUrl(listSitesInfo) {
 	$("#urlAccordion .contentCollapse > div").empty();
 	if (listSitesInfo.mainSites && listSitesInfo.mainSites.length) {
 		listSitesInfo.mainSites.forEach(function (url, index) {
@@ -875,6 +834,66 @@ function setListSites(listSitesInfo) {
 			$("#urlBlackSitesContent").append(link);
 		});
 		$("#urlBlackSitesCounter").text(listSitesInfo.blackSitesLength);
+	}
+}
+
+function updateTabMotd(motdInfo, tab = "motd") {
+	if (motdInfo.message) {
+		motdMessage.value = motdInfo.message;
+		motdMessage.dispatchEvent(new Event("focus"));
+		motdMessage.dispatchEvent(new Event("blur"));
+	}
+	if (motdInfo.motdMessages && motdInfo.motdMessages.length) {
+		$("#motdContent").empty();
+		for (const {code, type, pageRank, data, spreader} of motdInfo.motdMessages) {
+			const logData = {
+				code, type, pageRank,
+				message: data.message,
+				url: spreader
+			};
+			log(logData, type, tab);
+		}
+	}
+}
+
+function updateTabUpload(dirInfo, uploadMessages, tab = "upload") {
+	if (dirInfo.uploadMessages) uploadMessages = dirInfo.uploadMessages;
+	else if (!dirInfo.content) uploadMessages = dirInfo;
+
+	if (dirInfo.content && dirInfo.content.length) {
+		$("#uploadAccordion .contentCollapse > div").empty();
+		if (dirInfo.dirs && dirInfo.dirs.length) {
+			$("#uploadDirectoriesCounter").text(dirInfo.dirs.length);
+			for (const dir of dirInfo.dirs) {
+				$("#uploadDirectoriesContent").append(`<div>${dir}</div>`);
+			}
+			$("#uploadBtnDirectories").toggleClass("d-none", false);
+		} else $("#uploadBtnDirectories").toggleClass("d-none", true);
+		if (dirInfo.files && dirInfo.files.length) {
+			$("#uploadFilesCounter").text(dirInfo.files.length);
+			for (const file of dirInfo.files) {
+				$("#uploadFilesContent").append(`<div>${file}</div>`);
+			}
+			$("#uploadBtnFiles").toggleClass("d-none", false);
+		} else $("#uploadBtnFiles").toggleClass("d-none", true);
+		if (dirInfo.links && dirInfo.links.length) {
+			$("#uploadLinksCounter").text(dirInfo.links.length);
+			for (const link of dirInfo.links) {
+				$("#uploadLinksContent").append(`<div>${link}</div>`);
+			}
+			$("#uploadBtnLinks").toggleClass("d-none", false);
+		} else $("#uploadBtnLinks").toggleClass("d-none", true);
+	}
+
+	if (uploadMessages && uploadMessages.length) {
+		$("#uploadContent").empty();
+		for (const {code, type, pageRank, message, spreader} of uploadMessages) {
+			const logData = {
+				code, type, pageRank, message,
+				url: spreader
+			};
+			log(logData, type, tab);
+		}
 	}
 }
 

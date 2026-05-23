@@ -86,6 +86,8 @@ logger.addEventListener("change", function (e) {
 	}
 });
 
+
+// Starting point
 if (puppet.quickStart) runPuppet("start");
 
 app.post("/", (req, res, next) => {
@@ -143,7 +145,8 @@ app.post("/", (req, res, next) => {
 				uploadLogger.addLog(upload, type, {spreader, pageRank});
 
 				if (!puppet.quiet) {
-					logger.addLog(upload, type, {url: spreader, pageRank, dirInfo: uploadDirInfo});
+					const dirInfo = {message: uploadDirInfo.message, content: uploadDirInfo.content, dirs: uploadDirInfo.dirs, files: uploadDirInfo.files, links: uploadDirInfo.links};
+					logger.addLog(upload, type, {url: spreader, pageRank, dirInfo});
 				}
 				else logger.addLog(upload, type, {quiet: puppet.quiet});
 
@@ -229,14 +232,15 @@ app.get("/query", (req, res) => {
 	const action = req.query.action;
 	switch (action) {
 		case "getDir":
-			const dirName = req.query.dirName || "upload";
-			const dirPath = path.join(rootDir, dirName);
-			const dirInfo = getDir(dirPath);
-			if (dirInfo.isError) {
-				res.status(500).json(dirInfo);
-				return;
-			}
 			if (!puppet.quiet) {
+				const dirName = req.query.dirName || "upload";
+				const dirPath = path.join(rootDir, dirName);
+				let dirInfo = getDir(dirPath);
+				if (dirInfo.isError) {
+					res.status(500).json(dirInfo);
+					return;
+				}
+				dirInfo = {message: dirInfo.message, content: dirInfo.content, dirs: dirInfo.dirs, files: dirInfo.files, links: dirInfo.links};
 				console.log(dirInfo.message);
 				res.json(dirInfo);
 			}
@@ -253,17 +257,16 @@ app.get("/query", (req, res) => {
 
 		case "getMotdMsg":
 			if (!puppet.quiet) {
-				const message = motd.data.message;
-				const motdMessages = motdLogger.getLogs();
-				console.log("Motd:", message);
-				res.json({message, motdMessages});
+				const motdInfo = getMotdMsg();
+				console.log("Motd:", motdInfo.message);
+				res.json(motdInfo);
 			}
 			else res.json({quiet: puppet.quiet});
 			break;
 
 		case "getListSites":
-			const listSitesInfo = getListSites();
 			if (!puppet.quiet) {
+				const listSitesInfo = getListSites();
 				console.log(listSitesInfo.message);
 				res.json(listSitesInfo);
 			}
@@ -282,7 +285,10 @@ app.get("/logger", (req, res) => {
 	});
 	if (!puppet.quiet) {
 		const listSitesInfo = getListSites();
-		logger.addClient(res, "log", {code: 5, sitesLength: listSites[puppet.current].length, urlSuccess: listSites.urlSuccess, urlFailed: listSites.urlFailed, listSitesInfo, ...puppet});
+		const motdInfo = getMotdMsg();
+		const uploadMessages = uploadLogger.getLogs();
+		const dirInfo = {message: uploadDirInfo.message, content: uploadDirInfo.content, dirs: uploadDirInfo.dirs, files: uploadDirInfo.files, links: uploadDirInfo.links, uploadMessages};
+		logger.addClient(res, "log", {code: 5, sitesLength: listSites[puppet.current].length, urlSuccess: listSites.urlSuccess, urlFailed: listSites.urlFailed, listSitesInfo, motdInfo, dirInfo, ...puppet});
 	}
 	else logger.addClient(res, "log", {code: 5, sitesLength: listSites[puppet.current].length, ...puppet});
 });
@@ -358,6 +364,9 @@ app.get("*", (req, res) => res.status(404).sendFile(path.join(rootDir, "404.html
 
 server = app.listen(port, () => {
 	console.log(`Web server running at http://localhost:${port}`);
+	console.log(getListSites().message);
+	console.log(uploadDirInfo.message);
+	console.log("Motd:", motd.data.message);
 });
 
 function getDir(dirPath, created = false) {
@@ -919,3 +928,8 @@ function getListSites() {
 	};
 }
 
+function getMotdMsg() {
+	const message = motd.data.message;
+	const motdMessages = motdLogger.getLogs();
+	return {message, motdMessages};
+}
