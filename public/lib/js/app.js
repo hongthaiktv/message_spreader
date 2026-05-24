@@ -589,11 +589,10 @@ function log(data, type, tab = "logger") {
 							$("#uploadContent").empty();
 						}
 						else {
-							query("getListSites", "url");
+							updateTabUrl(data.listSitesInfo);
 							$("#urlAccordion").toggleClass("d-none", false).toggleClass("d-flex", true);
-							query("getMotdMsg", "motd");
-							query("getDir", "upload", "upload");
-							query("getUploadMsg", "upload");
+							updateTabMotd(data.motdInfo, "motd");
+							updateTabUpload(data.dirInfo);
 						}
 						break;
 				}
@@ -857,10 +856,13 @@ function updateTabMotd(motdInfo, tab = "motd") {
 }
 
 function updateTabUpload(dirInfo, uploadMessages, tab = "upload") {
-	if (dirInfo.uploadMessages) uploadMessages = dirInfo.uploadMessages;
-	else if (!dirInfo.content) uploadMessages = dirInfo;
+	if (dirInfo.uploadMessages && dirInfo.uploadMessages instanceof Array) uploadMessages = dirInfo.uploadMessages;
+	else if (dirInfo instanceof Array) {
+		uploadMessages = dirInfo;
+		dirInfo = undefined;
+	}
 
-	if (dirInfo.content && dirInfo.content.length) {
+	if (dirInfo && dirInfo.content && dirInfo.content.length) {
 		$("#uploadAccordion .contentCollapse > div").empty();
 		if (dirInfo.dirs && dirInfo.dirs.length) {
 			$("#uploadDirectoriesCounter").text(dirInfo.dirs.length);

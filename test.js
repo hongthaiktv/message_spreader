@@ -1,10 +1,8 @@
-const o = {
+let o = {
 	a: "aa",
-	b: 11,
-	fn: function () {
-		console.log("message");
-	}
+	b: 11
 }
-const s = JSON.stringify(o, null, "\t")
-console.log(s);
+const map = o;
+o = undefined;
+console.log(o, map);
 

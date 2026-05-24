@@ -286,6 +286,7 @@ app.get("/logger", (req, res) => {
 	if (!puppet.quiet) {
 		const listSitesInfo = getListSites();
 		const motdInfo = getMotdMsg();
+		uploadDirInfo.refresh();
 		const uploadMessages = uploadLogger.getLogs();
 		const dirInfo = {message: uploadDirInfo.message, content: uploadDirInfo.content, dirs: uploadDirInfo.dirs, files: uploadDirInfo.files, links: uploadDirInfo.links, uploadMessages};
 		logger.addClient(res, "log", {code: 5, sitesLength: listSites[puppet.current].length, urlSuccess: listSites.urlSuccess, urlFailed: listSites.urlFailed, listSitesInfo, motdInfo, dirInfo, ...puppet});
@@ -542,17 +543,27 @@ function runPuppet(act, res) {
 			});
 			break;
 
-		case "changeMode":
-			msg = `Puppet mode changed to "${puppet.mode}"`;
-			logger.addLog(msg, "success", {code: 12, mode: puppet.mode, quiet: puppet.quiet});
-			if (res) res.json({
-				code: 12,
-				message: msg,
-				type: "success",
-				mode: puppet.mode,
-				quiet: puppet.quiet
-			});
+		case "changeMode": {
+			const code = 12;
+			const type = "success";
+			const mode = puppet.mode;
+			const quiet = puppet.quiet;
+			msg = `Puppet mode changed to "${mode}"`;
+			if (!quiet) {
+				const listSitesInfo = getListSites();
+				const motdInfo = getMotdMsg();
+				uploadDirInfo.refresh();
+				const uploadMessages = uploadLogger.getLogs();
+				const dirInfo = {message: uploadDirInfo.message, content: uploadDirInfo.content, dirs: uploadDirInfo.dirs, files: uploadDirInfo.files, links: uploadDirInfo.links, uploadMessages};
+				logger.addLog(msg, type, {code, mode, quiet, listSitesInfo, motdInfo, dirInfo});
+				if (res) res.json({code, message: msg, type, mode, quiet, listSitesInfo, motdInfo, dirInfo});
+			}
+			else {
+				logger.addLog(msg, type, {code, mode, quiet});
+				if (res) res.json({code, message: msg, type, mode, quiet});
+			}
 			break;
+		}
 
 		default:
 			msg = "Wrong action!";
