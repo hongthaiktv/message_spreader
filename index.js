@@ -277,11 +277,11 @@ app.get("/query", (req, res) => {
 
 		case "getUrls":
 			if (!puppet.quiet) {
-				const urls = req.query.urls;
+				const list = req.query.list;
 				const start = +req.query.start || 0;
 				const end = start + listSites.step;
-				const urlsInfo = listSites[urls].slice(start, end);
-				res.json(urlsInfo);
+				const urls = listSites[list].slice(start, end);
+				res.json(urls);
 			}
 			else res.json({quiet: puppet.quiet});
 			break;

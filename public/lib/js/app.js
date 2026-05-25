@@ -82,57 +82,6 @@ var scrollerMainSites = scrollerUrlLoading("urlMainSites", "urlMainSitesContent"
 	element.innerHTML = `${urlIndex}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a>`;
 	return element;
 });
-// scrollerUrlLoading(urlMainSites, {});
-// function scrollerUrlLoading(scrollLayout, data) {
-// 	const contentLayout = scrollLayout.firstElementChild;
-// 	if (listSitesInfo.mainSites && listSitesInfo.mainSites.length) {
-// 		listSitesInfo.mainSites.forEach(function (url, index) {
-// 			if (url instanceof Object) url = url.url;
-// 			const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
-// 			const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
-// 			$("#urlMainSitesContent").append(link);
-// 		});
-// 		$("#urlMainSitesCounter").text(listSitesInfo.mainSitesLength);
-// 	}
-// 
-// 	if (listSitesInfo.trustSites && listSitesInfo.trustSites.length) {
-// 		listSitesInfo.trustSites.forEach(function (url, index) {
-// 			if (url instanceof Object) url = url.url;
-// 			const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
-// 			const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
-// 			$("#urlTrustSitesContent").append(link);
-// 		});
-// 		$("#urlTrustSitesCounter").text(listSitesInfo.trustSitesLength);
-// 	}
-// 
-// 	if (listSitesInfo.blackSites && listSitesInfo.blackSites.length) {
-// 		listSitesInfo.blackSites.forEach(function (url, index) {
-// 			if (url instanceof Object) url = url.url;
-// 			const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
-// 			const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
-// 			$("#urlBlackSitesContent").append(link);
-// 		});
-// 		$("#urlBlackSitesCounter").text(listSitesInfo.blackSitesLength);
-// 	}
-// }
-
-// let prevP = 0;
-// let sab = true;
-// urlMainSites.onscroll = function () {
-// 	const layout = this;
-// 	const id = layout.id;
-// 	const curPos = layout.scrollTop;
-// 	if (sab && curPos > prevP && layout.scrollHeight - curPos <= layout.offsetHeight * 6) {
-// 		alert("loading...")
-// 		sab = false;
-// 		query("getListSites", 100, "url")
-// 		.then(listSitesInfo => {
-// 			updateTabUrl(listSitesInfo, true);
-// 			sab = true;
-// 		});
-// 	}
-// 	prevP = curPos;
-// }
 
 function motd(data) {
 	motd.data = data;
@@ -439,7 +388,8 @@ async function query(action, data, tab) {
 		tab = data;
 		data = undefined;
 	}
-	tab = tab || "logger";
+	const start = typeof tab === "number" ? tab : 0;
+	tab = typeof tab === "string" && tab ? tab : "logger";
 	let url = `${SERVER}query?action=${action}`;
 	switch (action) {
 		case "getDir":
@@ -451,18 +401,27 @@ async function query(action, data, tab) {
 			break;
 
 		case "getUrls":
-			url += `&urls=${data}&start=${tab || 0}`;
+			url += `&list=${data}&start=${start}`;
 			break;
 	}
-	const response = await fetch(url);
+	const response = await fetch(url, {
+		method: "GET",
+		headers: {
+			"Content-Type": "application/json"
+		}
+	});
+	let res;
 	if (!response.ok) {
-		const res = await response.json();
-		if (res instanceof Object && res.message) {
+		try {
+			res = await response.json();
 			log(res.message, "error", tab);
-		} else log(`Error ${response.status}: Action "${action}" failed.`, "error", tab);
-		return response;
+			return res;
+		} catch(err) {
+			log(`Error ${response.status}: Action "${action}" failed.`, "error", tab);
+			return response;
+		}
 	}
-	const res = await response.json();
+	res = await response.json();
 	if (res.quiet) return res;
 	switch (action) {
 		case "getDir":
