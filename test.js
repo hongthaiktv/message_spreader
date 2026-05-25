@@ -1,2 +1,4 @@
-const start = true ? (console.log(1), console.log(2), 33) : 44;
-console.log(start);
+const a = [1, 2, 3, 4, 5]
+const b = a.slice(5, 10)
+console.log(b instanceof Array);
+

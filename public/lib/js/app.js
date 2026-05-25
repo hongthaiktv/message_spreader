@@ -47,23 +47,31 @@ const scrollerUrlLoading = (function () {
 			if (!loading && curPos > prevPos && this.scrollHeight - curPos <= this.offsetHeight * 6) {
 				scrollerOpt.loading = true;
 				query("getUrls", list, last)
-				.then(urlsInfo => {
+				.then(urls => {
+					if (urls.quiet) {
+						scrollerOpt.loading = false;
+						return;
+					}
 					if (!callback) {
-						for (let i = 0; i < urlsInfo.length; i++) {
-							const resultElement = document.createElement("DIV");
-							const element = urlsInfo[i];
-							resultElement.innerHTML = `${index + last + 1}. ${element}`;
-							contentEle.appendChild(resultElement);
+						for (let i = 0; i < urls.length; i++) {
+							let url = urls[i];
+							if (url instanceof Object) url = url.url;
+							const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
+							const urlIndex = i + last + 1;
+							const element = document.createElement("DIV");
+							element.className = "white-text my-2";
+							element.innerHTML = `${urlIndex}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a>`;
+							contentEle.appendChild(element);
 						}
 					}
 					else if (typeof callback === "function") {
-						for (let i = 0; i < urlsInfo.length; i++) {
-							const element = urlsInfo[i];
-							const resultElement = callback(element, i, last);
-							contentEle.appendChild(resultElement);
+						for (let i = 0; i < urls.length; i++) {
+							const url = urls[i];
+							const element = callback(url, i, last);
+							contentEle.appendChild(element);
 						}
 					}
-					scrollerOpt.last += urlsInfo.length;
+					scrollerOpt.last += urls.length;
 					scrollerOpt.loading = false;
 				});
 			}
@@ -73,15 +81,9 @@ const scrollerUrlLoading = (function () {
 	}
 })();
 
-var scrollerMainSites = scrollerUrlLoading("urlMainSites", "urlMainSitesContent", "mainSites", (url, index, last) => {
-	if (url instanceof Object) url = url.url;
-	const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
-	const urlIndex = `${index + last + 1}`;
-	const element = document.createElement("DIV");
-	element.className = "white-text my-2";
-	element.innerHTML = `${urlIndex}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a>`;
-	return element;
-});
+var scrollerMainSites = scrollerUrlLoading("urlMainSites", "urlMainSitesContent", "mainSites");
+var scrollerTrustSites = scrollerUrlLoading("urlTrustSites", "urlTrustSitesContent", "trustSites");
+var scrollerBlackSites = scrollerUrlLoading("urlBlackSites", "urlBlackSitesContent", "blackSites");
 
 function motd(data) {
 	motd.data = data;
