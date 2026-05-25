@@ -42,6 +42,7 @@ const listSites = {
 	mainSites: APPJSON.mainSites,
 	trustSites: APPJSON.trustSites,
 	blackSites: APPJSON.blackSites,
+	step: 100,
 	urlFailed: [],
 	urlSuccess: [],
 	getRank: function (url, list) {
@@ -266,9 +267,21 @@ app.get("/query", (req, res) => {
 
 		case "getListSites":
 			if (!puppet.quiet) {
-				const listSitesInfo = getListSites();
+				const start = +req.query.start || 0;
+				const listSitesInfo = getListSites(start);
 				console.log(listSitesInfo.message);
 				res.json(listSitesInfo);
+			}
+			else res.json({quiet: puppet.quiet});
+			break;
+
+		case "getUrls":
+			if (!puppet.quiet) {
+				const urls = req.query.urls;
+				const start = +req.query.start || 0;
+				const end = start + listSites.step;
+				const urlsInfo = listSites[urls].slice(start, end);
+				res.json(urlsInfo);
 			}
 			else res.json({quiet: puppet.quiet});
 			break;
@@ -923,19 +936,23 @@ function hashGenerate(data, algorithm = "sha256") {
 	return hash.digest("hex");
 }
 
-function getListSites() {
+function getListSites(start = 0, step = 100) {
 	const mainSitesLength = listSites.mainSites.length;
 	const trustSitesLength = listSites.trustSites.length;
 	const blackSitesLength = listSites.blackSites.length;
 	const message = `"mainSites" got ${mainSitesLength}, "trustSites" got ${trustSitesLength}, "blackSites" got ${blackSitesLength} url(s)`;
+
+	start = +start;
+	step = +step;
+	const end = start + step;
 	return {
 		message,
 		mainSitesLength,
 		trustSitesLength,
 		blackSitesLength,
-		mainSites: listSites.mainSites.slice(0, 100),
-		trustSites: listSites.trustSites.slice(0, 100),
-		blackSites: listSites.blackSites.slice(0, 100)
+		mainSites: listSites.mainSites.slice(start, end),
+		trustSites: listSites.trustSites.slice(start, end),
+		blackSites: listSites.blackSites.slice(start, end)
 	};
 }
 

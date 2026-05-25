@@ -24,6 +24,116 @@ for (const layout of scrollLayouts) {
 	window[layout].onscroll = function () {scroller(this)};
 }
 
+const scrollerUrlLoading = (function () {
+	const scroller = {};
+	return function (scrollLayout, contentLayout, list, callback) {
+		scroller[scrollLayout] = {
+			name: scrollLayout,
+			prevPos: 0,
+			loading: false,
+			last: 0,
+			setLast: function (last) {
+				this.last = last;
+			}
+		};
+		const scrollEle = window[scrollLayout];
+		const contentEle = window[contentLayout];
+		scrollEle.onscroll = function () {
+			const scrollerOpt = scroller[this.id];
+			const loading = scrollerOpt.loading;
+			const last = scrollerOpt.last;
+			const prevPos = scrollerOpt.prevPos;
+			const curPos = this.scrollTop;
+			if (!loading && curPos > prevPos && this.scrollHeight - curPos <= this.offsetHeight * 6) {
+				scrollerOpt.loading = true;
+				query("getUrls", list, last)
+				.then(urlsInfo => {
+					if (!callback) {
+						for (let i = 0; i < urlsInfo.length; i++) {
+							const resultElement = document.createElement("DIV");
+							const element = urlsInfo[i];
+							resultElement.innerHTML = `${index + last + 1}. ${element}`;
+							contentEle.appendChild(resultElement);
+						}
+					}
+					else if (typeof callback === "function") {
+						for (let i = 0; i < urlsInfo.length; i++) {
+							const element = urlsInfo[i];
+							const resultElement = callback(element, i, last);
+							contentEle.appendChild(resultElement);
+						}
+					}
+					scrollerOpt.last += urlsInfo.length;
+					scrollerOpt.loading = false;
+				});
+			}
+			scrollerOpt.prevPos = curPos;
+		};
+		return scroller[scrollLayout];
+	}
+})();
+
+var scrollerMainSites = scrollerUrlLoading("urlMainSites", "urlMainSitesContent", "mainSites", (url, index, last) => {
+	if (url instanceof Object) url = url.url;
+	const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
+	const urlIndex = `${index + last + 1}`;
+	const element = document.createElement("DIV");
+	element.className = "white-text my-2";
+	element.innerHTML = `${urlIndex}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a>`;
+	return element;
+});
+// scrollerUrlLoading(urlMainSites, {});
+// function scrollerUrlLoading(scrollLayout, data) {
+// 	const contentLayout = scrollLayout.firstElementChild;
+// 	if (listSitesInfo.mainSites && listSitesInfo.mainSites.length) {
+// 		listSitesInfo.mainSites.forEach(function (url, index) {
+// 			if (url instanceof Object) url = url.url;
+// 			const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
+// 			const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
+// 			$("#urlMainSitesContent").append(link);
+// 		});
+// 		$("#urlMainSitesCounter").text(listSitesInfo.mainSitesLength);
+// 	}
+// 
+// 	if (listSitesInfo.trustSites && listSitesInfo.trustSites.length) {
+// 		listSitesInfo.trustSites.forEach(function (url, index) {
+// 			if (url instanceof Object) url = url.url;
+// 			const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
+// 			const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
+// 			$("#urlTrustSitesContent").append(link);
+// 		});
+// 		$("#urlTrustSitesCounter").text(listSitesInfo.trustSitesLength);
+// 	}
+// 
+// 	if (listSitesInfo.blackSites && listSitesInfo.blackSites.length) {
+// 		listSitesInfo.blackSites.forEach(function (url, index) {
+// 			if (url instanceof Object) url = url.url;
+// 			const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
+// 			const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
+// 			$("#urlBlackSitesContent").append(link);
+// 		});
+// 		$("#urlBlackSitesCounter").text(listSitesInfo.blackSitesLength);
+// 	}
+// }
+
+// let prevP = 0;
+// let sab = true;
+// urlMainSites.onscroll = function () {
+// 	const layout = this;
+// 	const id = layout.id;
+// 	const curPos = layout.scrollTop;
+// 	if (sab && curPos > prevP && layout.scrollHeight - curPos <= layout.offsetHeight * 6) {
+// 		alert("loading...")
+// 		sab = false;
+// 		query("getListSites", 100, "url")
+// 		.then(listSitesInfo => {
+// 			updateTabUrl(listSitesInfo, true);
+// 			sab = true;
+// 		});
+// 	}
+// 	prevP = curPos;
+// }
+
 function motd(data) {
 	motd.data = data;
 }
@@ -335,6 +445,14 @@ async function query(action, data, tab) {
 		case "getDir":
 			url += `&dirName=${data}`;
 			break;
+
+		case "getListSites":
+			url += `&start=${data || 0}`;
+			break;
+
+		case "getUrls":
+			url += `&urls=${data}&start=${tab || 0}`;
+			break;
 	}
 	const response = await fetch(url);
 	if (!response.ok) {
@@ -342,7 +460,7 @@ async function query(action, data, tab) {
 		if (res instanceof Object && res.message) {
 			log(res.message, "error", tab);
 		} else log(`Error ${response.status}: Action "${action}" failed.`, "error", tab);
-		return;
+		return response;
 	}
 	const res = await response.json();
 	if (res.quiet) return res;
@@ -372,6 +490,7 @@ async function query(action, data, tab) {
 			updateTabUrl(res);
 			break;
 	}
+	return res;
 }
 
 function checkCounter(counter, length, apply = false) {
@@ -803,8 +922,8 @@ async function hashGenerate(data, algorithm = "SHA-256") {
 	return hashHex;
 }
 
-function updateTabUrl(listSitesInfo) {
-	$("#urlAccordion .contentCollapse > div").empty();
+function updateTabUrl(listSitesInfo, append = false) {
+	if (!append) $("#urlAccordion .contentCollapse > div").empty();
 	if (listSitesInfo.mainSites && listSitesInfo.mainSites.length) {
 		listSitesInfo.mainSites.forEach(function (url, index) {
 			if (url instanceof Object) url = url.url;
@@ -813,6 +932,7 @@ function updateTabUrl(listSitesInfo) {
 			$("#urlMainSitesContent").append(link);
 		});
 		$("#urlMainSitesCounter").text(listSitesInfo.mainSitesLength);
+		if (window.scrollerMainSites) scrollerMainSites.setLast(listSitesInfo.mainSites.length);
 	}
 
 	if (listSitesInfo.trustSites && listSitesInfo.trustSites.length) {
@@ -823,6 +943,7 @@ function updateTabUrl(listSitesInfo) {
 			$("#urlTrustSitesContent").append(link);
 		});
 		$("#urlTrustSitesCounter").text(listSitesInfo.trustSitesLength);
+		if (window.scrollerTrustSites) scrollerTrustSites.setLast(listSitesInfo.trustSites.length);
 	}
 
 	if (listSitesInfo.blackSites && listSitesInfo.blackSites.length) {
@@ -833,6 +954,7 @@ function updateTabUrl(listSitesInfo) {
 			$("#urlBlackSitesContent").append(link);
 		});
 		$("#urlBlackSitesCounter").text(listSitesInfo.blackSitesLength);
+		if (window.scrollerBlackSites) scrollerBlackSites.setLast(listSitesInfo.blackSites.length);
 	}
 }
 

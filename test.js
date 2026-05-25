@@ -1,8 +1,3 @@
-let o = {
-	a: "aa",
-	b: 11
-}
-const map = o;
-o = undefined;
-console.log(o, map);
-
+let n = undefined;
+let a = +n || 0;
+console.log(a);
