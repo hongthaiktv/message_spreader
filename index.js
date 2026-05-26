@@ -592,7 +592,7 @@ function runPuppet(act, res) {
 
 function linkParse(origin) {
 	let protocol = "https://";
-	let host = origin;
+	let host = origin instanceof Object ? origin.url : origin;
 	const patt = /^.*:\/\//i;
 	if (patt.test(host)) {
 		protocol = patt.exec(host)[0];
@@ -600,6 +600,7 @@ function linkParse(origin) {
 	}
 	const url = `${protocol}${host}`;
 	return {protocol, host, url, origin,
+		query: origin instanceof Object ? origin.query || "p" : "p",
 		src: function (url) {
 			if (/^data/i.test(url) || /^http/i.test(url)) return url;
 			else {
@@ -651,14 +652,13 @@ async function randRequest() {
 				}
 				const rand = getRandomInList(listSites[puppet.current]);
 				let url = listSites[puppet.current][rand];
-				if (url instanceof Object) url = url.url;
 				const link = linkParse(url);
 				url = link.url;
 				const pageRank = rand + 1;
 				const msg = `Rank ${pageRank}: ${url}`;
 				if (!puppet.quiet) console.log(msg);
 				const options = {
-					url: url,
+					url,
 					strictSSL: false,
 					headers: {
 						'User-Agent': 'Mozilla/5.0 (Android 15; Mobile; rv:78.0) Gecko/78.0 Firefox/78.0'
@@ -675,13 +675,13 @@ async function randRequest() {
 						if (!puppet.quiet) listSites.urlFailed.push({code, message, url, errorCode: error.code, errorMessage: error.syscall});
 						++puppet.failed;
 						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${error.code} : ${url}`;
-						if (!puppet.quiet) logger.addLog(msg, "error", {code, url, pageRank, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: error.code, errorMessage: error.syscall});
+						if (!puppet.quiet) logger.addLog(msg, "error", {code, url, pageRank, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed, errorCode: error.code, errorMessage: error.syscall || "server error"});
 						else logger.addLog("", "error", {code, quiet: puppet.quiet, counter: puppet.counter, total: puppet.total, success: puppet.success, failed: puppet.failed}, false);
 						return;
 					}
 					if (response.statusCode !== 200) {
 						const code = 1;
-						const message = response.statusMessage;
+						const message = response.statusMessage || "request error";
 						if (!puppet.quiet) listSites.urlFailed.push({code, message, url, errorCode: response.statusCode, errorMessage: message});
 						++puppet.failed;
 						const msg = `Failed (${puppet.failed}/${puppet.total}) : ${response.statusCode} : ${url}`;
@@ -695,7 +695,7 @@ async function randRequest() {
 						if (!puppet.quiet) console.log(msg);
 						const document = parseHTML(body); 
 						if (document) {
-							const paras = document.querySelectorAll("p");
+							const paras = document.querySelectorAll(link.query);
 							if (paras.length) {
 								const rand = Math.floor(Math.random() * paras.length);
 								const para = paras[rand];
