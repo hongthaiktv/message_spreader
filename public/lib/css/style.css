@@ -49,6 +49,14 @@ body {
 	font-size: 1.2em;
 }
 
+.nav-link {
+	font-size: 0.8em;
+}
+
+.app-iconTab {
+	font-size: 1.5em;
+}
+
 #motdMessage {
 	border-bottom-color: #9e9e9e;
 }
