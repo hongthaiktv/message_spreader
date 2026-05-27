@@ -55,12 +55,13 @@ const scrollerUrlLoading = (function () {
 					if (!callback) {
 						for (let i = 0; i < urls.length; i++) {
 							let url = urls[i];
+							const query = url instanceof Object ? url.query || "default" : "default";
 							if (url instanceof Object) url = url.url;
 							const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
 							const urlIndex = i + last + 1;
 							const element = document.createElement("DIV");
-							element.className = "white-text my-2";
-							element.innerHTML = `${urlIndex}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a>`;
+							element.className = "white-text d-flex align-items-center my-2";
+							element.innerHTML = `${urlIndex}. <a class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${url}</a><span class="text-truncate minw-20">${query}</span>`;
 							contentEle.appendChild(element);
 						}
 					}
@@ -887,9 +888,10 @@ function updateTabUrl(listSitesInfo, append = false) {
 	if (!append) $("#urlAccordion .contentCollapse > div").empty();
 	if (listSitesInfo.mainSites && listSitesInfo.mainSites.length) {
 		listSitesInfo.mainSites.forEach(function (url, index) {
+			const query = url instanceof Object ? url.query || "default" : "default";
 			if (url instanceof Object) url = url.url;
 			const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
-			const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
+			const link = `<div class="white-text d-flex align-items-center my-2">${index + 1}. <a class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${url}</a><span class="text-truncate minw-20">${query}</span></div>`;
 			$("#urlMainSitesContent").append(link);
 		});
 		$("#urlMainSitesCounter").text(listSitesInfo.mainSitesLength);
@@ -898,9 +900,10 @@ function updateTabUrl(listSitesInfo, append = false) {
 
 	if (listSitesInfo.trustSites && listSitesInfo.trustSites.length) {
 		listSitesInfo.trustSites.forEach(function (url, index) {
+			const query = url instanceof Object ? url.query || "default" : "default";
 			if (url instanceof Object) url = url.url;
 			const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
-			const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
+			const link = `<div class="white-text d-flex align-items-center my-2">${index + 1}. <a class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${url}</a><span class="text-truncate minw-20">${query}</span></div>`;
 			$("#urlTrustSitesContent").append(link);
 		});
 		$("#urlTrustSitesCounter").text(listSitesInfo.trustSitesLength);
@@ -909,9 +912,10 @@ function updateTabUrl(listSitesInfo, append = false) {
 
 	if (listSitesInfo.blackSites && listSitesInfo.blackSites.length) {
 		listSitesInfo.blackSites.forEach(function (url, index) {
+			const query = url instanceof Object ? url.query || "default" : "default";
 			if (url instanceof Object) url = url.url;
 			const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
-			const link = `<div class="white-text my-2">${index + 1}. <a class="app-text-link" target="_blank" href="${urlLink}">${url}</a></div>`;
+			const link = `<div class="white-text d-flex align-items-center my-2">${index + 1}. <a class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${url}</a><span class="text-truncate minw-20">${query}</span></div>`;
 			$("#urlBlackSitesContent").append(link);
 		});
 		$("#urlBlackSitesCounter").text(listSitesInfo.blackSitesLength);

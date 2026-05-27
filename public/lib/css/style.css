@@ -89,19 +89,23 @@ body {
 	font-size: 0.9em;
 }
 
+.minw-20 { min-width: 20%; }
 .minw-25 { min-width: 25%; }
 .minw-50 { min-width: 50%; }
 .minw-75 { min-width: 75%; }
 .minw-100 { min-width: 100%; }
+.minh-20 { min-height: 20%; }
 .minh-25 { min-height: 25%; }
 .minh-50 { min-height: 50%; }
 .minh-75 { min-height: 75%; }
 .minh-100 { min-height: 100%; }
 
+.maxw-20 { max-width: 20%; }
 .maxw-25 { max-width: 25%; }
 .maxw-50 { max-width: 50%; }
 .maxw-75 { max-width: 75%; }
 .maxw-100 { max-width: 100%; }
+.maxh-20 { max-height: 20%; }
 .maxh-25 { max-height: 25%; }
 .maxh-50 { max-height: 50%; }
 .maxh-75 { max-height: 75%; }
