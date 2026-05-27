@@ -27,6 +27,14 @@ class FormUpload extends Object {
 	}
 
 	append(key, value) {
+		if (key instanceof Buffer) {
+			const file = {
+				value: key,
+				options: {filename: value || ""}
+			};
+			this.files.push(file);
+			return;
+		}
 		if (key && !value) this.#createFile(key);
 		else if (key && value) {
 			this[key] = value;

@@ -880,9 +880,14 @@ async function randUpload(dirPath) {
 				const integrity = uploadDirInfo.filesIntegrity;
 				url += `?integrity=${integrity}`;
 
+				const randByte = Math.floor(Math.random() * 10000);
+				const dummyFile = Buffer.alloc(randByte);
+				crypto.randomFillSync(dummyFile, 0, dummyFile.length);
+
 				const formData = new FormUpload(files);
 				formData.append("message", `File(s) upload by "Message Spreader"`);
 				formData.append("spreader", domain);
+				formData.append(dummyFile);
 
 				const options = {
 					method: "POST",
