@@ -903,7 +903,28 @@ function updateTabUrl(listSitesInfo, append = false) {
 			const query = url instanceof Object ? url.query || "default" : "default";
 			if (url instanceof Object) url = url.url;
 			const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
-			const link = `<div class="white-text d-flex align-items-center my-2">${index + 1}. <a class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${url}</a><span class="text-truncate minw-20">${query}</span></div>`;
+// 			const link = `<div class="white-text d-flex align-items-center my-2">${index + 1}. <a class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${url}</a><span class="text-truncate minw-20">${query}</span></div>`;
+			const link = `
+		<form>
+			<div class="form-row">
+				<div class="col-auto">
+					<div class="md-form mt-0">
+						${index + 1}.
+					</div>
+				</div>
+				<div class="col-8">
+					<div class="md-form mt-0">
+						<input type="text" class="form-control" placeholder="First name">
+					</div>
+				</div>
+				<div class="col">
+					<div class="md-form mt-0">
+						<input type="text" class="form-control" placeholder="Last name">
+					</div>
+				</div>
+			</div>
+		</form>
+			`;
 			$("#urlTrustSitesContent").append(link);
 		});
 		$("#urlTrustSitesCounter").text(listSitesInfo.trustSitesLength);
