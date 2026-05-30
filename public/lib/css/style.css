@@ -33,7 +33,7 @@ body {
 }
 
 .app-text-link {
-	color: #1c71ff;
+	color: #1c71ff !important;
 }
 
 .app-numPageRank {
@@ -47,6 +47,14 @@ body {
 
 .app-textSize2 {
 	font-size: 1.2em;
+}
+
+.fs-16 {
+	font-size: 16px;
+}
+
+.fw-normal {
+	font-weight: 400;
 }
 
 .nav-link {
