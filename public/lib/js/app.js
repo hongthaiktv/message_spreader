@@ -903,29 +903,19 @@ function updateTabUrl(listSitesInfo, append = false) {
 			const query = url instanceof Object ? url.query || "default" : "default";
 			if (url instanceof Object) url = url.url;
 			const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
-// 			const link = `<div class="white-text d-flex align-items-center my-2">${index + 1}. <a class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${url}</a><span class="text-truncate minw-20">${query}</span></div>`;
-			const link = `
-		<form>
-			<div class="form-row">
-				<div class="col-auto">
-					<div class="md-form mt-0">
-						${index + 1}.
-					</div>
-				</div>
-				<div class="col-8">
-					<div class="md-form mt-0">
-						<input type="text" class="form-control" placeholder="First name">
-					</div>
-				</div>
-				<div class="col">
-					<div class="md-form mt-0">
-						<input type="text" class="form-control" placeholder="Last name">
-					</div>
-				</div>
-			</div>
-		</form>
-			`;
-			$("#urlTrustSitesContent").append(link);
+			const row = document.createElement("DIV");
+			row.className = "white-text d-flex align-items-center my-2";
+			row.innerHTML = `<span>${index + 1}</span>. <a class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${url}</a><span class="text-truncate minw-20">${query}</span>`;
+			$("#urlTrustSitesContent").append(row);
+			row.onclick = function (e) {
+				if (e.target.tagName === "A" || e.target.tagName === "DIV") return;
+				const form = editUrlRow(index + 1, url, query);
+				row.innerHTML = "";
+				row.appendChild(form);
+			}
+			row.onblur = function () {
+				alert(123);
+			}
 		});
 		$("#urlTrustSitesCounter").text(listSitesInfo.trustSitesLength);
 		if (window.scrollerTrustSites) scrollerTrustSites.setLast(listSitesInfo.trustSites.length);
@@ -1005,5 +995,29 @@ function updateTabUpload(dirInfo, uploadMessages, tab = "upload") {
 			log(logData, type, tab);
 		}
 	}
+}
+
+function editUrlRow(order, url, query) {
+	const form = document.createElement("FORM");
+	form.innerHTML = `
+	<div class="form-row align-items-center">
+		<div class="col-auto">
+			<div class="md-form my-0 pb-1">
+				${order}.
+			</div>
+		</div>
+		<div class="col-7">
+			<div class="md-form my-0">
+				<input type="text" class="form-control text-white" placeholder="URL" value="${url}">
+			</div>
+		</div>
+		<div class="col">
+			<div class="md-form my-0">
+				<input type="text" class="form-control text-white" placeholder="Query" value="${query}">
+			</div>
+		</div>
+	</div>
+	`;
+	return form;
 }
 
