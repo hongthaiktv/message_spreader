@@ -904,18 +904,34 @@ function updateTabUrl(listSitesInfo, append = false) {
 			if (url instanceof Object) url = url.url;
 			const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
 			const row = document.createElement("DIV");
+			const rowHTML = `<span>${index + 1}</span>. <a class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${url}</a><span class="text-truncate minw-20">${query}</span>`;
 			row.className = "white-text d-flex align-items-center my-2";
-			row.innerHTML = `<span>${index + 1}</span>. <a class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${url}</a><span class="text-truncate minw-20">${query}</span>`;
+			row.innerHTML = rowHTML;
 			$("#urlTrustSitesContent").append(row);
 			row.onclick = function (e) {
-				if (e.target.tagName === "A" || e.target.tagName === "DIV") return;
-				const form = editUrlRow(index + 1, url, query);
-				row.innerHTML = "";
-				row.appendChild(form);
-			}
-			row.onblur = function () {
-				alert(123);
-			}
+				if (e.target.tagName === "A" || e.target.tagName === "INPUT" || e.target.tagName === "DIV") return;
+				const index = $(this).find("span").first().text();
+				const url = $(this).find("a").text();
+				const query = $(this).find("span").last().text();
+				const form = editorUrlRow(index, url, query);
+				$(this).empty();
+				$(this).append(form);
+				form[0].focus();
+				$(form).find("input").on("keydown", function (e) {
+					if (e.keyCode === 9 || e.keyCode === 13) {
+						e.preventDefault();
+						const index = $(form).find(".md-form").first().find("span").text();
+						const rowHTML = `<span>${index}</span>. <a class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${form[0].value}</a><span class="text-truncate minw-20">${form[1].value}</span>`;
+						row.innerHTML = rowHTML;
+					}
+				});
+				$(form).find("input").on("focusout", function (e) {
+					if (e.relatedTarget && e.relatedTarget.tagName === "INPUT") return;
+					const index = $(form).find(".md-form").first().find("span").text();
+					const rowHTML = `<span>${index}</span>. <a class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${form[0].value}</a><span class="text-truncate minw-20">${form[1].value}</span>`;
+					row.innerHTML = rowHTML;
+				});
+			};
 		});
 		$("#urlTrustSitesCounter").text(listSitesInfo.trustSitesLength);
 		if (window.scrollerTrustSites) scrollerTrustSites.setLast(listSitesInfo.trustSites.length);
@@ -997,13 +1013,13 @@ function updateTabUpload(dirInfo, uploadMessages, tab = "upload") {
 	}
 }
 
-function editUrlRow(order, url, query) {
+function editorUrlRow(order, url, query) {
 	const form = document.createElement("FORM");
 	form.innerHTML = `
 	<div class="form-row align-items-center">
 		<div class="col-auto">
 			<div class="md-form my-0 pb-1">
-				${order}.
+				<span>${order}</span>.
 			</div>
 		</div>
 		<div class="col-7">
