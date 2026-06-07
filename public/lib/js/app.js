@@ -910,14 +910,19 @@ function updateTabUrl(listSitesInfo, append = false) {
 			row.innerHTML = rowHTML;
 			$("#urlTrustSitesContent").append(row);
 			row.onclick = function (e) {
+				if (e.target.tagName === "A" && editorUrlRow.edit) {
+					e.preventDefault();
+					editorUrlRow.edit = false;
+				}
 				if (e.target.tagName === "A" || e.target.tagName === "INPUT" || e.target.tagName === "DIV") return;
 				const colIndex = +e.target.getAttribute("colIndex");
-				const index = $(this).find("span").first().text();
+				const index = +$(this).find("span").first().text();
 				const url = $(this).find("a").text();
 				const query = $(this).find("span").last().text();
 				const form = editorUrlRow(index, url, query);
 				$(this).empty();
 				$(this).append(form);
+				editorUrlRow.edit = true;
 				if (colIndex === 2) form[1].focus();
 				else form[0].focus();
 				$(form).find("input").on("keydown focusout", function (e) {
@@ -928,6 +933,7 @@ function updateTabUrl(listSitesInfo, append = false) {
 						const urlLink = !/^.*:\/\//i.test(url) ? `https://${url}` : url;
 						const rowHTML = `<span colIndex="0">${index}</span>. <a colIndex="1" class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${url}</a><span colIndex="2" class="text-truncate minw-20">${form[1].value}</span>`;
 						row.innerHTML = rowHTML;
+						if (!e.relatedTarget) editorUrlRow.edit = false;
 					}
 				});
 			};
