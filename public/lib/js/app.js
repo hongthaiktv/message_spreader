@@ -53,17 +53,7 @@ const scrollerUrlLoading = (function () {
 						return;
 					}
 					if (!callback) {
-						for (let i = 0; i < urls.length; i++) {
-							let url = urls[i];
-							const query = url instanceof Object ? url.query || "default" : "default";
-							if (url instanceof Object) url = url.url;
-							const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
-							const urlIndex = i + last + 1;
-							const element = document.createElement("DIV");
-							element.className = "white-text d-flex align-items-center my-2";
-							element.innerHTML = `${urlIndex}. <a class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${url}</a><span class="text-truncate minw-20">${query}</span>`;
-							contentEle.appendChild(element);
-						}
+						createUrlRow(contentEle, urls, last);
 					}
 					else if (typeof callback === "function") {
 						for (let i = 0; i < urls.length; i++) {
@@ -887,69 +877,19 @@ async function hashGenerate(data, algorithm = "SHA-256") {
 function updateTabUrl(listSitesInfo, append = false) {
 	if (!append) $("#urlAccordion .contentCollapse > div").empty();
 	if (listSitesInfo.mainSites && listSitesInfo.mainSites.length) {
-		listSitesInfo.mainSites.forEach(function (url, index) {
-			const query = url instanceof Object ? url.query || "default" : "default";
-			if (url instanceof Object) url = url.url;
-			const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
-			const link = `<div class="white-text d-flex align-items-center my-2">${index + 1}. <a class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${url}</a><span class="text-truncate minw-20">${query}</span></div>`;
-			$("#urlMainSitesContent").append(link);
-		});
+		createUrlRow(urlMainSitesContent, listSitesInfo.mainSites);
 		$("#urlMainSitesCounter").text(listSitesInfo.mainSitesLength);
 		if (window.scrollerMainSites) scrollerMainSites.setLast(listSitesInfo.mainSites.length);
 	}
 
 	if (listSitesInfo.trustSites && listSitesInfo.trustSites.length) {
-		listSitesInfo.trustSites.forEach(function (url, index) {
-			const query = url instanceof Object ? url.query || "default" : "default";
-			if (url instanceof Object) url = url.url;
-			const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
-			const row = document.createElement("DIV");
-			const rowHTML = `<span colIndex="0">${index + 1}</span>. <a colIndex="1" class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${url}</a><span colIndex="2" class="text-truncate minw-20">${query}</span>`;
-			row.className = "white-text d-flex align-items-center p-1";
-			if (index % 2 !== 0) row.className += " rgba-white-slight";
-			row.innerHTML = rowHTML;
-			$("#urlTrustSitesContent").append(row);
-			row.onclick = function (e) {
-				if (e.target.tagName === "A" && editorUrlRow.edit) {
-					e.preventDefault();
-					editorUrlRow.edit = false;
-				}
-				if (e.target.tagName === "A" || e.target.tagName === "INPUT" || e.target.tagName === "DIV") return;
-				const colIndex = +e.target.getAttribute("colIndex");
-				const index = +$(this).find("span").first().text();
-				const url = $(this).find("a").text();
-				const query = $(this).find("span").last().text();
-				const form = editorUrlRow(index, url, query);
-				$(this).empty();
-				$(this).append(form);
-				editorUrlRow.edit = true;
-				if (colIndex === 2) form[1].focus();
-				else form[0].focus();
-				$(form).find("input").on("keydown focusout", function (e) {
-					if (e.relatedTarget && e.relatedTarget.tagName === "INPUT") return;
-					if (e.keyCode === 13 || e.type === "focusout") {
-						const index = $(form).find(".md-form").first().children("span")[0].innerText;
-						const url = form[0].value;
-						const urlLink = !/^.*:\/\//i.test(url) ? `https://${url}` : url;
-						const rowHTML = `<span colIndex="0">${index}</span>. <a colIndex="1" class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${url}</a><span colIndex="2" class="text-truncate minw-20">${form[1].value}</span>`;
-						row.innerHTML = rowHTML;
-						if (!e.relatedTarget) editorUrlRow.edit = false;
-					}
-				});
-			};
-		});
+		createUrlRow(urlTrustSitesContent, listSitesInfo.trustSites);
 		$("#urlTrustSitesCounter").text(listSitesInfo.trustSitesLength);
 		if (window.scrollerTrustSites) scrollerTrustSites.setLast(listSitesInfo.trustSites.length);
 	}
 
 	if (listSitesInfo.blackSites && listSitesInfo.blackSites.length) {
-		listSitesInfo.blackSites.forEach(function (url, index) {
-			const query = url instanceof Object ? url.query || "default" : "default";
-			if (url instanceof Object) url = url.url;
-			const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
-			const link = `<div class="white-text d-flex align-items-center my-2">${index + 1}. <a class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${url}</a><span class="text-truncate minw-20">${query}</span></div>`;
-			$("#urlBlackSitesContent").append(link);
-		});
+		createUrlRow(urlBlackSitesContent, listSitesInfo.blackSites);
 		$("#urlBlackSitesCounter").text(listSitesInfo.blackSitesLength);
 		if (window.scrollerBlackSites) scrollerBlackSites.setLast(listSitesInfo.blackSites.length);
 	}
@@ -1040,5 +980,53 @@ function editorUrlRow(order, url, query) {
 	</div>
 	`;
 	return form;
+}
+
+function createUrlRow(container, urls, last = 0) {
+	urls.forEach(function (url, index) {
+		const query = url instanceof Object ? url.query || "default" : "default";
+		if (url instanceof Object) url = url.url;
+		const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
+		const order = index + last + 1;
+		const row = document.createElement("DIV");
+		row.className = "white-text d-flex align-items-center p-1";
+		row.innerHTML = `<span colIndex="0">${order}</span>. <a colIndex="1" class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${url}</a><span colIndex="2" class="text-truncate minw-20">${query}</span>`;
+		if (index % 2 !== 0) row.className += " rgba-white-slight";
+		container.appendChild(row);
+		row.onclick = function (e) {
+			if (e.target.tagName === "A" && editorUrlRow.edit) {
+				e.preventDefault();
+				editorUrlRow.edit = false;
+			}
+			if (e.target.tagName === "A" || e.target.tagName === "INPUT" || e.target.tagName === "DIV") return;
+			const colIndex = +e.target.getAttribute("colIndex");
+			const order = +$(this).find("span").first().text();
+			const url = $(this).find("a").text();
+			const query = $(this).find("span").last().text();
+			const form = editorUrlRow(order, url, query);
+			$(this).empty();
+			$(this).append(form);
+			editorUrlRow.edit = true;
+			if (colIndex === 2) {
+				form[1].focus();
+				form[1].setSelectionRange(form[1].value.length, form[1].value.length);
+			}
+			else {
+				form[0].focus();
+				form[0].setSelectionRange(form[0].value.length, form[0].value.length);
+			}
+			$(form).find("input").on("keydown focusout", function (e) {
+				if (e.relatedTarget && e.relatedTarget.tagName === "INPUT") return;
+				if (e.keyCode === 13 || e.type === "focusout") {
+					const order = $(form).find(".md-form").first().children("span")[0].innerText;
+					const url = form[0].value;
+					const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
+					const query = form[1].value !== "" ? form[1].value : "default";
+					row.innerHTML = `<span colIndex="0">${order}</span>. <a colIndex="1" class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${url}</a><span colIndex="2" class="text-truncate minw-20">${query}</span>`;
+					if (!e.relatedTarget) editorUrlRow.edit = false;
+				}
+			});
+		};
+	});
 }
 
