@@ -333,6 +333,30 @@ app.post("/puppet", (req, res) => {
 			setting.mode = puppet.mode;
 			updateJSON("setting");
 			break;
+
+		case "updateUrl": {
+			console.log("update url");
+			const {listSite, index, url, query} = req.body.urlData;
+			const listSiteUrl = APPJSON[listSite][index].url;
+			const listSiteQuery = APPJSON[listSite][index].query;
+			if (listSiteUrl === url && listSiteQuery === query) {
+				const code = 46;
+				const type = "error";
+				const message = `URL list "${listSite}:${index}" nothing change to update`;
+				logger.addLog(message, type, {code, listSite, index, url, query});
+				res.json({code, message, type, listSite, index, url, query});
+				return;
+			}
+			const data = {url, query};
+			APPJSON[listSite][index] = data;
+			updateJSON(listSite);
+			const code = 26;
+			const type = "success";
+			const message = `URL list "${listSite}:${index}" updated`;
+			logger.addLog(message, type, {code, listSite, index, url, query});
+			res.json({code, message, type, listSite, index, url, query});
+			return;
+		}
 	}
 	runPuppet(reqAct, res);
 });

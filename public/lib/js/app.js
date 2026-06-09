@@ -322,6 +322,10 @@ async function puppet(action, value) {
 			data = {action, quiet: value};
 			break;
 
+		case "updateUrl":
+			data = {action, urlData: value};
+			break;
+
 		default:
 			data = {action};
 	}
@@ -561,6 +565,10 @@ function log(data, type, tab = "logger") {
 						const message = patt.test(data.errorMessage) ? data.errorMessage.replace(patt, "") : data.errorMessage;
 						cardContent = `<span class="text-danger font-weight-bold">${data.errorCode}</span> : ${message}`;
 						break;
+
+					case 46:
+						cardContent = `URL list "<span class="text-primary font-weight-bold">${data.listSite}</span> : <span class="text-danger font-weight-bold">${data.index + 1}</span>" nothing change to update.`;
+						break;
 				}
 				break;
 
@@ -665,6 +673,10 @@ function log(data, type, tab = "logger") {
 							updateTabMotd(data.motdInfo, "motd");
 							updateTabUpload(data.dirInfo);
 						}
+						break;
+
+					case 26:
+						cardContent = `URL list "<span class="orange-text font-weight-bold">${data.listSite}</span> : <span class="text-danger font-weight-bold">${data.index + 1}</span>" updated.`;
 						break;
 				}
 				break;
@@ -1018,12 +1030,28 @@ function createUrlRow(container, urls, last = 0) {
 			$(form).find("input").on("keydown focusout", function (e) {
 				if (e.relatedTarget && e.relatedTarget.tagName === "INPUT") return;
 				if (e.keyCode === 13 || e.type === "focusout") {
-					const order = $(form).find(".md-form").first().children("span")[0].innerText;
-					const url = form[0].value;
-					const urlLink = !/^http/i.test(url) ? `https://${url}` : url;
-					const query = form[1].value !== "" ? form[1].value : "default";
-					row.innerHTML = `<span colIndex="0">${order}</span>. <a colIndex="1" class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${url}</a><span colIndex="2" class="text-truncate minw-20">${query}</span>`;
+					const order = +$(form).find(".md-form").first().children("span")[0].innerText;
+					const inputUrl = form[0].value;
+					const urlLink = !/^http/i.test(inputUrl) ? `https://${inputUrl}` : inputUrl;
+					const inputQuery = form[1].value !== "" ? form[1].value : "default";
+					row.innerHTML = `<span colIndex="0">${order}</span>. <a colIndex="1" class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${inputUrl}</a><span colIndex="2" class="text-truncate minw-20">${inputQuery}</span>`;
 					if (!e.relatedTarget) editorUrlRow.edit = false;
+					if (inputUrl === url && inputQuery === query) return;
+					let listSite;
+					switch (container.id) {
+						case "urlMainSitesContent":
+							listSite = "mainSites";
+							break;
+
+						case "urlTrustSitesContent":
+							listSite = "trustSites";
+							break;
+
+						case "urlBlackSitesCounter":
+							listSite = "blackSites";
+							break;
+					}
+					puppet("updateUrl", {listSite, index: order - 1, url: inputUrl, query: inputQuery});
 				}
 			});
 		};
