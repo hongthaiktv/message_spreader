@@ -322,10 +322,6 @@ async function puppet(action, value) {
 			data = {action, quiet: value};
 			break;
 
-		case "updateUrl":
-			data = {action, urlData: value};
-			break;
-
 		default:
 			data = {action};
 	}
@@ -1051,10 +1047,40 @@ function createUrlRow(container, urls, last = 0) {
 							listSite = "blackSites";
 							break;
 					}
-					puppet("updateUrl", {listSite, index: order - 1, url: inputUrl, query: inputQuery});
+					urlRowCRUD("update", {listSite, index: order - 1, url: inputUrl, query: inputQuery});
 				}
 			});
 		};
 	});
+}
+
+async function urlRowCRUD(action, urlData) {
+	let data;
+	switch (action) {
+		case "update": {
+			data = {action, urlData};
+			break;
+		}
+	}
+
+	const response = await fetch(`${SERVER}url`, {
+		method: "POST",
+		body: JSON.stringify(data),
+		headers: {
+			"Content-Type": "application/json"
+		}
+	});
+
+	if (!response.ok) {
+		if (response.status === 500 && (!SSE || SSE && res.nosse)) {
+			const res = await response.json();
+			log(res);
+		}
+		else if (response.status !== 500) log(`Request error ${response.status}!`, "error");
+		return;
+	}
+	const res = await response.json();
+	if (SSE && !res.nosse) return;
+	else log(res);
 }
 

@@ -333,9 +333,14 @@ app.post("/puppet", (req, res) => {
 			setting.mode = puppet.mode;
 			updateJSON("setting");
 			break;
+	}
+	runPuppet(reqAct, res);
+});
 
-		case "updateUrl": {
-			console.log("update url");
+app.post("/url", (req, res) => {
+	const {action} = req.body;
+	switch (action) {
+		case "update": {
 			const {listSite, index, url, query} = req.body.urlData;
 			const listSiteUrl = APPJSON[listSite][index].url;
 			const listSiteQuery = APPJSON[listSite][index].query;
@@ -344,7 +349,7 @@ app.post("/puppet", (req, res) => {
 				const type = "error";
 				const message = `URL list "${listSite}:${index}" nothing change to update`;
 				logger.addLog(message, type, {code, listSite, index, url, query});
-				res.json({code, message, type, listSite, index, url, query});
+				res.status(500).json({code, message, type, listSite, index, url, query});
 				return;
 			}
 			const data = {url, query};
@@ -355,10 +360,9 @@ app.post("/puppet", (req, res) => {
 			const message = `URL list "${listSite}:${index}" updated`;
 			logger.addLog(message, type, {code, listSite, index, url, query});
 			res.json({code, message, type, listSite, index, url, query});
-			return;
+			break;
 		}
 	}
-	runPuppet(reqAct, res);
 });
 
 app.post("/motd", (req, res) => {
