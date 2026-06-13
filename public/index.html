@@ -112,32 +112,41 @@
 				</div>
 				<div id="tabUrlContent" class="overflow-auto flex-grow-1 w-100 tab-pane fade" role="tabpanel" aria-labelledby="tabUrl">
 					<div id="urlAccordion" class="d-none flex-column overflow-auto w-100 h-100">
-						<button id="urlBtnMainSites" class="btn btn-rounded btn-mdb-color align-self-center text-left font-weight-bold btnCollapse py-2 pr-2 w-75" type="button" data-toggle="collapse" data-target="#urlMainSites" data-parent="#urlAccordion" aria-expanded="false" aria-controls="urlMainSites">
-							<i class="fas fa-clipboard-list white text-mdb text-center rounded-pill iconBtnCollapse"></i>
-							Main Sites
-							<span id="urlMainSitesCounter" class="badge badge-pill badge-danger badge-lg pr-2 ml-2">0</span>
-							<i class="fas fa-angle-double-down float-right mt-1 mr-1"></i>
-						</button>
+						<div class="d-flex justify-content-center align-items-center position-relative w-100">
+							<button id="urlBtnMainSites" class="btn btn-rounded btn-mdb-color align-self-center text-left font-weight-bold btnCollapse py-2 pr-2 w-75" type="button" data-toggle="collapse" data-target="#urlMainSites" data-parent="#urlAccordion" aria-expanded="false" aria-controls="urlMainSites">
+								<i class="fas fa-clipboard-list white text-mdb text-center rounded-pill iconBtnCollapse"></i>
+								Main Sites
+								<span id="urlMainSitesCounter" class="badge badge-pill badge-danger badge-lg pr-2 ml-2">0</span>
+								<i class="fas fa-angle-double-down float-right mt-1 mr-1"></i>
+							</button>
+							<i id="urlBtnAddMainSites" class="fas fa-plus position-right dark-green-text font-weight-bold fs-20"></i>
+						</div>
 						<div id="urlMainSites" class="collapse overflow-auto flex-grow-1 contentCollapse" data-parent="#urlAccordion">
 							<div id="urlMainSitesContent" class="mt-1"></div>
 						</div>
 
-						<button id="urlBtnTrustSites" class="btn btn-rounded btn-mdb-color align-self-center text-left font-weight-bold btnCollapse py-2 pr-2 w-75" type="button" data-toggle="collapse" data-target="#urlTrustSites" data-parent="#urlAccordion" aria-expanded="false" aria-controls="urlTrustSites">
-							<i class="fas fa-shield-alt white text-mdb text-center rounded-pill iconBtnCollapse"></i>
-							Trust Sites
-							<span id="urlTrustSitesCounter" class="badge badge-pill badge-danger badge-lg pr-2 ml-2">0</span>
-							<i class="fas fa-angle-double-down float-right mt-1 mr-1"></i>
-						</button>
+						<div class="d-flex justify-content-center align-items-center position-relative w-100">
+							<button id="urlBtnTrustSites" class="btn btn-rounded btn-mdb-color align-self-center text-left font-weight-bold btnCollapse py-2 pr-2 w-75" type="button" data-toggle="collapse" data-target="#urlTrustSites" data-parent="#urlAccordion" aria-expanded="false" aria-controls="urlTrustSites">
+								<i class="fas fa-shield-alt white text-mdb text-center rounded-pill iconBtnCollapse"></i>
+								Trust Sites
+								<span id="urlTrustSitesCounter" class="badge badge-pill badge-danger badge-lg pr-2 ml-2">0</span>
+								<i class="fas fa-angle-double-down float-right mt-1 mr-1"></i>
+							</button>
+							<i id="urlBtnAddTrustSites" class="fas fa-plus position-right dark-green-text font-weight-bold fs-20"></i>
+						</div>
 						<div id="urlTrustSites" class="collapse overflow-auto flex-grow-1 contentCollapse" data-parent="#urlAccordion">
 							<div id="urlTrustSitesContent" class="mt-1"></div>
 						</div>
 
-						<button id="urlBtnBlackSites" class="btn btn-rounded btn-mdb-color align-self-center text-left font-weight-bold btnCollapse py-2 pr-2 w-75" type="button" data-toggle="collapse" data-target="#urlBlackSites" data-parent="#urlAccordion" aria-expanded="false" aria-controls="urlBlackSites">
-							<i class="fas fa-ban white text-mdb text-center rounded-pill iconBtnCollapse"></i>
-							Black Sites
-							<span id="urlBlackSitesCounter" class="badge badge-pill badge-danger badge-lg pr-2 ml-2">0</span>
-							<i class="fas fa-angle-double-down float-right mt-1 mr-1"></i>
-						</button>
+						<div class="d-flex justify-content-center align-items-center position-relative w-100">
+							<button id="urlBtnBlackSites" class="btn btn-rounded btn-mdb-color align-self-center text-left font-weight-bold btnCollapse py-2 pr-2 w-75" type="button" data-toggle="collapse" data-target="#urlBlackSites" data-parent="#urlAccordion" aria-expanded="false" aria-controls="urlBlackSites">
+								<i class="fas fa-ban white text-mdb text-center rounded-pill iconBtnCollapse"></i>
+								Black Sites
+								<span id="urlBlackSitesCounter" class="badge badge-pill badge-danger badge-lg pr-2 ml-2">0</span>
+								<i class="fas fa-angle-double-down float-right mt-1 mr-1"></i>
+							</button>
+							<i id="urlBtnAddBlackSites" class="fas fa-plus position-right dark-green-text font-weight-bold fs-20"></i>
+						</div>
 						<div id="urlBlackSites" class="collapse overflow-auto flex-grow-1 contentCollapse" data-parent="#urlAccordion">
 							<div id="urlBlackSitesContent" class="mt-1"></div>
 						</div>
