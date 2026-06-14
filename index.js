@@ -265,6 +265,17 @@ app.get("/query", (req, res) => {
 			else res.json({quiet: puppet.quiet});
 			break;
 
+		case "getListSite":
+			if (!puppet.quiet) {
+				const {listSite} = req.query;
+				const start = +req.query.start || 0;
+				const listSiteInfo = getListSite(listSite, start);
+				console.log(listSiteInfo.message);
+				res.json(listSiteInfo);
+			}
+			else res.json({quiet: puppet.quiet});
+			break;
+
 		case "getListSites":
 			if (!puppet.quiet) {
 				const start = +req.query.start || 0;
@@ -340,6 +351,21 @@ app.post("/puppet", (req, res) => {
 app.post("/url", (req, res) => {
 	const {action} = req.body;
 	switch (action) {
+		case "create": {
+			const {listSite, url, query} = req.body.urlData;
+			const data = {url, query};
+			APPJSON[listSite].push(data);
+			updateJSON(listSite);
+			const index = APPJSON[listSite].length - 1;
+			const code = 27;
+			const type = "success";
+			const message = `URL list "${listSite}:${index}" added`;
+			const listSiteInfo = getListSite(listSite);
+			logger.addLog(message, type, {code, listSite, index, url, query, listSiteInfo});
+			res.json({code, message, type, listSite, index, url, query, listSiteInfo});
+			break;
+		}
+
 		case "update": {
 			const {listSite, index, url, query} = req.body.urlData;
 			const listSiteUrl = APPJSON[listSite][index].url;
@@ -969,7 +995,21 @@ function hashGenerate(data, algorithm = "sha256") {
 	return hash.digest("hex");
 }
 
-function getListSites(start = 0, step = 100) {
+function getListSite(listSite, start = 0, step = listSites.step) {
+	const listSiteLength = listSites[listSite].length;
+	const message = `"${listSite}" got ${listSiteLength} url(s)`;
+
+	start = +start;
+	const end = start + step;
+
+	return {
+		message,
+		listSiteLength,
+		listSite: listSites[listSite].slice(start, end)
+	};
+}
+
+function getListSites(start = 0, step = listSites.step) {
 	const mainSitesLength = listSites.mainSites.length;
 	const trustSitesLength = listSites.trustSites.length;
 	const blackSitesLength = listSites.blackSites.length;

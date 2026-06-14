@@ -76,6 +76,18 @@ var scrollerMainSites = scrollerUrlLoading("urlMainSites", "urlMainSitesContent"
 var scrollerTrustSites = scrollerUrlLoading("urlTrustSites", "urlTrustSitesContent", "trustSites");
 var scrollerBlackSites = scrollerUrlLoading("urlBlackSites", "urlBlackSitesContent", "blackSites");
 
+urlBtnAddMainSites.onclick = function () {
+	urlBtnAddListener("mainSites", "urlBtnMainSites", "urlMainSites", "urlMainSitesContent");
+};
+
+urlBtnAddTrustSites.onclick = function () {
+	urlBtnAddListener("trustSites", "urlBtnTrustSites", "urlTrustSites", "urlTrustSitesContent");
+};
+
+urlBtnAddBlackSites.onclick = function () {
+	urlBtnAddListener("blackSites", "urlBtnBlackSites", "urlBlackSites", "urlBlackSitesContent");
+};
+
 function motd(data) {
 	motd.data = data;
 }
@@ -1057,6 +1069,11 @@ function createUrlRow(container, urls, last = 0) {
 async function urlRowCRUD(action, urlData) {
 	let data;
 	switch (action) {
+		case "create": {
+			data = {action, urlData};
+			break;
+		}
+
 		case "update": {
 			data = {action, urlData};
 			break;
@@ -1080,7 +1097,61 @@ async function urlRowCRUD(action, urlData) {
 		return;
 	}
 	const res = await response.json();
+	if (action === "create" && res.listSitesInfo && res.listSitesInfo.listSite.length) {
+		let container, counter, scroller;
+		const listSite = res.listSitesInfo.listSite;
+		const length = res.listSitesInfo.listSiteLength;
+		switch (res.listSite) {
+			case "mainSites":
+				container = urlMainSitesContent;
+				counter = urlMainSitesCounter;
+				scroller = window.scrollerMainSites;
+				break;
+
+			case "trustSites":
+				container = urlTrustSitesContent;
+				counter = urlTrustSitesCounter;
+				scroller = window.scrollerTrustSites;
+				break;
+
+			case "blackSites":
+				container = urlBlackSitesContent;
+				counter = urlBlackSitesCounter;
+				scroller = window.scrollerBlackSites;
+				break;
+		}
+		//add server res last record, no need empty
+		$(container).empty();
+		createUrlRow(container, listSite);
+		$(counter).text(length);
+		if (scroller) scroller.setLast(listSite.length);
+	}
 	if (SSE && !res.nosse) return;
 	else log(res);
+}
+
+function urlBtnAddListener(listSite, button, collapse, content) {
+	if (editorUrlRow.edit) return;
+	const expanded = $(`#${collapse}`).hasClass("show");
+	if (!expanded) $(`#${button}`).click();
+	const row = document.createElement("DIV");
+	row.className = "white-text d-flex align-items-center p-1";
+	const form = editorUrlRow("#", "", "");
+	$(row).append(form);
+	$(`#${content}`).prepend(row);
+	form[0].focus();
+	editorUrlRow.edit = true;
+	$(form).find("input").on("keydown focusout", function (e) {
+		if (e.relatedTarget && e.relatedTarget.tagName === "INPUT") return;
+		if (e.keyCode === 13 || e.type === "focusout") {
+			const inputUrl = form[0].value;
+			const inputQuery = form[1].value !== "" ? form[1].value : "default";
+			if (inputUrl !== "") {
+				urlRowCRUD("create", {listSite, url: inputUrl, query: inputQuery});
+			}
+			if (!e.relatedTarget) editorUrlRow.edit = false;
+			if (row) $(row).remove();
+		}
+	});
 }
 
