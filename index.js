@@ -355,8 +355,18 @@ app.post("/url", (req, res) => {
 			const {listSite, url, query} = req.body.urlData;
 			const data = {url, query};
 			APPJSON[listSite].push(data);
-			updateJSON(listSite);
 			const index = APPJSON[listSite].length - 1;
+			try {
+				updateJSON(listSite);
+			} catch(err) {
+				APPJSON[listSite].pop();
+				const code = 47;
+				const type = "error";
+				const message = `URL list "${listSite}.json" write failed`;
+				logger.addLog(message, type, {code, listSite, url, query});
+				res.status(500).json({code, message, type, listSite, url, query});
+				return;
+			}
 			const code = 27;
 			const type = "success";
 			const message = `URL list "${listSite}:${index}" added`;

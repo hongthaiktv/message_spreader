@@ -575,7 +575,11 @@ function log(data, type, tab = "logger") {
 						break;
 
 					case 46:
-						cardContent = `URL list "<span class="text-primary font-weight-bold">${data.listSite}</span> : <span class="text-danger font-weight-bold">${data.index + 1}</span>" nothing change to update.`;
+						cardContent = `URL list <span class="text-primary font-weight-bold">${data.listSite}</span> : <span class="text-danger font-weight-bold">${data.index + 1}</span> nothing change to update.`;
+						break;
+
+					case 47:
+						cardContent = `URL list <span class="text-primary font-weight-bold">${data.listSite}.json</span> write failed.`;
 						break;
 				}
 				break;
@@ -684,7 +688,11 @@ function log(data, type, tab = "logger") {
 						break;
 
 					case 26:
-						cardContent = `URL list "<span class="orange-text font-weight-bold">${data.listSite}</span> : <span class="text-danger font-weight-bold">${data.index + 1}</span>" updated.`;
+						cardContent = `URL list <span class="orange-text font-weight-bold">${data.listSite}</span> : <span class="text-danger font-weight-bold">${data.index + 1}</span> updated.`;
+						break;
+
+					case 27:
+						cardContent = `URL list <span class="orange-text font-weight-bold">${data.listSite}</span> : <span class="text-danger font-weight-bold">${data.index + 1}</span> added.`;
 						break;
 				}
 				break;
@@ -1067,19 +1075,7 @@ function createUrlRow(container, urls, last = 0) {
 }
 
 async function urlRowCRUD(action, urlData) {
-	let data;
-	switch (action) {
-		case "create": {
-			data = {action, urlData};
-			break;
-		}
-
-		case "update": {
-			data = {action, urlData};
-			break;
-		}
-	}
-
+	const data = {action, urlData};
 	const response = await fetch(`${SERVER}url`, {
 		method: "POST",
 		body: JSON.stringify(data),
@@ -1097,10 +1093,10 @@ async function urlRowCRUD(action, urlData) {
 		return;
 	}
 	const res = await response.json();
-	if (action === "create" && res.listSitesInfo && res.listSitesInfo.listSite.length) {
+	if (action === "create" && res.listSiteInfo && res.listSiteInfo.listSite.length) {
 		let container, counter, scroller;
-		const listSite = res.listSitesInfo.listSite;
-		const length = res.listSitesInfo.listSiteLength;
+		const listSite = res.listSiteInfo.listSite;
+		const length = res.listSiteInfo.listSiteLength;
 		switch (res.listSite) {
 			case "mainSites":
 				container = urlMainSitesContent;
