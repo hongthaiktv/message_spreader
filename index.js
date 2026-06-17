@@ -388,9 +388,20 @@ app.post("/url", (req, res) => {
 				res.status(500).json({code, message, type, listSite, index, url, query});
 				return;
 			}
+			const oldData = APPJSON[listSite][index];
 			const data = {url, query};
 			APPJSON[listSite][index] = data;
-			updateJSON(listSite);
+			try {
+				updateJSON(listSite);
+			} catch(err) {
+				APPJSON[listSite][index] = oldData;
+				const code = 47;
+				const type = "error";
+				const message = `URL list "${listSite}.json" write failed`;
+				logger.addLog(message, type, {code, listSite, url, query});
+				res.status(500).json({code, message, type, listSite, url, query});
+				return;
+			}
 			const code = 26;
 			const type = "success";
 			const message = `URL list "${listSite}:${index}" updated`;

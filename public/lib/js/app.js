@@ -1027,6 +1027,7 @@ function createUrlRow(container, urls, last = 0) {
 				editorUrlRow.edit = false;
 			}
 			if (e.target.tagName === "A" || e.target.tagName === "INPUT" || e.target.tagName === "DIV") return;
+			const oldRowHTML = row.innerHTML;
 			const colIndex = +e.target.getAttribute("colIndex");
 			const order = +$(this).find("span").first().text();
 			const url = $(this).find("a").text();
@@ -1063,18 +1064,18 @@ function createUrlRow(container, urls, last = 0) {
 							listSite = "trustSites";
 							break;
 
-						case "urlBlackSitesCounter":
+						case "urlBlackSitesContent":
 							listSite = "blackSites";
 							break;
 					}
-					urlRowCRUD("update", {listSite, index: order - 1, url: inputUrl, query: inputQuery});
+					urlRowCRUD("update", {listSite, index: order - 1, url: inputUrl, query: inputQuery}, row, oldRowHTML);
 				}
 			});
 		};
 	});
 }
 
-async function urlRowCRUD(action, urlData) {
+async function urlRowCRUD(action, urlData, row, oldRowHTML) {
 	const data = {action, urlData};
 	const response = await fetch(`${SERVER}url`, {
 		method: "POST",
@@ -1085,6 +1086,12 @@ async function urlRowCRUD(action, urlData) {
 	});
 
 	if (!response.ok) {
+		switch (action) {
+			case "update":
+				row.innerHTML = oldRowHTML;
+				break;
+		}
+
 		if (response.status === 500 && (!SSE || SSE && res.nosse)) {
 			const res = await response.json();
 			log(res);
@@ -1116,11 +1123,12 @@ async function urlRowCRUD(action, urlData) {
 				scroller = window.scrollerBlackSites;
 				break;
 		}
-		//add server res last record, no need empty
-		$(container).empty();
-		createUrlRow(container, listSite);
 		$(counter).text(length);
-		if (scroller) scroller.setLast(listSite.length);
+		if (length <= 100) {
+			$(container).empty();
+			createUrlRow(container, listSite);
+			if (scroller) scroller.setLast(listSite.length);
+		}
 	}
 	if (SSE && !res.nosse) return;
 	else log(res);
