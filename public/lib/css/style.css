@@ -118,6 +118,13 @@ body {
 	color: #558b2f;
 }
 
+#urlMainSitesContent > div, #urlTrustSitesContent > div, #urlBlackSitesContent > div {
+	user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	-webkit-touch-callout: none;
+}
+
 .minw-20 { min-width: 20%; }
 .minw-25 { min-width: 25%; }
 .minw-50 { min-width: 50%; }

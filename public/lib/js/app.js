@@ -1019,6 +1019,7 @@ function createUrlRow(container, urls, last = 0) {
 		const row = document.createElement("DIV");
 		row.className = "white-text d-flex align-items-center p-1";
 		row.innerHTML = `<span colIndex="0">${order}</span>. <a colIndex="1" class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${url}</a><span colIndex="2" class="text-truncate minw-20">${query}</span>`;
+		row.querySelector("a").oncontextmenu = linkListener;
 		if (index % 2 !== 0) row.className += " rgba-white-slight";
 		container.appendChild(row);
 		row.onclick = function (e) {
@@ -1052,6 +1053,7 @@ function createUrlRow(container, urls, last = 0) {
 					const urlLink = !/^http/i.test(inputUrl) ? `https://${inputUrl}` : inputUrl;
 					const inputQuery = form[1].value !== "" ? form[1].value : "default";
 					row.innerHTML = `<span colIndex="0">${order}</span>. <a colIndex="1" class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${inputUrl}</a><span colIndex="2" class="text-truncate minw-20">${inputQuery}</span>`;
+					row.querySelector("a").oncontextmenu = linkListener;
 					if (!e.relatedTarget) editorUrlRow.edit = false;
 					if (inputUrl === url && inputQuery === query) return;
 					let listSite;
@@ -1073,6 +1075,11 @@ function createUrlRow(container, urls, last = 0) {
 			});
 		};
 	});
+
+	function linkListener(e) {
+		e.preventDefault();
+		alert("active selection mode")
+	}
 }
 
 async function urlRowCRUD(action, urlData, row, oldRowHTML) {
