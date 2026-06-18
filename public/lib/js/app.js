@@ -1124,7 +1124,7 @@ async function urlRowCRUD(action, urlData, row, oldRowHTML) {
 				break;
 		}
 		$(counter).text(length);
-		if (length <= 100) {
+		if (length <= 20) {
 			$(container).empty();
 			createUrlRow(container, listSite);
 			if (scroller) scroller.setLast(listSite.length);
