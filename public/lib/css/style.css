@@ -125,6 +125,10 @@ body {
 	-webkit-touch-callout: none;
 }
 
+.app-rgba-blue-light {
+	background-color: rgba(3, 169, 244, 0.3);
+}
+
 .minw-20 { min-width: 20%; }
 .minw-25 { min-width: 25%; }
 .minw-50 { min-width: 50%; }

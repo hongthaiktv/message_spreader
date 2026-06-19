@@ -1027,7 +1027,7 @@ function createUrlRow(container, urls, last = 0) {
 				e.preventDefault();
 				editorUrlRow.edit = false;
 			}
-			if (e.target.tagName === "A" || e.target.tagName === "INPUT" || e.target.tagName === "DIV") return;
+			if (e.target.tagName === "A" || e.target.tagName === "INPUT" || e.target.tagName === "DIV" || e.target.tagName === "LABEL") return;
 			const oldRowHTML = row.innerHTML;
 			const colIndex = +e.target.getAttribute("colIndex");
 			const order = +$(this).find("span").first().text();
@@ -1078,7 +1078,23 @@ function createUrlRow(container, urls, last = 0) {
 
 	function linkListener(e) {
 		e.preventDefault();
-		alert("active selection mode")
+		$(container).children().each(function (index, row) {
+			$(row).prepend(`<div class="custom-control custom-checkbox ml-1"><input type="checkbox" class="custom-control-input" id="checkbox-${index}"><label class="custom-control-label" for="checkbox-${index}"></label></div>`);
+			const checkbox = row.querySelector('input[type="checkbox"]');
+			checkbox.onchange = function () {
+				let counter = +counterUrlRowsSelected.innerText;
+				if (this.checked) {
+					counterUrlRowsSelected.innerText = ++counter;
+					if (counter === 1) $("#btnDeleteUrlSelection").toggleClass("d-none", false);
+					$(row).toggleClass("app-rgba-blue-light", true);
+				}
+				else {
+					counterUrlRowsSelected.innerText = --counter;
+					if (counter < 1) $("#btnDeleteUrlSelection").toggleClass("d-none", true);
+					$(row).toggleClass("app-rgba-blue-light", false);
+				}
+			}
+		});
 	}
 }
 
