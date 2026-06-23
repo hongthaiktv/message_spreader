@@ -1,6 +1,6 @@
 {
 	"rate": 5,
-	"quiet": false,
+	"quiet": true,
 	"current": "mainSites",
-	"mode": "normal"
+	"mode": "quiet"
 }
