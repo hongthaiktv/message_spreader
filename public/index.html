@@ -112,15 +112,15 @@
 				</div>
 				<div id="tabUrlContent" class="overflow-auto flex-grow-1 w-100 tab-pane fade" role="tabpanel" aria-labelledby="tabUrl">
 					<div id="urlAccordion" class="d-none flex-column overflow-auto w-100 h-100">
-						<div class="alert alert-danger alert-dismissible fade show my-1 px-3" role="alert">
+						<div id="alertUrlRowsSelected" class="alert alert-danger alert-dismissible fade show d-none my-1 px-3" role="alert">
 							<i class="fas fa-table mr-1"></i>
 							<strong id="counterUrlRowsSelected">0</strong> row(s) selected.
-							<button id="btnDeleteUrlSelection" type="button" class="d-none btn btn-danger btn-sm btn-rounded my-0 mx-1 py-1 px-2">
+							<button id="btnDeleteUrlRowsSelected" type="button" class="d-none btn btn-danger btn-sm btn-rounded my-0 mx-1 py-1 px-2">
 								<i class="fas fa-trash mr-1"></i>
 								Delete
 							</button>
-							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-								<span id="btnCloseUrlSelection" aria-hidden="true">&times;</span>
+							<button id="btnCloseUrlSelection" type="button" class="close" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
 							</button>
 						</div>
 						<div class="d-flex justify-content-center align-items-center position-relative w-100">

@@ -1078,6 +1078,8 @@ function createUrlRow(container, urls, last = 0) {
 
 	function linkListener(e) {
 		e.preventDefault();
+		APPSETTING.currentUrlSelectionList = container.id;
+		$("#alertUrlRowsSelected").toggleClass("d-none", false);
 		$(container).children().each(function (index, row) {
 			$(row).prepend(`<div class="custom-control custom-checkbox ml-1"><input type="checkbox" class="custom-control-input" id="checkbox-${index}"><label class="custom-control-label" for="checkbox-${index}"></label></div>`);
 			const checkbox = row.querySelector('input[type="checkbox"]');
@@ -1085,12 +1087,12 @@ function createUrlRow(container, urls, last = 0) {
 				let counter = +counterUrlRowsSelected.innerText;
 				if (this.checked) {
 					counterUrlRowsSelected.innerText = ++counter;
-					if (counter === 1) $("#btnDeleteUrlSelection").toggleClass("d-none", false);
+					if (counter === 1) $("#btnDeleteUrlRowsSelected").toggleClass("d-none", false);
 					$(row).toggleClass("app-rgba-blue-light", true);
 				}
 				else {
 					counterUrlRowsSelected.innerText = --counter;
-					if (counter < 1) $("#btnDeleteUrlSelection").toggleClass("d-none", true);
+					if (counter < 1) $("#btnDeleteUrlRowsSelected").toggleClass("d-none", true);
 					$(row).toggleClass("app-rgba-blue-light", false);
 				}
 			}
@@ -1180,5 +1182,14 @@ function urlBtnAddListener(listSite, button, collapse, content) {
 			if (row) $(row).remove();
 		}
 	});
+}
+
+btnCloseUrlSelection.onclick = function () {
+	const container = APPSETTING.currentUrlSelectionList;
+	$(`#${container}`).find("* > div:first-child").remove();
+	$(`#${container}`).children().toggleClass("app-rgba-blue-light", false);
+	$("#alertUrlRowsSelected").toggleClass("d-none", true);
+	counterUrlRowsSelected.innerText = 0;
+	$("#btnDeleteUrlRowsSelected").toggleClass("d-none", true);
 }
 
