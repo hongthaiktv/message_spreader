@@ -1,7 +1,8 @@
 const PROTO = "http", HOST = "localhost", PORT = 3000;
 const SERVER = location.href || `${PROTO}://${HOST}:${PORT}/`;
 const APPSETTING = {
-	urlSelectionMode: false
+	urlSelectionMode: false,
+	currentUrlSelectionList: ""
 };
 let SSE = false;
 
@@ -1198,6 +1199,33 @@ btnCloseUrlSelection.onclick = function () {
 	$("#alertUrlRowsSelected").toggleClass("d-none", true);
 	counterUrlRowsSelected.innerText = 0;
 	$("#btnDeleteUrlRowsSelected").toggleClass("d-none", true);
+	APPSETTING.currentUrlSelectionList = "";
 	APPSETTING.urlSelectionMode = false;
-}
+};
+
+btnDeleteUrlRowsSelected.onclick = function () {
+	const container = APPSETTING.currentUrlSelectionList;
+	const selectedRows = $(`#${container}`).find('* > div:first-child > input[type="checkbox"]:checked');
+	const rowIDs = [];
+	selectedRows.each(function (index, checkbox) {
+		const id = +checkbox.id.slice(9);
+		rowIDs.push(id);
+	});
+
+	let listSite;
+	switch (container) {
+		case "urlMainSitesContent":
+			listSite = "mainSites";
+			break;
+
+		case "urlTrustSitesContent":
+			listSite = "trustSites";
+			break;
+
+		case "urlBlackSitesContent":
+			listSite = "blackSites";
+			break;
+	}
+	urlRowCRUD("delete", {listSite, rowIDs});
+};
 

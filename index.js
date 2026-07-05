@@ -409,6 +409,33 @@ app.post("/url", (req, res) => {
 			res.json({code, message, type, listSite, index, url, query});
 			break;
 		}
+
+		case "delete": {
+			let numDeleted = 0;
+			const {listSite, rowIDs} = req.body.urlData;
+			rowIDs.forEach(function (rowID, index) {
+				APPJSON[listSite].splice(rowID - numDeleted, 1);
+				++numDeleted;
+			});
+
+			try {
+				updateJSON(listSite);
+			} catch(err) {
+// 				APPJSON[listSite][index] = oldData;
+// 				const code = 47;
+// 				const type = "error";
+// 				const message = `URL list "${listSite}.json" write failed`;
+// 				logger.addLog(message, type, {code, listSite, url, query});
+// 				res.status(500).json({code, message, type, listSite, url, query});
+				return;
+			}
+// 			const code = 28;
+// 			const type = "success";
+// 			const message = `URL list "${listSite}:${index}" updated`;
+// 			logger.addLog(message, type, {code, listSite, index, url, query});
+// 			res.json({code, message, type, listSite, index, url, query});
+			break;
+		}
 	}
 });
 
