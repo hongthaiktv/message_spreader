@@ -1,6 +1,8 @@
 const PROTO = "http", HOST = "localhost", PORT = 3000;
 const SERVER = location.href || `${PROTO}://${HOST}:${PORT}/`;
-const APPSETTING = {};
+const APPSETTING = {
+	urlSelectionMode: false
+};
 let SSE = false;
 
 const wHeight = window.innerHeight;
@@ -1078,7 +1080,11 @@ function createUrlRow(container, urls, last = 0) {
 
 	function linkListener(e) {
 		e.preventDefault();
+		if (APPSETTING.urlSelectionMode && container.id !== APPSETTING.currentUrlSelectionList) $("#btnCloseUrlSelection").click();
+		if (APPSETTING.urlSelectionMode) return;
+		const activeRow = $(this).parent()[0];
 		APPSETTING.currentUrlSelectionList = container.id;
+		APPSETTING.urlSelectionMode = true;
 		$("#alertUrlRowsSelected").toggleClass("d-none", false);
 		$(container).children().each(function (index, row) {
 			$(row).prepend(`<div class="custom-control custom-checkbox ml-1"><input type="checkbox" class="custom-control-input" id="checkbox-${index}"><label class="custom-control-label" for="checkbox-${index}"></label></div>`);
@@ -1096,6 +1102,7 @@ function createUrlRow(container, urls, last = 0) {
 					$(row).toggleClass("app-rgba-blue-light", false);
 				}
 			}
+			if (row === activeRow) checkbox.click();
 		});
 	}
 }
@@ -1191,5 +1198,6 @@ btnCloseUrlSelection.onclick = function () {
 	$("#alertUrlRowsSelected").toggleClass("d-none", true);
 	counterUrlRowsSelected.innerText = 0;
 	$("#btnDeleteUrlRowsSelected").toggleClass("d-none", true);
+	APPSETTING.urlSelectionMode = false;
 }
 
