@@ -582,6 +582,7 @@ function log(data, type, tab = "logger") {
 						break;
 
 					case 47:
+						urlAlert(`<span class="text-danger font-weight-bold">${data.listSite}.json</span> write failed.`);
 						cardContent = `URL list <span class="text-primary font-weight-bold">${data.listSite}.json</span> write failed.`;
 						break;
 				}
@@ -696,6 +697,10 @@ function log(data, type, tab = "logger") {
 
 					case 27:
 						cardContent = `URL list <span class="orange-text font-weight-bold">${data.listSite}</span> : <span class="text-danger font-weight-bold">${data.index + 1}</span> added.`;
+						break;
+
+					case 28:
+						cardContent = `URL list <span class="orange-text font-weight-bold">${data.listSite}</span> had <span class="text-danger font-weight-bold">${data.numDeleted}</span> row(s) deleted.`;
 						break;
 				}
 				break;
@@ -1125,15 +1130,18 @@ async function urlRowCRUD(action, urlData, row, oldRowHTML) {
 				break;
 		}
 
-		if (response.status === 500 && (!SSE || SSE && res.nosse)) {
+		if (response.status === 500) {
 			const res = await response.json();
-			log(res);
+			if (!SSE || SSE && res.nosse) {
+				urlAlert(`<span class="text-danger font-weight-bold">${res.listSite}.json</span> write failed.`);
+				log(res);
+			}
 		}
-		else if (response.status !== 500) log(`Request error ${response.status}!`, "error");
+		else log(`Request error ${response.status}!`, "error");
 		return;
 	}
 	const res = await response.json();
-	if (action === "create" && res.listSiteInfo && res.listSiteInfo.listSite.length) {
+	if (action === "create" && res.listSiteInfo) {
 		let container, counter, scroller;
 		const listSite = res.listSiteInfo.listSite;
 		const length = res.listSiteInfo.listSiteLength;
@@ -1163,6 +1171,35 @@ async function urlRowCRUD(action, urlData, row, oldRowHTML) {
 			if (scroller) scroller.setLast(listSite.length);
 		}
 	}
+	else if (action === "delete" && res.listSiteInfo) {
+		let container, counter, scroller;
+		const listSite = res.listSiteInfo.listSite;
+		const length = res.listSiteInfo.listSiteLength;
+		switch (res.listSite) {
+			case "mainSites":
+				container = urlMainSitesContent;
+				counter = urlMainSitesCounter;
+				scroller = window.scrollerMainSites;
+				break;
+
+			case "trustSites":
+				container = urlTrustSitesContent;
+				counter = urlTrustSitesCounter;
+				scroller = window.scrollerTrustSites;
+				break;
+
+			case "blackSites":
+				container = urlBlackSitesContent;
+				counter = urlBlackSitesCounter;
+				scroller = window.scrollerBlackSites;
+				break;
+		}
+		$(counter).text(length);
+		$(container).empty();
+		createUrlRow(container, listSite);
+		if (scroller) scroller.setLast(listSite.length);
+	}
+
 	if (SSE && !res.nosse) return;
 	else log(res);
 }
@@ -1227,5 +1264,18 @@ btnDeleteUrlRowsSelected.onclick = function () {
 			break;
 	}
 	urlRowCRUD("delete", {listSite, rowIDs});
+	$("#btnCloseUrlSelection").click();
 };
+
+function urlAlert(message) {
+	$("#urlAccordion").prepend(`
+		<div class="alert alert-danger alert-dismissible fade show my-1 px-3" role="alert">
+			<i class="fas fa-bug mr-1"></i>
+			${message}
+			<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+	`);
+}
 
