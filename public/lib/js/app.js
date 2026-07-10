@@ -1,3 +1,7 @@
+if ("serviceWorker" in navigator) {
+	navigator.serviceWorker.register("/lib/js/sw.js");
+}
+
 const PROTO = "http", HOST = "localhost", PORT = 3000;
 const SERVER = location.href || `${PROTO}://${HOST}:${PORT}/`;
 const APPSETTING = {
