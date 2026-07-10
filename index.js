@@ -91,6 +91,11 @@ logger.addEventListener("change", function (e) {
 // Starting point
 if (puppet.quickStart) runPuppet("start");
 
+app.get("/manifest.webmanifest", (req, res) => {
+	const manifest = path.join(rootDir, "manifest.webmanifest");
+	res.type("application/manifest+json").sendFile(manifest);
+});
+
 app.post("/", (req, res, next) => {
 	const contentType = req.get("Content-Type");
 	if (/application\/json/i.test(contentType)) next();
