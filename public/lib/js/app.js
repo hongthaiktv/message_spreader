@@ -1035,6 +1035,7 @@ function createUrlRow(container, urls, last = 0) {
 		if (index % 2 !== 0) row.className += " rgba-white-slight";
 		container.appendChild(row);
 		row.onclick = function (e) {
+			alert(editorUrlRow.edit)
 			if (e.target.tagName === "A" && editorUrlRow.edit) {
 				e.preventDefault();
 				editorUrlRow.edit = false;
@@ -1064,6 +1065,7 @@ function createUrlRow(container, urls, last = 0) {
 					const inputUrl = form[0].value;
 					const urlLink = !/^http/i.test(inputUrl) ? `https://${inputUrl}` : inputUrl;
 					const inputQuery = form[1].value !== "" ? form[1].value : "default";
+					$(row).empty();
 					row.innerHTML = `<span colIndex="0">${order}</span>. <a colIndex="1" class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${inputUrl}</a><span colIndex="2" class="text-truncate minw-20">${inputQuery}</span>`;
 					row.querySelector("a").oncontextmenu = linkListener;
 					if (!e.relatedTarget) editorUrlRow.edit = false;
