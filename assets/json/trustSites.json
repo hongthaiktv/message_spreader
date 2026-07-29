@@ -1,18 +1,9 @@
 [
-	{
-		"url": "news.google.com",
-		"query": "h4"
-	},
-	{
-		"url": "vietnamnet.vn/chinh-tri",
-		"query": "defa"
-	},
+	{"url": "news.google.com", "query": "h4"},
+	"vietnamnet.vn/chinh-tri",
 	"vnexpress.net",
 	"www.nytimes.com/international",
-	{
-		"url": "edition.cnn.com",
-		"query": "de"
-	},
+	"edition.cnn.com",
 	"www.forbes.com",
 	"www.washingtonpost.com",
 	"news.un.org/en/news/topic/un-affairs",
@@ -20,145 +11,6 @@
 	"apnews.com",
 	"www.nbcnews.com",
 	"www.abc.net.au",
-	"www.cbc.ca/news/canada",
-	{
-		"url": "abc",
-		"query": "default"
-	},
-	{
-		"url": "jsjd",
-		"query": "er"
-	},
-	{
-		"url": "jejej",
-		"query": "default"
-	},
-	{
-		"url": "jsjdjj",
-		"query": "dddd"
-	},
-	{
-		"url": "jdjrj",
-		"query": "d"
-	},
-	{
-		"url": "jdjdj",
-		"query": "df"
-	},
-	{
-		"url": "jdjje",
-		"query": "r"
-	},
-	{
-		"url": "sjjej",
-		"query": "dj"
-	},
-	{
-		"url": "ndndn",
-		"query": "de"
-	},
-	{
-		"url": "j3j4j",
-		"query": "de"
-	},
-	{
-		"url": "hh",
-		"query": "jjff"
-	},
-	{
-		"url": "hhdd",
-		"query": "de"
-	},
-	{
-		"url": "jdjdj",
-		"query": "n"
-	},
-	{
-		"url": "tyy",
-		"query": "y"
-	},
-	{
-		"url": "ffg",
-		"query": "g"
-	},
-	{
-		"url": "jdjdj",
-		"query": "default"
-	},
-	{
-		"url": "jdjdjjd",
-		"query": "fff"
-	},
-	{
-		"url": "jdndnd",
-		"query": "f"
-	},
-	{
-		"url": "ndnd",
-		"query": "default"
-	},
-	{
-		"url": "aaa",
-		"query": "default"
-	},
-	{
-		"url": "bbbb",
-		"query": "default"
-	},
-	{
-		"url": "jdjdd",
-		"query": "default"
-	},
-	{
-		"url": "jdjej",
-		"query": "default"
-	},
-	{
-		"url": "hdjdj",
-		"query": "default"
-	},
-	{
-		"url": "jdjdjj",
-		"query": "default"
-	},
-	{
-		"url": "hhhh",
-		"query": "default"
-	},
-	{
-		"url": "hhddj",
-		"query": "default"
-	},
-	{
-		"url": "hh",
-		"query": "default"
-	},
-	{
-		"url": "hhj",
-		"query": "default"
-	},
-	{
-		"url": "hjjjh",
-		"query": "default"
-	},
-	{
-		"url": "hdjdj",
-		"query": "default"
-	},
-	{
-		"url": "dddd",
-		"query": "default"
-	},
-	{
-		"url": "dff",
-		"query": "default"
-	},
-	{
-		"url": "ghhhgg",
-		"query": "default"
-	},
-	{
-		"url": "jddkdjdj",
-		"query": "hhjhh"
-	}
+	"www.cbc.ca/news/canada"
 ]
+
