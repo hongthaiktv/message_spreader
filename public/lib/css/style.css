@@ -129,6 +129,10 @@ body {
 	background-color: rgba(3, 169, 244, 0.3);
 }
 
+.app-formEditor {
+	height: 2.3em;
+}
+
 .minw-20 { min-width: 20%; }
 .minw-25 { min-width: 25%; }
 .minw-50 { min-width: 50%; }

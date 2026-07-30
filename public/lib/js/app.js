@@ -1001,7 +1001,7 @@ function updateTabUpload(dirInfo, uploadMessages, tab = "upload") {
 function editorUrlRow(order, url, query) {
 	const form = document.createElement("FORM");
 	form.innerHTML = `
-	<div class="form-row align-items-center">
+	<div class="app-formEditor form-row align-items-center">
 		<div class="col-auto">
 			<div class="md-form my-0 pb-1">
 				<span>${order}</span>.
