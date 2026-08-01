@@ -1035,7 +1035,6 @@ function createUrlRow(container, urls, last = 0) {
 		if (index % 2 !== 0) row.className += " rgba-white-slight";
 		container.appendChild(row);
 		row.onclick = function (e) {
-			alert(editorUrlRow.edit)
 			if (e.target.tagName === "A" && editorUrlRow.edit) {
 				e.preventDefault();
 				editorUrlRow.edit = false;
@@ -1230,7 +1229,11 @@ function urlBtnAddListener(listSite, button, collapse, content) {
 				urlRowCRUD("create", {listSite, url: inputUrl, query: inputQuery});
 			}
 			if (!e.relatedTarget) editorUrlRow.edit = false;
-			if (row) $(row).remove();
+
+			// fix for stupid event invoke
+			setTimeout(function () {
+				$(row).remove();
+			}, 0);
 		}
 	});
 }
