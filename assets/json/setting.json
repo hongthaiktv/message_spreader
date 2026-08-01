@@ -1,5 +1,5 @@
 {
-	"rate": 20,
+	"rate": 10,
 	"quiet": false,
 	"current": "mainSites",
 	"mode": "normal"

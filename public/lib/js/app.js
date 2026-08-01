@@ -1067,7 +1067,7 @@ function createUrlRow(container, urls, last = 0) {
 					$(row).empty();
 					row.innerHTML = `<span colIndex="0">${order}</span>. <a colIndex="1" class="app-text-link flex-grow-1 text-truncate mx-1" target="_blank" href="${urlLink}">${inputUrl}</a><span colIndex="2" class="text-truncate minw-20">${inputQuery}</span>`;
 					row.querySelector("a").oncontextmenu = linkListener;
-					if (!e.relatedTarget) editorUrlRow.edit = false;
+					if (!e.relatedTarget || e.relatedTarget.tagName !== "A") editorUrlRow.edit = false;
 					if (inputUrl === url && inputQuery === query) return;
 					let listSite;
 					switch (container.id) {
@@ -1219,6 +1219,9 @@ function urlBtnAddListener(listSite, button, collapse, content) {
 	$(row).append(form);
 	$(`#${content}`).prepend(row);
 	form[0].focus();
+	setTimeout(function () {
+		$(`#${content}`).parent().scrollTop(0);
+	}, 100);
 	editorUrlRow.edit = true;
 	$(form).find("input").on("keydown focusout", function (e) {
 		if (e.relatedTarget && e.relatedTarget.tagName === "INPUT") return;
@@ -1228,7 +1231,7 @@ function urlBtnAddListener(listSite, button, collapse, content) {
 			if (inputUrl !== "") {
 				urlRowCRUD("create", {listSite, url: inputUrl, query: inputQuery});
 			}
-			if (!e.relatedTarget) editorUrlRow.edit = false;
+			if (!e.relatedTarget || e.relatedTarget.tagName !== "A") editorUrlRow.edit = false;
 
 			// fix for stupid event invoke
 			setTimeout(function () {
