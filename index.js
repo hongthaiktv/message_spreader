@@ -489,7 +489,7 @@ app.use(serveIndex(rootDir, {
 app.get("*", (req, res) => res.status(404).sendFile(path.join(rootDir, "404.html")));
 
 server = app.listen(port, () => {
-	console.log(`Web server running at http://localhost:${port}`);
+	console.log(`Web server running at ${domain}`);
 	console.log(getListSites().message);
 	console.log(uploadDirInfo.message);
 	console.log("Motd:", motd.data.message);
