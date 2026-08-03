@@ -1,6 +1,6 @@
 {
 	"rate": 10,
 	"quiet": false,
-	"current": "trustSites",
+	"current": "mainSites",
 	"mode": "normal"
 }
